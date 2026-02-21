@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Procedural Particle Forge — Live 3D</title>
+<title>Animated Sprite Sheet Particles — Live 3D</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#030306;color:#ccc;font-family:'Segoe UI',system-ui,sans-serif;overflow-x:hidden}
@@ -18,40 +18,38 @@ background:linear-gradient(90deg,#ff6622,#ff44ff,#44aaff,#ff6622);background-siz
 .bar-fill{width:0;height:100%;background:linear-gradient(90deg,#ff6622,#ff44ff);transition:width .3s}
 #viewport{width:100%;max-width:1400px;margin:0 auto;position:relative;
 border:1px solid #1a1a2e;border-radius:4px;overflow:hidden;
-box-shadow:0 0 60px rgba(255,100,30,.1),0 0 120px rgba(200,50,200,.05)}
+box-shadow:0 0 60px rgba(255,100,30,.08),0 0 120px rgba(200,50,200,.04)}
 #viewport canvas{width:100%;display:block}
-#viewport::after{content:'';position:absolute;top:0;left:0;right:0;bottom:0;
-background:radial-gradient(ellipse at center,transparent 60%,rgba(0,0,0,.4));pointer-events:none}
-.info-bar{max-width:1400px;margin:20px auto;padding:15px;text-align:center;font-family:monospace;font-size:11px;color:#444;border-top:1px solid #111}
-.info-bar kbd{background:#1a1a2e;padding:2px 6px;border-radius:3px;color:#888;font-size:10px}
-.sprite-strip{max-width:1400px;margin:20px auto;padding:0 20px;display:flex;gap:20px;justify-content:center;flex-wrap:wrap}
-.sprite-card{text-align:center;font-family:monospace}
-.sprite-card canvas{width:100px;height:100px;border-radius:8px;border:1px solid #1a1a2e;background:#000;display:block;margin-bottom:4px}
-.sprite-card .label{font-size:10px;color:#888}.sprite-card .sub{font-size:8px;color:#444}
 .toggle-bar{max-width:1400px;margin:10px auto;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:0 20px}
 .toggle-btn{font-family:monospace;font-size:12px;padding:8px 16px;border:1px solid #333;border-radius:6px;
 background:#111;color:#aaa;cursor:pointer;transition:all .2s}
 .toggle-btn.active{background:#1a1a2e;color:#fff;border-color:#e94560}
 .toggle-btn:hover{border-color:#666}
+.info-bar{max-width:1400px;margin:15px auto;padding:12px;text-align:center;font-family:monospace;font-size:11px;color:#444;border-top:1px solid #111}
+.info-bar kbd{background:#1a1a2e;padding:2px 6px;border-radius:3px;color:#888;font-size:10px}
+.sheet-strip{max-width:1400px;margin:20px auto;padding:0 20px;display:flex;gap:24px;justify-content:center;flex-wrap:wrap}
+.sheet-card{text-align:center;font-family:monospace}
+.sheet-card canvas{width:160px;height:160px;border-radius:6px;border:1px solid #1a1a2e;background:#000;display:block;margin-bottom:4px;image-rendering:pixelated}
+.sheet-card .label{font-size:11px;color:#aaa;font-weight:bold}.sheet-card .sub{font-size:9px;color:#555}
 .links{text-align:center;padding:20px;font-family:monospace;font-size:12px}
 .links a{color:#e94560;text-decoration:none;margin:0 10px}
 </style>
 </head>
 <body>
 <div class="header">
-<h1>PROCEDURAL PARTICLE FORGE</h1>
-<p>Particle sprites generated from procedural shaders + gradient maps — then used in real-time 3D particle systems |
+<h1>ANIMATED PARTICLE FORGE</h1>
+<p>Each particle plays an animated sprite sheet generated from procedural shaders — 16 frames per effect |
 <a href="editor.html">Editor</a> | <a href="demos.html">Materials</a> | <a href="gallery.html">Gallery</a></p>
 </div>
-<div id="loading">Forging particle sprites...<div class="bar"><div class="bar-fill" id="pbar"></div></div></div>
+<div id="loading">Generating sprite sheets (64 frames)...<div class="bar"><div class="bar-fill" id="pbar"></div></div></div>
 <div id="content" style="display:none">
 <div id="viewport"></div>
 <div class="toggle-bar" id="toggles"></div>
 <div class="info-bar">
 <kbd>Drag</kbd> orbit &nbsp; <kbd>Scroll</kbd> zoom &nbsp; | &nbsp;
-4 particle systems &middot; procedural sprite textures &middot; bloom post-processing &middot; ~1000 live particles
+4 animated sprite sheet particle systems &middot; 16 frames each &middot; smooth interpolation
 </div>
-<div class="sprite-strip" id="sprite-strip"></div>
+<div class="sheet-strip" id="sheet-strip"></div>
 </div>
 <div class="links">
 <a href="editor.html">Open Editor</a>
@@ -72,7 +70,8 @@ import{RenderPass}from"three/addons/postprocessing/RenderPass.js";
 import{UnrealBloomPass}from"three/addons/postprocessing/UnrealBloomPass.js";
 import{OutputPass}from"three/addons/postprocessing/OutputPass.js";
 
-const SRES=256; // sprite texture resolution
+const SRES=256,GRID=4,FRAMES=GRID*GRID; // 4x4 = 16 frames per sheet
+const SHEET=SRES*GRID; // 1024px atlas
 const pbar=document.getElementById("pbar");
 function prog(p){pbar.style.width=p+"%";}
 const clock=new THREE.Clock();
@@ -81,15 +80,16 @@ const clock=new THREE.Clock();
 const W=1400,H=700;
 const r3=new THREE.WebGLRenderer({antialias:true,powerPreference:"high-performance"});
 r3.setSize(W,H);r3.setPixelRatio(Math.min(window.devicePixelRatio,2));
-r3.toneMapping=THREE.ACESFilmicToneMapping;r3.toneMappingExposure=1.2;
+r3.toneMapping=THREE.ACESFilmicToneMapping;r3.toneMappingExposure=1.3;
 r3.autoClear=true;
 r3.domElement.style.cssText="cursor:grab;display:block;width:100%;height:auto";
 
-// ── Texture generation infrastructure ──
+// ── Texture infrastructure ──
 const texScene=new THREE.Scene();const texCam=new THREE.Camera();
 texScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),new THREE.MeshBasicMaterial()));
-function makeRT(){
-return new THREE.WebGLRenderTarget(SRES,SRES,{minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter});
+function makeRT(sz){
+sz=sz||SRES;
+return new THREE.WebGLRenderTarget(sz,sz,{minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter});
 }
 const grungeTex=await new Promise(ok=>{
 new THREE.TextureLoader().load("images/grunge.png",t=>{
@@ -97,7 +97,7 @@ t.wrapS=t.wrapT=THREE.RepeatWrapping;t.minFilter=THREE.LinearFilter;t.magFilter=
 });});
 const ppV=`varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.0,1.0);}`;
 
-// Gradient map shader
+// Gradient map
 const gradScene=new THREE.Scene(),gradCam=new THREE.Camera();
 const gradMat=new THREE.ShaderMaterial({
 uniforms:{tDiffuse:{value:null},tGradient:{value:null},intensity:{value:1}},vertexShader:ppV,
@@ -107,13 +107,13 @@ vec4 g=texture2D(tGradient,vec2(l,.5));gl_FragColor=vec4(mix(t.rgb,g.rgb,intensi
 depthTest:false,depthWrite:false});
 gradScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),gradMat));
 
-// Circle mask shader (softens edges for particle sprites)
+// Soft circle mask (wide falloff for clean particles)
 const maskScene=new THREE.Scene(),maskCam=new THREE.Camera();
 const maskMat=new THREE.ShaderMaterial({
 uniforms:{tDiffuse:{value:null}},vertexShader:ppV,
 fragmentShader:`uniform sampler2D tDiffuse;varying vec2 vUv;
 void main(){vec4 c=texture2D(tDiffuse,vUv);float d=length(vUv-.5)*2.;
-float mask=1.-smoothstep(.5,1.,d);gl_FragColor=vec4(c.rgb*mask,mask);}`,
+float mask=1.-smoothstep(.3,1.,d);gl_FragColor=vec4(c.rgb*mask,mask);}`,
 depthTest:false,depthWrite:false});
 maskScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),maskMat));
 
@@ -145,7 +145,6 @@ function doMask(inRT,outRT){
 maskMat.uniforms.tDiffuse.value=inRT.texture;maskMat.uniformsNeedUpdate=true;
 r3.setRenderTarget(outRT);r3.clear();r3.render(maskScene,maskCam);r3.setRenderTarget(null);
 }
-
 function makeGrad(stops){
 const c=document.createElement("canvas");c.width=256;c.height=1;
 const ctx=c.getContext("2d"),g=ctx.createLinearGradient(0,0,256,0);
@@ -157,224 +156,231 @@ tex.wrapS=tex.wrapT=THREE.ClampToEdgeWrapping;tex.needsUpdate=true;return tex;
 }
 
 // ══════════════════════════════════════════════════════════════════
-// GENERATE 4 SPRITE TEXTURES (effect → gradient → circle mask)
+// GENERATE SPRITE SHEETS (effect → gradient → mask, 16 frames each)
 // ══════════════════════════════════════════════════════════════════
 prog(5);
 
-const gradLava=makeGrad([{p:0,c:"#110000"},{p:.15,c:"#551100"},{p:.35,c:"#cc3300"},{p:.55,c:"#ff6600"},{p:.75,c:"#ffaa22"},{p:.9,c:"#ffdd66"},{p:1,c:"#ffffcc"}]);
-const gradPlasma=makeGrad([{p:0,c:"#110022"},{p:.15,c:"#440088"},{p:.3,c:"#9922dd"},{p:.45,c:"#ff44ff"},{p:.6,c:"#ff88ff"},{p:.75,c:"#88ccff"},{p:.9,c:"#ccf0ff"},{p:1,c:"#ffffff"}]);
-const gradSpark=makeGrad([{p:0,c:"#050520"},{p:.15,c:"#1133aa"},{p:.35,c:"#3388ff"},{p:.55,c:"#66ccff"},{p:.8,c:"#ccf0ff"},{p:1,c:"#ffffff"}]);
-const gradEmber=makeGrad([{p:0,c:"#110000"},{p:.2,c:"#662200"},{p:.45,c:"#dd6600"},{p:.65,c:"#ff9922"},{p:.85,c:"#ffdd44"},{p:1,c:"#ffffee"}]);
+const pixBuf=new Uint8Array(SRES*SRES*4);
 
-const spriteData=[
-{name:"Fire",effect:"Explosion",params:{time:.8,cExplosionRadius:2,cExplosionBallness:4,cExplosionGrowth:3,cExplosionDensity:1.5,cExplosionContrast:1.5,cExplosionGrain:2},grad:gradLava},
-{name:"Magic",effect:"Corona",params:{time:4},grad:gradPlasma},
-{name:"Spark",effect:"Electric",params:{time:2},grad:gradSpark},
-{name:"Ember",effect:"Flame",params:{time:3,cSpeed:.5},grad:gradEmber}
+function makeSpriteSheet(effect,baseParams,gradTex,timeStart,timeEnd){
+const canvas=document.createElement("canvas");
+canvas.width=SHEET;canvas.height=SHEET;
+const ctx=canvas.getContext("2d",{willReadFrequently:true});
+const tmpRT=makeRT(),colorRT=makeRT(),maskedRT=makeRT();
+
+for(let f=0;f<FRAMES;f++){
+const t=timeStart+(f/(FRAMES-1))*(timeEnd-timeStart);
+const params=Object.assign({},baseParams,{time:t});
+renderFx(effect,params,tmpRT);
+doGrad(tmpRT,gradTex,colorRT);
+doMask(colorRT,maskedRT);
+r3.readRenderTargetPixels(maskedRT,0,0,SRES,SRES,pixBuf);
+const col=f%GRID,row=Math.floor(f/GRID);
+const img=ctx.createImageData(SRES,SRES);
+for(let y=0;y<SRES;y++){
+const s=(SRES-1-y)*SRES*4,d=y*SRES*4;
+for(let x=0;x<SRES*4;x++)img.data[d+x]=pixBuf[s+x];
+}
+ctx.putImageData(img,col*SRES,row*SRES);
+}
+tmpRT.dispose();colorRT.dispose();maskedRT.dispose();
+
+const tex=new THREE.CanvasTexture(canvas);
+tex.minFilter=THREE.LinearFilter;tex.magFilter=THREE.LinearFilter;
+tex.wrapS=tex.wrapT=THREE.ClampToEdgeWrapping;tex.needsUpdate=true;
+return{tex,canvas};
+}
+
+const gradFire=makeGrad([{p:0,c:"#0a0000"},{p:.2,c:"#661100"},{p:.4,c:"#cc3300"},{p:.6,c:"#ff7700"},{p:.8,c:"#ffcc33"},{p:1,c:"#ffffdd"}]);
+const gradMagic=makeGrad([{p:0,c:"#0a0018"},{p:.2,c:"#4400aa"},{p:.4,c:"#9933ff"},{p:.6,c:"#dd66ff"},{p:.8,c:"#ffaaff"},{p:1,c:"#ffffff"}]);
+const gradSpark=makeGrad([{p:0,c:"#000818"},{p:.2,c:"#0044aa"},{p:.4,c:"#2288ff"},{p:.65,c:"#66ccff"},{p:.85,c:"#ccf0ff"},{p:1,c:"#ffffff"}]);
+const gradEmber=makeGrad([{p:0,c:"#0a0400"},{p:.25,c:"#663300"},{p:.5,c:"#cc6600"},{p:.75,c:"#ffaa22"},{p:1,c:"#ffeeaa"}]);
+
+const sheets=[
+{name:"Fire Burst",effect:"Explosion",
+params:{cExplosionRadius:2,cExplosionBallness:4,cExplosionGrowth:3,cExplosionDensity:1.5,cExplosionContrast:1.2,cExplosionGrain:1.5},
+grad:gradFire,tStart:.3,tEnd:1.8},
+{name:"Magic Aura",effect:"Corona",
+params:{},
+grad:gradMagic,tStart:2,tEnd:9},
+{name:"Lightning Arc",effect:"Caustics",
+params:{cSpeed:.8,tiling:false},
+grad:gradSpark,tStart:1,tEnd:6},
+{name:"Flame Flicker",effect:"Flame",
+params:{cSpeed:.6},
+grad:gradEmber,tStart:1,tEnd:5}
 ];
 
-const spriteTex=[];
-const pixelBuf=new Uint8Array(SRES*SRES*4);
-
-for(let i=0;i<spriteData.length;i++){
-const sd=spriteData[i];
-const rawRT=makeRT(),colorRT=makeRT(),maskedRT=makeRT();
-renderFx(sd.effect,sd.params,rawRT);
-doGrad(rawRT,sd.grad,colorRT);
-doMask(colorRT,maskedRT);
-maskedRT.texture.wrapS=maskedRT.texture.wrapT=THREE.ClampToEdgeWrapping;
-spriteTex.push(maskedRT.texture);
-rawRT.dispose();colorRT.dispose();
-prog(10+i*15);
+const sheetTextures=[];
+for(let i=0;i<sheets.length;i++){
+const s=sheets[i];
+const result=makeSpriteSheet(s.effect,s.params,s.grad,s.tStart,s.tEnd);
+sheetTextures.push(result);
+prog(5+(i+1)*18);
 }
-
-// ── Show sprite textures in strip ──
-const strip=document.getElementById("sprite-strip");
-for(let i=0;i<spriteData.length;i++){
-const sd=spriteData[i];
-// Re-render the masked sprite to read pixels for thumbnail
-const tmpRT=makeRT();
-const rawRT2=makeRT(),colorRT2=makeRT();
-renderFx(sd.effect,sd.params,rawRT2);
-doGrad(rawRT2,sd.grad,colorRT2);
-doMask(colorRT2,tmpRT);
-r3.readRenderTargetPixels(tmpRT,0,0,SRES,SRES,pixelBuf);
-const card=document.createElement("div");card.className="sprite-card";
-const cv=document.createElement("canvas");cv.width=SRES;cv.height=SRES;
-const ctx=cv.getContext("2d",{willReadFrequently:true});
-const img=ctx.createImageData(SRES,SRES);
-for(let y=0;y<SRES;y++){const s=(SRES-1-y)*SRES*4,d=y*SRES*4;
-for(let x=0;x<SRES*4;x++)img.data[d+x]=pixelBuf[s+x];}
-ctx.putImageData(img,0,0);
-card.appendChild(cv);
-const lbl=document.createElement("div");lbl.className="label";lbl.textContent=sd.name+" Sprite";
-card.appendChild(lbl);
-const sub=document.createElement("div");sub.className="sub";sub.textContent=sd.effect+" → Gradient → Mask";
-card.appendChild(sub);
-strip.appendChild(card);
-tmpRT.dispose();rawRT2.dispose();colorRT2.dispose();
-}
-
-prog(75);
 
 // ══════════════════════════════════════════════════════════════════
-// PARTICLE SHADERS (custom for per-particle size + opacity)
+// SPRITE SHEET PARTICLE SHADER (interpolates between frames)
 // ══════════════════════════════════════════════════════════════════
 const partVert=`
 attribute float aSize;
 attribute float aOpacity;
+attribute float aFrame;
 varying float vOpacity;
+varying float vFrame;
 void main(){
 vOpacity=aOpacity;
+vFrame=aFrame;
 vec4 mv=modelViewMatrix*vec4(position,1.0);
-gl_PointSize=clamp(aSize*(250.0/-mv.z),1.0,300.0);
-gl_Position=projectionMatrix*mv;}`;
+gl_PointSize=clamp(aSize*(280.0/-mv.z),1.0,400.0);
+gl_Position=projectionMatrix*mv;
+}`;
+
 const partFrag=`
 uniform sampler2D uMap;
+uniform float uGrid;
+uniform float uFrames;
 varying float vOpacity;
+varying float vFrame;
 void main(){
-vec4 c=texture2D(uMap,gl_PointCoord);
-gl_FragColor=vec4(c.rgb*vOpacity,c.a*vOpacity);}`;
+float f0=floor(vFrame);
+float f1=min(f0+1.,uFrames-1.);
+float blend=fract(vFrame);
+float invG=1./uGrid;
+vec2 uv0=vec2(mod(f0,uGrid),floor(f0/uGrid))*invG+gl_PointCoord*invG;
+vec2 uv1=vec2(mod(f1,uGrid),floor(f1/uGrid))*invG+gl_PointCoord*invG;
+vec4 c0=texture2D(uMap,uv0);
+vec4 c1=texture2D(uMap,uv1);
+vec4 c=mix(c0,c1,blend);
+gl_FragColor=vec4(c.rgb*vOpacity,c.a*vOpacity);
+}`;
 
-function createParticleMat(sprite){
+function createSheetMat(sheetTex){
 return new THREE.ShaderMaterial({
-uniforms:{uMap:{value:sprite}},
+uniforms:{uMap:{value:sheetTex},uGrid:{value:GRID},uFrames:{value:FRAMES}},
 vertexShader:partVert,fragmentShader:partFrag,
 transparent:true,blending:THREE.AdditiveBlending,depthWrite:false});
 }
 
 // ══════════════════════════════════════════════════════════════════
-// PARTICLE SYSTEMS
+// PARTICLE SYSTEMS (each particle animates through sprite sheet)
 // ══════════════════════════════════════════════════════════════════
-
-function mkSystem(count,sprite,spawn,updateFn){
+function mkSys(count,sheetTex,spawnFn,updateFn){
 const pos=new Float32Array(count*3);
 const sizes=new Float32Array(count);
-const opacities=new Float32Array(count);
+const opac=new Float32Array(count);
+const frames=new Float32Array(count);
 const vel=new Float32Array(count*3);
 const life=new Float32Array(count);
 const maxLife=new Float32Array(count);
-const baseSize=new Float32Array(count);
-const extra=new Float32Array(count*4); // per-system extra data (angle, radius, etc.)
+const bSize=new Float32Array(count);
+const extra=new Float32Array(count*4);
 
-for(let i=0;i<count;i++)spawn(i,pos,vel,life,maxLife,baseSize,extra,true);
+for(let i=0;i<count;i++)spawnFn(i,pos,vel,life,maxLife,bSize,extra,true);
 
 const geo=new THREE.BufferGeometry();
 geo.setAttribute("position",new THREE.BufferAttribute(pos,3));
 geo.setAttribute("aSize",new THREE.BufferAttribute(sizes,1));
-geo.setAttribute("aOpacity",new THREE.BufferAttribute(opacities,1));
-const mat=createParticleMat(sprite);
+geo.setAttribute("aOpacity",new THREE.BufferAttribute(opac,1));
+geo.setAttribute("aFrame",new THREE.BufferAttribute(frames,1));
+const mat=createSheetMat(sheetTex);
 const points=new THREE.Points(geo,mat);
 
 function update(dt,t){
 for(let i=0;i<count;i++){
 life[i]-=dt;
-if(life[i]<=0){spawn(i,pos,vel,life,maxLife,baseSize,extra,false);continue;}
-const frac=1-life[i]/maxLife[i]; // 0→born, 1→dead
-updateFn(i,dt,t,frac,pos,vel,life,maxLife,baseSize,sizes,opacities,extra);
+if(life[i]<=0){spawnFn(i,pos,vel,life,maxLife,bSize,extra,false);continue;}
+const frac=1-life[i]/maxLife[i];
+frames[i]=frac*(FRAMES-1); // float frame for interpolation
+updateFn(i,dt,t,frac,pos,vel,life,maxLife,bSize,sizes,opac,extra);
 }
 geo.attributes.position.needsUpdate=true;
 geo.attributes.aSize.needsUpdate=true;
 geo.attributes.aOpacity.needsUpdate=true;
+geo.attributes.aFrame.needsUpdate=true;
 }
 return{points,update};
 }
 
-// 1) FIRE FOUNTAIN — erupts upward from center, gravity pulls back
-const fire=mkSystem(400,spriteTex[0],
-(i,pos,vel,life,maxLife,bs,ex,init)=>{
-const a=Math.random()*Math.PI*2;
-const r=Math.random()*.4;
+// 1) FIRE BURST — erupts upward, gravity arcs, each particle plays explosion sequence
+const fire=mkSys(200,sheetTextures[0].tex,
+(i,pos,vel,life,ml,bs,ex,init)=>{
+const a=Math.random()*Math.PI*2,r=Math.random()*.3;
 pos[i*3]=Math.cos(a)*r;
-pos[i*3+1]=init?Math.random()*3:0;
+pos[i*3+1]=init?Math.random()*4:.2;
 pos[i*3+2]=Math.sin(a)*r;
-vel[i*3]=(Math.random()-.5)*1.2;
-vel[i*3+1]=3+Math.random()*4;
-vel[i*3+2]=(Math.random()-.5)*1.2;
-maxLife[i]=1.2+Math.random()*1.8;
-life[i]=maxLife[i];
-bs[i]=15+Math.random()*25;
+vel[i*3]=(Math.random()-.5)*1.5;
+vel[i*3+1]=4+Math.random()*3;
+vel[i*3+2]=(Math.random()-.5)*1.5;
+ml[i]=1.5+Math.random()*1.5;life[i]=ml[i];
+bs[i]=20+Math.random()*30;
 },
-(i,dt,t,frac,pos,vel,life,ml,bs,sizes,opac,ex)=>{
-vel[i*3+1]-=6*dt; // gravity
-pos[i*3]+=vel[i*3]*dt;
-pos[i*3+1]+=vel[i*3+1]*dt;
-pos[i*3+2]+=vel[i*3+2]*dt;
-sizes[i]=bs[i]*(1-frac*.6);
-opac[i]=(1-frac)*(1-frac); // quadratic fade
+(i,dt,t,frac,pos,vel,life,ml,bs,sizes,opac)=>{
+vel[i*3+1]-=7*dt;
+pos[i*3]+=vel[i*3]*dt;pos[i*3+1]+=vel[i*3+1]*dt;pos[i*3+2]+=vel[i*3+2]*dt;
+sizes[i]=bs[i]*(1-frac*.5);
+opac[i]=Math.pow(1-frac,1.5);
 });
 
-// 2) MAGIC VORTEX — spiral helix around center, rising
-const magic=mkSystem(250,spriteTex[1],
-(i,pos,vel,life,maxLife,bs,ex,init)=>{
-ex[i*4]=Math.random()*Math.PI*2; // angle
-ex[i*4+1]=1.5+Math.random()*1.5; // radius
-ex[i*4+2]=1.5+Math.random()*1; // angular velocity
-ex[i*4+3]=.6+Math.random()*.6; // rise speed
-pos[i*3+1]=init?Math.random()*8:-1;
-maxLife[i]=3+Math.random()*3;
-life[i]=maxLife[i];
-bs[i]=10+Math.random()*18;
+// 2) MAGIC AURA — helix spiral, each particle plays corona sequence
+const magic=mkSys(150,sheetTextures[1].tex,
+(i,pos,vel,life,ml,bs,ex,init)=>{
+ex[i*4]=Math.random()*Math.PI*2;
+ex[i*4+1]=1.8+Math.random()*1.2;
+ex[i*4+2]=1.2+Math.random()*.8;
+ex[i*4+3]=.5+Math.random()*.4;
+pos[i*3+1]=init?Math.random()*7:-.5;
+ml[i]=3+Math.random()*3;life[i]=ml[i];
+bs[i]=14+Math.random()*20;
 },
 (i,dt,t,frac,pos,vel,life,ml,bs,sizes,opac,ex)=>{
-ex[i*4]+=ex[i*4+2]*dt; // advance angle
-pos[i*3+1]+=ex[i*4+3]*dt; // rise
-const wobble=Math.sin(t*2+i)*0.15;
-pos[i*3]=Math.cos(ex[i*4])*(ex[i*4+1]+wobble);
-pos[i*3+2]=Math.sin(ex[i*4])*(ex[i*4+1]+wobble);
-sizes[i]=bs[i]*(1-frac*.4);
-const fadeIn=Math.min(frac*5,1);
-const fadeOut=1-Math.max((frac-.7)/.3,0);
-opac[i]=fadeIn*fadeOut*.8;
+ex[i*4]+=ex[i*4+2]*dt;
+pos[i*3+1]+=ex[i*4+3]*dt;
+pos[i*3]=Math.cos(ex[i*4])*ex[i*4+1];
+pos[i*3+2]=Math.sin(ex[i*4])*ex[i*4+1];
+sizes[i]=bs[i]*(1-frac*.3);
+const fi=Math.min(frac*4,1),fo=1-Math.max((frac-.75)/.25,0);
+opac[i]=fi*fo*.7;
 });
 
-// 3) LIGHTNING SPARKS — brief intense flashes, random positions
-const sparks=mkSystem(120,spriteTex[2],
-(i,pos,vel,life,maxLife,bs,ex,init)=>{
-const a=Math.random()*Math.PI*2;
-const r=.5+Math.random()*3;
-const h=Math.random()*5;
-pos[i*3]=Math.cos(a)*r;
-pos[i*3+1]=h;
-pos[i*3+2]=Math.sin(a)*r;
-vel[i*3]=(Math.random()-.5)*8;
-vel[i*3+1]=(Math.random()-.5)*8;
-vel[i*3+2]=(Math.random()-.5)*8;
-maxLife[i]=.05+Math.random()*.2;
-life[i]=maxLife[i];
-bs[i]=5+Math.random()*15;
+// 3) LIGHTNING — brief flashes, each particle plays caustic arc sequence
+const sparks=mkSys(80,sheetTextures[2].tex,
+(i,pos,vel,life,ml,bs,ex,init)=>{
+const a=Math.random()*Math.PI*2,r=.5+Math.random()*3,h=.5+Math.random()*5;
+pos[i*3]=Math.cos(a)*r;pos[i*3+1]=h;pos[i*3+2]=Math.sin(a)*r;
+vel[i*3]=(Math.random()-.5)*4;
+vel[i*3+1]=(Math.random()-.5)*4;
+vel[i*3+2]=(Math.random()-.5)*4;
+ml[i]=.15+Math.random()*.35;life[i]=ml[i];
+bs[i]=10+Math.random()*20;
 },
-(i,dt,t,frac,pos,vel,life,ml,bs,sizes,opac,ex)=>{
-pos[i*3]+=vel[i*3]*dt;
-pos[i*3+1]+=vel[i*3+1]*dt;
-pos[i*3+2]+=vel[i*3+2]*dt;
-sizes[i]=bs[i]*(1-frac);
-opac[i]=(1-frac)*1.5; // bright flash, fast fade
+(i,dt,t,frac,pos,vel,life,ml,bs,sizes,opac)=>{
+pos[i*3]+=vel[i*3]*dt;pos[i*3+1]+=vel[i*3+1]*dt;pos[i*3+2]+=vel[i*3+2]*dt;
+sizes[i]=bs[i]*(1-frac*.3);
+opac[i]=(1-frac)*1.2;
 });
 
-// 4) EMBER RAIN — tiny glowing embers drifting down from above
-const embers=mkSystem(250,spriteTex[3],
-(i,pos,vel,life,maxLife,bs,ex,init)=>{
-pos[i*3]=(Math.random()-.5)*14;
-pos[i*3+1]=8+Math.random()*4;
-pos[i*3+2]=(Math.random()-.5)*14;
-vel[i*3]=(Math.random()-.5)*.3;
-vel[i*3+1]=-(1+Math.random()*1.5);
-vel[i*3+2]=(Math.random()-.5)*.3;
-ex[i*4]=Math.random()*Math.PI*2; // sway phase
-ex[i*4+1]=.5+Math.random()*1.5; // sway speed
-maxLife[i]=3+Math.random()*4;
-life[i]=init?Math.random()*maxLife[i]:maxLife[i];
-bs[i]=3+Math.random()*6;
+// 4) EMBERS — tiny animated flames drifting down with gentle sway
+const embers=mkSys(200,sheetTextures[3].tex,
+(i,pos,vel,life,ml,bs,ex,init)=>{
+pos[i*3]=(Math.random()-.5)*16;
+pos[i*3+1]=8+Math.random()*5;
+pos[i*3+2]=(Math.random()-.5)*16;
+vel[i*3]=(Math.random()-.5)*.2;
+vel[i*3+1]=-(1+Math.random()*1.2);
+vel[i*3+2]=(Math.random()-.5)*.2;
+ex[i*4]=Math.random()*Math.PI*2;
+ex[i*4+1]=.8+Math.random()*1.5;
+ml[i]=3+Math.random()*4;life[i]=init?Math.random()*ml[i]:ml[i];
+bs[i]=4+Math.random()*8;
 },
 (i,dt,t,frac,pos,vel,life,ml,bs,sizes,opac,ex)=>{
-pos[i*3]+=vel[i*3]*dt+Math.sin(t*ex[i*4+1]+ex[i*4])*.01;
+pos[i*3]+=vel[i*3]*dt+Math.sin(t*ex[i*4+1]+ex[i*4])*.008;
 pos[i*3+1]+=vel[i*3+1]*dt;
 pos[i*3+2]+=vel[i*3+2]*dt;
 sizes[i]=bs[i];
-const fadeIn=Math.min(frac*3,1);
-const fadeOut=1-Math.max((frac-.8)/.2,0);
-opac[i]=fadeIn*fadeOut*.6;
+const fi=Math.min(frac*3,1),fo=1-Math.max((frac-.8)/.2,0);
+opac[i]=fi*fo*.5;
 });
 
 // ══════════════════════════════════════════════════════════════════
@@ -382,8 +388,8 @@ opac[i]=fadeIn*fadeOut*.6;
 // ══════════════════════════════════════════════════════════════════
 document.getElementById("viewport").appendChild(r3.domElement);
 const scene=new THREE.Scene();
-scene.background=new THREE.Color(0x030308);
-scene.fog=new THREE.FogExp2(0x030308,.03);
+scene.background=new THREE.Color(0x040408);
+scene.fog=new THREE.FogExp2(0x040408,.025);
 
 const cam=new THREE.PerspectiveCamera(45,W/H,.1,100);
 cam.position.set(0,4,10);cam.lookAt(0,2,0);
@@ -397,29 +403,29 @@ ctrl.autoRotate=true;ctrl.autoRotateSpeed=.6;
 const pmrem=new THREE.PMREMGenerator(r3);
 const envS=new THREE.Scene();
 envS.add(new THREE.HemisphereLight(0x222233,0x060608,2));
-const envD=new THREE.DirectionalLight(0xffeedd,1.5);envD.position.set(5,8,5);envS.add(envD);
+envS.add(Object.assign(new THREE.DirectionalLight(0xffeedd,1.5),{position:new THREE.Vector3(5,8,5)}));
 scene.environment=pmrem.fromScene(envS,0,.1,100).texture;
 pmrem.dispose();
 
 // Lighting
 scene.add(new THREE.AmbientLight(0x111115,.5));
-scene.add(new THREE.HemisphereLight(0x223344,0x111111,.8));
-const fireLight=new THREE.PointLight(0xff5500,.3,8);fireLight.position.set(0,2,0);scene.add(fireLight);
-const magicLight=new THREE.PointLight(0xaa44ff,.2,8);magicLight.position.set(0,4,0);scene.add(magicLight);
+scene.add(new THREE.HemisphereLight(0x223344,0x111111,.6));
+const fireLight=new THREE.PointLight(0xff5500,.25,8);fireLight.position.set(0,2,0);scene.add(fireLight);
+const magicLight=new THREE.PointLight(0xaa44ff,.15,8);magicLight.position.set(0,4,0);scene.add(magicLight);
 
-// Central dark crystal
-const crystalGeo=new THREE.OctahedronGeometry(.6,0);
-const crystalMat=new THREE.MeshPhysicalMaterial({
-color:0x111122,roughness:.1,metalness:.9,emissive:0x220044,emissiveIntensity:.2,
-clearcoat:1,clearcoatRoughness:.05,envMapIntensity:2});
-const crystal=new THREE.Mesh(crystalGeo,crystalMat);
+// Central crystal
+const crystal=new THREE.Mesh(
+new THREE.OctahedronGeometry(.6,0),
+new THREE.MeshPhysicalMaterial({
+color:0x111122,roughness:.1,metalness:.9,emissive:0x220044,emissiveIntensity:.15,
+clearcoat:1,clearcoatRoughness:.05,envMapIntensity:2}));
 crystal.position.set(0,1.5,0);crystal.scale.set(1,2.5,1);scene.add(crystal);
 
 // Pedestal
-const pedGeo=new THREE.CylinderGeometry(.8,1,.3,6);
-const pedMat=new THREE.MeshStandardMaterial({color:0x0a0a12,roughness:.6,metalness:.5});
-const pedestal=new THREE.Mesh(pedGeo,pedMat);
-pedestal.position.set(0,.15,0);scene.add(pedestal);
+scene.add(Object.assign(new THREE.Mesh(
+new THREE.CylinderGeometry(.8,1,.3,6),
+new THREE.MeshStandardMaterial({color:0x0a0a12,roughness:.6,metalness:.5})),
+{position:new THREE.Vector3(0,.15,0)}));
 
 // Ground
 const ground=new THREE.Mesh(
@@ -427,7 +433,6 @@ new THREE.PlaneGeometry(30,30),
 new THREE.MeshStandardMaterial({color:0x080810,roughness:.85,metalness:.1}));
 ground.rotation.x=-Math.PI/2;scene.add(ground);
 
-// Add particle systems to scene
 scene.add(fire.points);
 scene.add(magic.points);
 scene.add(sparks.points);
@@ -439,6 +444,24 @@ composer.addPass(new RenderPass(scene,cam));
 composer.addPass(new UnrealBloomPass(new THREE.Vector2(W,H),.15,.3,.9));
 composer.addPass(new OutputPass());
 
+prog(95);
+
+// ── Sprite sheet thumbnails ──
+const strip=document.getElementById("sheet-strip");
+for(let i=0;i<sheets.length;i++){
+const card=document.createElement("div");card.className="sheet-card";
+const cv=document.createElement("canvas");
+cv.width=sheetTextures[i].canvas.width;cv.height=sheetTextures[i].canvas.height;
+cv.getContext("2d").drawImage(sheetTextures[i].canvas,0,0);
+card.appendChild(cv);
+const lbl=document.createElement("div");lbl.className="label";lbl.textContent=sheets[i].name;
+card.appendChild(lbl);
+const sub=document.createElement("div");sub.className="sub";
+sub.textContent=sheets[i].effect+" → Gradient → 4×4 Sheet (16 frames)";
+card.appendChild(sub);
+strip.appendChild(card);
+}
+
 prog(100);
 await new Promise(r=>setTimeout(r,200));
 document.getElementById("loading").style.display="none";
@@ -446,9 +469,9 @@ document.getElementById("content").style.display="block";
 
 // ── Toggle buttons ──
 const systems=[
-{name:"Fire Fountain",obj:fire,color:"#ff5500"},
-{name:"Magic Vortex",obj:magic,color:"#aa44ff"},
-{name:"Lightning Sparks",obj:sparks,color:"#4488ff"},
+{name:"Fire Burst",obj:fire,color:"#ff5500"},
+{name:"Magic Aura",obj:magic,color:"#aa44ff"},
+{name:"Lightning Arc",obj:sparks,color:"#4488ff"},
 {name:"Ember Rain",obj:embers,color:"#ff8800"}
 ];
 const togBar=document.getElementById("toggles");
@@ -458,7 +481,7 @@ allBtn.onclick=()=>{systems.forEach(s=>{s.obj.points.visible=true;});
 document.querySelectorAll(".toggle-btn").forEach(b=>b.classList.add("active"));};
 togBar.appendChild(allBtn);
 const soloBtn=document.createElement("button");
-soloBtn.className="toggle-btn";soloBtn.textContent="Solo Mode";soloBtn.dataset.solo="0";
+soloBtn.className="toggle-btn";soloBtn.textContent="Solo";soloBtn.dataset.solo="0";
 soloBtn.onclick=()=>{const on=soloBtn.dataset.solo==="1";soloBtn.dataset.solo=on?"0":"1";
 soloBtn.classList.toggle("active",!on);};
 togBar.appendChild(soloBtn);
@@ -467,16 +490,12 @@ const btn=document.createElement("button");
 btn.className="toggle-btn active";btn.textContent=s.name;
 btn.style.borderColor=s.color;
 btn.onclick=()=>{
-const solo=soloBtn.dataset.solo==="1";
-if(solo){
-systems.forEach(x=>{x.obj.points.visible=false;
-document.querySelectorAll(".toggle-btn").forEach(b=>{if(b!==allBtn&&b!==soloBtn)b.classList.remove("active");});});
+if(soloBtn.dataset.solo==="1"){
+systems.forEach(x=>{x.obj.points.visible=false;});
+document.querySelectorAll(".toggle-btn").forEach(b=>{if(b!==allBtn&&b!==soloBtn)b.classList.remove("active");});
 s.obj.points.visible=true;btn.classList.add("active");
-}else{
-s.obj.points.visible=!s.obj.points.visible;
-btn.classList.toggle("active",s.obj.points.visible);
-}};
-togBar.appendChild(btn);
+}else{s.obj.points.visible=!s.obj.points.visible;btn.classList.toggle("active",s.obj.points.visible);}
+};togBar.appendChild(btn);
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -486,7 +505,7 @@ let prevTime=0;
 function animate(){
 requestAnimationFrame(animate);
 const t=clock.getElapsedTime();
-const dt=Math.min(t-prevTime,.05); // cap dt to avoid jumps
+const dt=Math.min(t-prevTime,.05);
 prevTime=t;
 
 fire.update(dt,t);
@@ -494,14 +513,9 @@ magic.update(dt,t);
 sparks.update(dt,t);
 embers.update(dt,t);
 
-// Crystal rotation + pulse
 crystal.rotation.y=t*.3;
-const pulse=Math.sin(t*1.5)*.05+.25;
-crystalMat.emissiveIntensity=pulse;
-
-// Dynamic lights
-fireLight.intensity=.25+Math.sin(t*3)*.05;
-magicLight.intensity=.15+Math.sin(t*2+1)*.05;
+fireLight.intensity=.2+Math.sin(t*3)*.05;
+magicLight.intensity=.12+Math.sin(t*2+1)*.03;
 
 ctrl.update();
 composer.render();
