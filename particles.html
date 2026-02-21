@@ -133,6 +133,18 @@ gl_FragColor=vec4(c.rgb*alpha,alpha);}`,
 depthTest:false,depthWrite:false});
 maskScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),maskMat));
 
+// Luminance-only alpha (no circle) for effects that have their own shape
+const lumScene=new THREE.Scene(),lumCam=new THREE.Camera();
+const lumMat=new THREE.ShaderMaterial({
+uniforms:{tDiffuse:{value:null}},vertexShader:ppV,
+fragmentShader:`uniform sampler2D tDiffuse;varying vec2 vUv;
+void main(){vec4 c=texture2D(tDiffuse,vUv);
+float lum=dot(c.rgb,vec3(.299,.587,.114));
+float alpha=smoothstep(.02,.15,lum);
+gl_FragColor=vec4(c.rgb*alpha,alpha);}`,
+depthTest:false,depthWrite:false});
+lumScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),lumMat));
+
 // Defaults
 function D(){return{animate:false,time:5,resolution:SRES+"",polarConversion:false,tiling:false,normalMap:false,cHeightScale:2,cRadialMask:1,cColorBalanceShadowsR:0,cColorBalanceShadowsG:0,cColorBalanceShadowsB:0,cColorBalanceMidtonesR:0,cColorBalanceMidtonesG:0,cColorBalanceMidtonesB:0,cColorBalanceHighlightsR:0,cColorBalanceHighlightsG:0,cColorBalanceHighlightsB:0,cToonEnable:false,cToonDark:.8,cToonLight:.95,cFrequency:30,cAmplitude:.01,cIntensity:.5,cDirectionX:0,cDirectionY:1,cPowerExponent:1,cRadius:.5,cInnerRadius:1,cInnerRadius2:1,cSize:1,cWidth:1,cHeight:1,cDepth:1,cColor:1,cPetals:6,cOffset:.2,cVolume:3,cBeta:4,cDelta:.05,cScale:1,cInnerWidth:.4,cStrength:1,cPower:1,cRange:2,cEmission:1,cBloom:1,cLightX:1,cLightY:1,cLightZ:1,cAmbient:1,cSmoothness:1,cSmoothnessPower:1,cThickness:1,cThicknessPower:1,cCameraTilt:0,cCameraPan:0,cSpeed:1,cAngle:0,cDensity:1,cAlpha:1,cRepeat:1,cScaleShift:0,cBias:0,cGain:0,cInvert:0,cThreshold:0,cDiamondGearTeeth:18,cDiamondGearMid:.8,cBrushStrokeX1:-.4,cBrushStrokeY1:0,cBrushStrokeX2:1.1,cBrushStrokeY2:.8,cBubblesVariation:1,cFlameEyeInnerFade:1,cFlameEyeOuterFade:1,cFlameEyeBorder:1,cSplatLines:20,cSplatSpotStep:.04,cTrabeculumVariation:2,cLifeTime:.9,cGravity:.26,cCount:300,cExplosionRadius:1.75,cExplosionDownScale:1.25,cExplosionGrain:2,cExplosionSpeed:.3,cExplosionBallness:2,cExplosionGrowth:2.2,cExplosionFade:1.6,cExplosionDensity:1.35,cExplosionContrast:1,cExplosionRollingInitDamp:.3,cExplosionRollingSpeed:2,cExplosionDelayRange:.25,cExplosionBallSpread:1,cExplosionBloom:0,cExplosionEmission:.2,cExplosionColor:1,cNoiseOctave:8,cNoiseFrequency:1,cNoiseAmplitude:.65,cNoisePersistence:.5,cNoiseScale:1,cNoiseSphereEnable:false,cNoiseGraphEnable:false,cNoiseStrength:1,cNoiseDepth:3,cNoiseSize:8,cNoiseLacunarity:2,cTurbulence:0,cRidge:0,cRidgeOffset:.9,cGradientNoise:0,cValueNoise:0,cVoronoiNoise:0,cVoronoiCell:0,cSimplexNoise:1}}
 
@@ -161,6 +173,10 @@ function doMask(inRT,outRT){
 maskMat.uniforms.tDiffuse.value=inRT.texture;maskMat.uniformsNeedUpdate=true;
 r3.setRenderTarget(outRT);r3.clear();r3.render(maskScene,maskCam);r3.setRenderTarget(null);
 }
+function doLumAlpha(inRT,outRT){
+lumMat.uniforms.tDiffuse.value=inRT.texture;lumMat.uniformsNeedUpdate=true;
+r3.setRenderTarget(outRT);r3.clear();r3.render(lumScene,lumCam);r3.setRenderTarget(null);
+}
 function makeGrad(stops){
 const c=document.createElement("canvas");c.width=256;c.height=1;
 const ctx=c.getContext("2d"),g=ctx.createLinearGradient(0,0,256,0);
@@ -178,7 +194,7 @@ prog(5);
 
 const pixBuf=new Uint8Array(SRES*SRES*4);
 
-function makeSpriteSheet(effect,baseParams,gradTex,timeStart,timeEnd){
+function makeSpriteSheet(effect,baseParams,gradTex,timeStart,timeEnd,useCircleMask){
 const canvas=document.createElement("canvas");
 canvas.width=SHEET;canvas.height=SHEET;
 const ctx=canvas.getContext("2d",{willReadFrequently:true});
@@ -189,8 +205,8 @@ const t=timeStart+(f/(FRAMES-1))*(timeEnd-timeStart);
 const params=Object.assign({},baseParams,{time:t});
 renderFx(effect,params,tmpRT);
 doGrad(tmpRT,gradTex,colorRT);
-doMask(colorRT,maskedRT);
-r3.readRenderTargetPixels(maskedRT,0,0,SRES,SRES,pixBuf);
+if(useCircleMask!==false){doMask(colorRT,maskedRT);r3.readRenderTargetPixels(maskedRT,0,0,SRES,SRES,pixBuf);}
+else{doLumAlpha(colorRT,maskedRT);r3.readRenderTargetPixels(maskedRT,0,0,SRES,SRES,pixBuf);}
 const col=f%GRID,row=Math.floor(f/GRID);
 const img=ctx.createImageData(SRES,SRES);
 for(let y=0;y<SRES;y++){
@@ -224,13 +240,13 @@ params:{cSpeed:.8,tiling:false},
 grad:gradSpark,tStart:1,tEnd:6},
 {name:"Flame Flicker",effect:"Flame",
 params:{cSpeed:.6},
-grad:gradEmber,tStart:1,tEnd:5}
+grad:gradEmber,tStart:1,tEnd:5,mask:false}
 ];
 
 const sheetTextures=[];
 for(let i=0;i<sheets.length;i++){
 const s=sheets[i];
-const result=makeSpriteSheet(s.effect,s.params,s.grad,s.tStart,s.tEnd);
+const result=makeSpriteSheet(s.effect,s.params,s.grad,s.tStart,s.tEnd,s.mask);
 sheetTextures.push(result);
 prog(5+(i+1)*18);
 }
