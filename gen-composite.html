@@ -161,6 +161,50 @@ function renderShader(shaderSrc,t,target){
   mat.dispose();
 }
 
+// ==================== ATLAS TEXTURE LAYER SUPPORT ====================
+// Renders a specific frame from a pre-rendered sprite sheet atlas onto a RT
+const atlasBlitFrag=`
+uniform sampler2D tAtlas;
+uniform vec4 uvRect; // x,y = offset, z,w = size (in 0-1 UV space)
+varying vec2 vUv;
+void main(){
+  vec2 uv=uvRect.xy+vUv*uvRect.zw;
+  gl_FragColor=texture2D(tAtlas,uv);
+}`;
+const atlasBlitScene=new THREE.Scene(),atlasBlitCam=new THREE.Camera();
+const atlasBlitMat=new THREE.ShaderMaterial({
+  uniforms:{tAtlas:{value:null},uvRect:{value:new THREE.Vector4(0,0,1,1)}},
+  vertexShader:ppV,fragmentShader:atlasBlitFrag,
+  depthTest:false,depthWrite:false,transparent:true
+});
+atlasBlitScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),atlasBlitMat));
+
+// Cache loaded atlas textures
+const atlasCache={};
+async function loadAtlas(name){
+  if(atlasCache[name]) return atlasCache[name];
+  const tex=await new THREE.TextureLoader().loadAsync(`sprites/${name}.png`);
+  tex.minFilter=THREE.LinearFilter;
+  tex.magFilter=THREE.LinearFilter;
+  tex.flipY=true;
+  atlasCache[name]=tex;
+  return tex;
+}
+
+function renderAtlasFrame(atlasTex,frameIdx,target){
+  const col=frameIdx%GRID, row=Math.floor(frameIdx/GRID);
+  const cellW=1/GRID, cellH=1/GRID;
+  // UV rect: bottom-left origin (Three.js textures are flipped)
+  const uvX=col*cellW;
+  const uvY=1-(row+1)*cellH; // flip Y for atlas rows
+  atlasBlitMat.uniforms.tAtlas.value=atlasTex;
+  atlasBlitMat.uniforms.uvRect.value.set(uvX,uvY,cellW,cellH);
+  atlasBlitMat.uniformsNeedUpdate=true;
+  r3.setRenderTarget(target);r3.clear();
+  r3.render(atlasBlitScene,atlasBlitCam);
+  r3.setRenderTarget(null);
+}
+
 // ==================== MASK TYPES ====================
 const MASK_TYPES={none:0,circle:1,ring:2,rect:3,radial:4,linear:5,angular:6,diamond:7};
 const BLEND_MODES={normal:0,add:1,multiply:2,screen:3};
@@ -205,7 +249,7 @@ function blendLayers(baseRT,layerRT,outRT,mode){
 }
 
 // ==================== COMPOSITE RENDERER ====================
-function renderCompositeFrame(recipe,globalT,accumA,accumB,tempRT,maskedRT){
+function renderCompositeFrame(recipe,globalT,frameIdx,accumA,accumB,tempRT,maskedRT){
   // Clear accumA to transparent
   r3.setRenderTarget(accumA);
   r3.clearColor(0,0,0,0);
@@ -216,14 +260,19 @@ function renderCompositeFrame(recipe,globalT,accumA,accumB,tempRT,maskedRT){
 
   for(let li=0;li<recipe.layers.length;li++){
     const layer=recipe.layers[li];
-    const src=SHADERS[layer.shader];
-    if(!src) continue;
 
-    // Map global time to layer's time range
-    const layerT=layer.tStart+(globalT*(layer.tEnd-layer.tStart));
-
-    // Render shader to temp
-    renderShader(src,layerT,tempRT);
+    if(layer.atlas){
+      // Atlas texture layer — blit frame from pre-rendered sprite sheet
+      const atlasTex=atlasCache[layer.atlas];
+      if(!atlasTex) continue;
+      renderAtlasFrame(atlasTex,frameIdx,tempRT);
+    } else if(layer.shader){
+      // Live GLSL shader layer
+      const src=SHADERS[layer.shader];
+      if(!src) continue;
+      const layerT=layer.tStart+(globalT*(layer.tEnd-layer.tStart));
+      renderShader(src,layerT,tempRT);
+    } else continue;
 
     // Apply mask
     applyMask(tempRT,maskedRT,layer);
@@ -238,7 +287,12 @@ function renderCompositeFrame(recipe,globalT,accumA,accumB,tempRT,maskedRT){
   return readAccum;
 }
 
-function makeCompositeSpriteSheet(recipe){
+async function makeCompositeSpriteSheet(recipe){
+  // Preload any atlas textures needed by this recipe
+  for(const layer of recipe.layers){
+    if(layer.atlas) await loadAtlas(layer.atlas);
+  }
+
   const canvas=document.createElement("canvas");
   canvas.width=SHEET;canvas.height=SHEET;
   const ctx=canvas.getContext("2d",{willReadFrequently:true});
@@ -249,7 +303,7 @@ function makeCompositeSpriteSheet(recipe){
   for(let f=0;f<FRAMES;f++){
     const globalT=f/(FRAMES-1); // 0 to 1
 
-    const resultRT=renderCompositeFrame(recipe,globalT,accumA,accumB,tempRT,maskedRT);
+    const resultRT=renderCompositeFrame(recipe,globalT,f,accumA,accumB,tempRT,maskedRT);
 
     r3.readRenderTargetPixels(resultRT,0,0,SRES,SRES,pixBuf);
     const col=f%GRID,row=Math.floor(f/GRID);
@@ -268,26 +322,26 @@ function makeCompositeSpriteSheet(recipe){
 // ==================== COMPOSITE CATALOG ====================
 
 const COMPOSITE_CATALOG=[
-  // 201. Dark Ritual Portal — summoning circle ring + warp tunnel center
-  {name:"Dark Ritual Portal",cat:"magic",fps:8,layers:[
+  // 201. Dark Ritual Portal — ACTUAL Dark Ritual (#029) ring + warp tunnel center
+  {name:"Dark Ritual Portal",cat:"magic",fps:5,layers:[
     {shader:"warp_tunnel",tStart:0,tEnd:15,blend:"normal",opacity:1.0,
-     mask:{type:"circle",radius:0.35,feather:0.05}},
-    {shader:"summoning",tStart:0,tEnd:20,blend:"add",opacity:0.9,
-     mask:{type:"ring",inner:0.25,outer:1.0,feather:0.06}}
+     mask:{type:"circle",radius:0.3,feather:0.04}},
+    {atlas:"029-dark-ritual",blend:"normal",opacity:1.0,
+     mask:{type:"ring",inner:0.2,outer:1.0,feather:0.06}}
   ]},
-  // 202. Inferno Portal — summoning circle + warp inferno center
-  {name:"Inferno Portal",cat:"fire",fps:8,layers:[
+  // 202. Dark Ritual Inferno — Dark Ritual ring + warp inferno center
+  {name:"Dark Ritual Inferno",cat:"fire",fps:5,layers:[
     {shader:"warp_inferno",tStart:0,tEnd:12,blend:"normal",opacity:1.0,
-     mask:{type:"circle",radius:0.35,feather:0.05}},
-    {shader:"summoning",tStart:0,tEnd:20,blend:"add",opacity:0.9,
-     mask:{type:"ring",inner:0.25,outer:1.0,feather:0.06}}
+     mask:{type:"circle",radius:0.3,feather:0.04}},
+    {atlas:"029-dark-ritual",blend:"normal",opacity:1.0,
+     mask:{type:"ring",inner:0.2,outer:1.0,feather:0.06}}
   ]},
-  // 203. Void Summon — summoning circle + void tentacles center
-  {name:"Void Summon",cat:"dark",fps:7,layers:[
+  // 203. Dark Ritual Void — Dark Ritual ring + void warp center
+  {name:"Dark Ritual Void",cat:"dark",fps:5,layers:[
     {shader:"warp_void",tStart:0,tEnd:30,blend:"normal",opacity:1.0,
-     mask:{type:"circle",radius:0.4,feather:0.08}},
-    {shader:"summoning",tStart:0,tEnd:20,blend:"add",opacity:0.85,
-     mask:{type:"ring",inner:0.3,outer:1.0,feather:0.06}}
+     mask:{type:"circle",radius:0.35,feather:0.05}},
+    {atlas:"029-dark-ritual",blend:"normal",opacity:1.0,
+     mask:{type:"ring",inner:0.25,outer:1.0,feather:0.06}}
   ]},
   // 204. Shield Break — energy shield + reality shatter cracking through
   {name:"Shield Break",cat:"energy",fps:9,layers:[
@@ -335,17 +389,18 @@ async function generateAll(){
     const recipe=COMPOSITE_CATALOG[i];
     status.textContent=`Compositing ${i+1}/${COMPOSITE_CATALOG.length}: ${recipe.name}`;
 
-    // Validate shaders
+    // Validate layers — each must have either a shader or atlas source
     let valid=true;
     for(const layer of recipe.layers){
-      if(!SHADERS[layer.shader]){
+      if(layer.atlas) continue; // atlas layers validated during preload
+      if(!layer.shader || !SHADERS[layer.shader]){
         status.textContent=`ERROR: no shader "${layer.shader}" in ${recipe.name}`;
         valid=false;break;
       }
     }
     if(!valid) continue;
 
-    const canvas=makeCompositeSpriteSheet(recipe);
+    const canvas=await makeCompositeSpriteSheet(recipe);
     const num=String(i+201).padStart(3,"0");
     const slug=recipe.name.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/-$/,"");
     window.__sprites.push({name:`${num}-${slug}`,data:canvas.toDataURL("image/png")});
