@@ -14,7 +14,7 @@ body{background:#030306;color:#ccc;font-family:'Segoe UI',system-ui,sans-serif;l
 .chapter-num{font-family:monospace;font-size:13px;color:#e94560;letter-spacing:2px;display:block;margin-bottom:2px}
 .chapter h2{font-size:26px;color:#e0e0ff;margin-bottom:6px;letter-spacing:1px}
 .new{display:inline-block;background:#e94560;color:#fff;font-size:9px;padding:2px 7px;border-radius:10px;vertical-align:middle;margin-left:8px;letter-spacing:1px;font-weight:bold}
-.chapter p{color:#777;max-width:750px;font-size:14px;margin-bottom:20px}
+.chapter>p{color:#777;max-width:750px;font-size:14px;margin-bottom:20px}
 .demo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
 .demo-grid.wide{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
 .card{background:#0a0a12;border:1px solid #1a1a2e;border-radius:8px;overflow:hidden;transition:all .3s}
@@ -25,15 +25,21 @@ body{background:#030306;color:#ccc;font-family:'Segoe UI',system-ui,sans-serif;l
 .card .lbl .desc{font-size:10px;color:#555}
 .card.highlight{border-color:#e94560;box-shadow:0 0 15px rgba(233,69,96,.15)}
 .arrow{text-align:center;padding:15px;color:#1a1a2e;font-size:28px;user-select:none}
-.pipeline-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
-.pipeline-row .pipe-arrow{color:#e94560;font-family:monospace;font-size:20px;font-weight:bold;flex-shrink:0;padding:0 4px}
-.pipeline-row .card{flex:1;min-width:180px;max-width:280px}
-.pbr-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
-.preview-wrap{display:flex;justify-content:center;align-items:flex-start;gap:24px;flex-wrap:wrap}
-.preview-wrap canvas{border-radius:8px;border:1px solid #1a1a2e;background:#111}
-.preview-info{color:#555;font-family:monospace;font-size:11px;max-width:280px;padding-top:20px}
+.pipeline-row{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.pipeline-row .pipe-arrow{color:#e94560;font-family:monospace;font-size:22px;font-weight:bold;flex-shrink:0;padding:0 2px}
+.pipeline-row .card{flex:1;min-width:160px;max-width:260px}
+.pbr-strip{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.preview-wrap{display:flex;justify-content:center;align-items:flex-start;gap:20px;flex-wrap:wrap}
+.preview-wrap canvas{border-radius:10px;border:1px solid #1a1a2e;cursor:grab}
+.preview-info{color:#666;font-family:monospace;font-size:11px;max-width:260px;padding-top:10px}
+.preview-info h3{color:#e0e0ff;font-size:14px;margin-bottom:8px}
 .preview-info p{margin-bottom:8px}
 .preview-info kbd{background:#1a1a2e;padding:2px 6px;border-radius:3px;color:#aaa;font-size:10px}
+.preview-info .map-list{list-style:none;padding:0;margin:8px 0}
+.preview-info .map-list li{padding:2px 0;color:#555}
+.preview-info .map-list li::before{content:"▸ ";color:#e94560}
+.section-note{color:#e94560;font-size:12px;font-family:monospace;margin-bottom:12px;opacity:.8}
+.vs-label{background:#e94560;color:#fff;padding:2px 8px;border-radius:4px;font-family:monospace;font-size:10px;letter-spacing:1px;align-self:center;flex-shrink:0}
 .outro{text-align:center;padding:50px 20px;max-width:700px;margin:0 auto}
 .outro h2{color:#e0e0ff;margin-bottom:10px;font-size:22px}
 .outro p{color:#555;margin-bottom:18px;font-size:14px}
@@ -42,8 +48,8 @@ body{background:#030306;color:#ccc;font-family:'Segoe UI',system-ui,sans-serif;l
 .progress{width:300px;height:3px;background:#111;margin:12px auto 0;border-radius:3px;overflow:hidden}
 .progress-bar{width:0;height:100%;background:#e94560;transition:width .3s}
 @media(max-width:700px){
-.demo-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
-.pbr-strip{grid-template-columns:repeat(3,1fr)}
+.demo-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+.pbr-strip{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
 .pipeline-row{flex-direction:column}.pipeline-row .card{max-width:100%}
 .pipeline-row .pipe-arrow{transform:rotate(90deg)}
 }
@@ -66,7 +72,7 @@ Initializing WebGL + loading shaders...
 <section class="chapter" id="ch1">
 <span class="chapter-num">CHAPTER 01</span>
 <h2>The Raw Canvas</h2>
-<p>The original tool generates 70+ procedural textures from pure math — noise, fractals, fluid simulations, cellular patterns. Interesting math, but the output is essentially grayscale.</p>
+<p>The original tool generates 70+ procedural textures from pure math — explosions, energy fields, fluid simulations, geometric mandalas. Visually striking patterns, but locked to grayscale or basic tinting.</p>
 <div class="demo-grid wide" id="grid-raw"></div>
 </section>
 <div class="arrow">&#x25BC;</div>
@@ -74,7 +80,7 @@ Initializing WebGL + loading shaders...
 <section class="chapter" id="ch2">
 <span class="chapter-num">CHAPTER 02</span>
 <h2>Color Balance — The Original Color System</h2>
-<p>The built-in color tool: 9 sliders controlling RGB across shadows, midtones, and highlights. It adds color, but you're painting with numbers. Here are the same four effects with hand-tuned color balance.</p>
+<p>The built-in color tool: 9 sliders controlling RGB across shadows, midtones, and highlights. It shifts the palette, but the results feel limited — you're painting with numbers. Same effects, now with hand-tuned color.</p>
 <div class="demo-grid wide" id="grid-color"></div>
 </section>
 <div class="arrow">&#x25BC;</div>
@@ -82,7 +88,7 @@ Initializing WebGL + loading shaders...
 <section class="chapter" id="ch3">
 <span class="chapter-num">CHAPTER 03</span>
 <h2>Gradient Color Mapping <span class="new">NEW</span></h2>
-<p>Instead of 9 numbers, define a full color gradient — unlimited stops, any colors. The shader maps brightness to your palette. One base pattern, infinite color variations. Here's a single texture mapped through 10 different gradient palettes.</p>
+<p>This changes everything. Define a full color gradient with unlimited stops. The shader maps the texture's brightness to your palette — same pattern, completely different look. Below: one explosion texture mapped through 10 palettes.</p>
 <div class="demo-grid" id="grid-grad"></div>
 </section>
 <div class="arrow">&#x25BC;</div>
@@ -90,7 +96,7 @@ Initializing WebGL + loading shaders...
 <section class="chapter" id="ch4">
 <span class="chapter-num">CHAPTER 04</span>
 <h2>Multi-Layer Compositing <span class="new">NEW</span></h2>
-<p>Stack multiple effects with Photoshop-style blend modes. Each mode creates a fundamentally different interaction between layers. Below: two simple inputs combined nine ways — each blend mode produces a unique texture that neither layer could create alone.</p>
+<p>Stack effects with blend modes. Below: organic water caustics layered with a digital matrix — maximum contrast between natural and synthetic. Nine blend modes, nine completely different textures from the same two inputs.</p>
 <div class="demo-grid" id="grid-blend"></div>
 </section>
 <div class="arrow">&#x25BC;</div>
@@ -98,7 +104,7 @@ Initializing WebGL + loading shaders...
 <section class="chapter" id="ch5">
 <span class="chapter-num">CHAPTER 05</span>
 <h2>The Power of Combination</h2>
-<p>Now combine everything: take two effects, blend them with a composite mode, then apply a gradient color ramp. Each row below shows the complete pipeline: Layer A + Layer B → Blend → Gradient Color.</p>
+<p>The full pipeline: pick two effects, blend them, then apply a gradient color ramp. Each row shows the complete journey from two inputs to a final texture that no single effect could produce.</p>
 <div id="grid-combined"></div>
 </section>
 <div class="arrow">&#x25BC;</div>
@@ -106,7 +112,8 @@ Initializing WebGL + loading shaders...
 <section class="chapter" id="ch6">
 <span class="chapter-num">CHAPTER 06</span>
 <h2>PBR Map Generation <span class="new">NEW</span></h2>
-<p>Turn any texture into a game-ready PBR material. Sobel filter for normals, height analysis for roughness and ambient occlusion, threshold mapping for metallic. One texture in, five maps out.</p>
+<p>Turn any texture into a game-ready PBR material. One input, five output maps. The color map gets a gradient ramp applied; the structural maps (normal, roughness, AO, metallic) are derived from the underlying height data.</p>
+<div class="section-note">Source: ridge noise with voronoi cells — good surface variation for PBR</div>
 <div class="pbr-strip" id="grid-pbr"></div>
 </section>
 <div class="arrow">&#x25BC;</div>
@@ -114,7 +121,7 @@ Initializing WebGL + loading shaders...
 <section class="chapter" id="ch7">
 <span class="chapter-num">CHAPTER 07</span>
 <h2>3D Material Preview <span class="new">NEW</span></h2>
-<p>See your material on a real 3D object with physically-based lighting. The PBR maps from Chapter 6 applied to a sphere. Drag to orbit, scroll to zoom.</p>
+<p>See your material in context. The PBR maps from Chapter 6 applied to 3D geometry with physically-based lighting, environment reflections, and ACES tone mapping.</p>
 <div class="preview-wrap" id="grid-3d"></div>
 </section>
 
@@ -139,37 +146,32 @@ const RES=512;
 const pixelBuf=new Uint8Array(RES*RES*4);
 const pbar=document.getElementById("pbar");
 
-// --- Shared 2D renderer ---
 const renderer=new THREE.WebGLRenderer({alpha:true,antialias:false});
-renderer.setSize(RES,RES);
-renderer.autoClear=true;
-const bScene=new THREE.Scene();
-const bCam=new THREE.Camera();
+renderer.setSize(RES,RES);renderer.autoClear=true;
+const bScene=new THREE.Scene();const bCam=new THREE.Camera();
 bScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),new THREE.MeshBasicMaterial()));
 
-// --- Render targets ---
 function makeRT(){return new THREE.WebGLRenderTarget(RES,RES,{minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter})}
-const rt=Array.from({length:5},makeRT);
-const pbrRT={color:makeRT(),normal:makeRT(),rough:makeRT(),ao:makeRT(),metal:makeRT()};
+const rt=Array.from({length:6},makeRT);
+const pbrRT={struct:makeRT(),color:makeRT(),normal:makeRT(),rough:makeRT(),ao:makeRT(),metal:makeRT()};
 
-// --- Grunge texture ---
 const grungeTex=await new Promise(ok=>{
 new THREE.TextureLoader().load("images/grunge.png",t=>{
 t.wrapS=t.wrapT=THREE.RepeatWrapping;t.minFilter=THREE.LinearFilter;t.magFilter=THREE.LinearFilter;ok(t);
 });});
 
-// --- Gradient textures ---
+// === GRADIENTS ===
 const GRADS={
-Fire:[{p:0,c:"#000000"},{p:.25,c:"#8b0000"},{p:.5,c:"#ff4500"},{p:.75,c:"#ffa500"},{p:1,c:"#ffff00"}],
-Ice:[{p:0,c:"#000022"},{p:.3,c:"#003366"},{p:.6,c:"#4488cc"},{p:.85,c:"#aaddff"},{p:1,c:"#ffffff"}],
-Neon:[{p:0,c:"#0a0020"},{p:.2,c:"#6600cc"},{p:.5,c:"#ff00ff"},{p:.7,c:"#00ffff"},{p:1,c:"#ffffff"}],
-Earth:[{p:0,c:"#1a0f00"},{p:.3,c:"#4a3000"},{p:.5,c:"#8b6914"},{p:.75,c:"#c4a35a"},{p:1,c:"#f5e6c8"}],
-Toxic:[{p:0,c:"#000000"},{p:.3,c:"#003300"},{p:.5,c:"#00cc00"},{p:.75,c:"#66ff00"},{p:1,c:"#ccff66"}],
-Plasma:[{p:0,c:"#0a0015"},{p:.2,c:"#4400aa"},{p:.4,c:"#cc00ff"},{p:.6,c:"#ff0066"},{p:.8,c:"#ff6600"},{p:1,c:"#ffff00"}],
-Ocean:[{p:0,c:"#000510"},{p:.25,c:"#002244"},{p:.5,c:"#006688"},{p:.75,c:"#00aacc"},{p:1,c:"#88ffee"}],
-Ember:[{p:0,c:"#000000"},{p:.3,c:"#330000"},{p:.5,c:"#991100"},{p:.7,c:"#ff4400"},{p:.9,c:"#ffaa00"},{p:1,c:"#ffeecc"}],
-Frost:[{p:0,c:"#050520"},{p:.3,c:"#1a3355"},{p:.5,c:"#5588bb"},{p:.8,c:"#bbddff"},{p:1,c:"#ffffff"}],
-Void:[{p:0,c:"#000000"},{p:.3,c:"#1a0033"},{p:.5,c:"#440066"},{p:.75,c:"#8800aa"},{p:1,c:"#cc44ff"}]
+Fire:[{p:0,c:"#000000"},{p:.15,c:"#330000"},{p:.35,c:"#aa1100"},{p:.55,c:"#ff4400"},{p:.75,c:"#ffaa00"},{p:.9,c:"#ffdd44"},{p:1,c:"#ffffcc"}],
+Ice:[{p:0,c:"#000011"},{p:.25,c:"#002255"},{p:.5,c:"#2277bb"},{p:.75,c:"#88ccee"},{p:.9,c:"#cceeFF"},{p:1,c:"#ffffff"}],
+Neon:[{p:0,c:"#05000a"},{p:.15,c:"#220044"},{p:.35,c:"#7700cc"},{p:.55,c:"#ff00ff"},{p:.75,c:"#00ffff"},{p:.9,c:"#aaffff"},{p:1,c:"#ffffff"}],
+Earth:[{p:0,c:"#0a0500"},{p:.2,c:"#2a1800"},{p:.4,c:"#6b4410"},{p:.6,c:"#aa7733"},{p:.8,c:"#ccaa66"},{p:1,c:"#f5e8d0"}],
+Toxic:[{p:0,c:"#000000"},{p:.2,c:"#001a00"},{p:.4,c:"#006600"},{p:.6,c:"#33cc00"},{p:.8,c:"#88ff22"},{p:1,c:"#ccff88"}],
+Plasma:[{p:0,c:"#050005"},{p:.15,c:"#2a0055"},{p:.3,c:"#7700aa"},{p:.45,c:"#cc00cc"},{p:.6,c:"#ff2255"},{p:.75,c:"#ff7700"},{p:.9,c:"#ffcc00"},{p:1,c:"#ffff88"}],
+Ocean:[{p:0,c:"#000208"},{p:.2,c:"#001133"},{p:.4,c:"#003366"},{p:.6,c:"#0077aa"},{p:.8,c:"#22bbcc"},{p:1,c:"#88ffee"}],
+Ember:[{p:0,c:"#000000"},{p:.2,c:"#1a0000"},{p:.35,c:"#550000"},{p:.5,c:"#aa2200"},{p:.65,c:"#ee5500"},{p:.8,c:"#ffaa22"},{p:.95,c:"#ffdd88"},{p:1,c:"#fff8ee"}],
+Frost:[{p:0,c:"#020210"},{p:.2,c:"#0a1133"},{p:.4,c:"#224488"},{p:.6,c:"#5599cc"},{p:.8,c:"#99ccee"},{p:1,c:"#eef8ff"}],
+Void:[{p:0,c:"#000000"},{p:.2,c:"#0a0022"},{p:.4,c:"#220055"},{p:.6,c:"#5500aa"},{p:.8,c:"#9933dd"},{p:1,c:"#dd88ff"}]
 };
 function makeGrad(stops){
 const c=document.createElement("canvas");c.width=256;c.height=1;
@@ -182,25 +184,21 @@ tex.wrapS=tex.wrapT=THREE.ClampToEdgeWrapping;tex.needsUpdate=true;return tex;
 }
 const gTex={};for(const[k,v]of Object.entries(GRADS))gTex[k]=makeGrad(v);
 
-// --- Full-screen post-process vertex shader ---
-const ppVert=`varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.0,1.0);}`;
+// === POST-PROCESS SHADERS ===
+const ppV=`varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.0,1.0);}`;
 
-// --- Gradient map material ---
 const gradS=new THREE.Scene(),gradC=new THREE.Camera();
 const gradM=new THREE.ShaderMaterial({
-uniforms:{tDiffuse:{value:null},tGradient:{value:null},intensity:{value:1.0}},
-vertexShader:ppVert,
+uniforms:{tDiffuse:{value:null},tGradient:{value:null},intensity:{value:1.0}},vertexShader:ppV,
 fragmentShader:`uniform sampler2D tDiffuse;uniform sampler2D tGradient;uniform float intensity;varying vec2 vUv;
 void main(){vec4 t=texture2D(tDiffuse,vUv);float l=clamp(dot(t.rgb,vec3(.299,.587,.114)),0.,1.);
 vec4 g=texture2D(tGradient,vec2(l,.5));gl_FragColor=vec4(mix(t.rgb,g.rgb,intensity),1.);}`,
 depthTest:false,depthWrite:false});
 const gradQ=new THREE.Mesh(new THREE.PlaneGeometry(2,2),gradM);gradS.add(gradQ);
 
-// --- Blend material ---
 const blendS=new THREE.Scene(),blendC=new THREE.Camera();
 const blendM=new THREE.ShaderMaterial({
-uniforms:{tBase:{value:null},tBlend:{value:null},opacity:{value:1},blendMode:{value:0}},
-vertexShader:ppVert,
+uniforms:{tBase:{value:null},tBlend:{value:null},opacity:{value:1},blendMode:{value:0}},vertexShader:ppV,
 fragmentShader:`uniform sampler2D tBase;uniform sampler2D tBlend;uniform float opacity;uniform int blendMode;varying vec2 vUv;
 vec3 bN(vec3 a,vec3 b){return b;}vec3 bM(vec3 a,vec3 b){return a*b;}
 vec3 bSc(vec3 a,vec3 b){return 1.-(1.-a)*(1.-b);}
@@ -218,13 +216,11 @@ gl_FragColor=vec4(mix(base.rgb,r,opacity),1.);}`,
 depthTest:false,depthWrite:false});
 const blendQ=new THREE.Mesh(new THREE.PlaneGeometry(2,2),blendM);blendS.add(blendQ);
 
-// --- PBR materials ---
 const ppS=new THREE.Scene(),ppC=new THREE.Camera();
 const ppQ=new THREE.Mesh(new THREE.PlaneGeometry(2,2),null);ppS.add(ppQ);
 
 const normalM=new THREE.ShaderMaterial({
-uniforms:{tDiffuse:{value:null},resolution:{value:new THREE.Vector2(RES,RES)},strength:{value:2.5}},
-vertexShader:ppVert,
+uniforms:{tDiffuse:{value:null},resolution:{value:new THREE.Vector2(RES,RES)},strength:{value:3.0}},vertexShader:ppV,
 fragmentShader:`uniform sampler2D tDiffuse;uniform vec2 resolution;uniform float strength;varying vec2 vUv;
 float h(vec2 u){return dot(texture2D(tDiffuse,u).rgb,vec3(.299,.587,.114));}
 void main(){vec2 tx=1./resolution;
@@ -236,17 +232,14 @@ gl_FragColor=vec4(normalize(vec3(-dx*strength,-dy*strength,1.))*.5+.5,1.);}`,
 depthTest:false,depthWrite:false});
 
 const roughM=new THREE.ShaderMaterial({
-uniforms:{tDiffuse:{value:null},invert:{value:1.},contrast:{value:1.2},bias:{value:.5}},
-vertexShader:ppVert,
+uniforms:{tDiffuse:{value:null},invert:{value:1.},contrast:{value:1.5},bias:{value:.45}},vertexShader:ppV,
 fragmentShader:`uniform sampler2D tDiffuse;uniform float invert,contrast,bias;varying vec2 vUv;
 void main(){float l=dot(texture2D(tDiffuse,vUv).rgb,vec3(.299,.587,.114));
 float r=mix(l,1.-l,invert);r=clamp((r-.5)*contrast+.5,0.,1.);r=clamp(r+(bias-.5),0.,1.);
-gl_FragColor=vec4(vec3(r),1.);}`,
-depthTest:false,depthWrite:false});
+gl_FragColor=vec4(vec3(r),1.);}`,depthTest:false,depthWrite:false});
 
 const aoM=new THREE.ShaderMaterial({
-uniforms:{tDiffuse:{value:null},resolution:{value:new THREE.Vector2(RES,RES)},intensity:{value:1.5},radius:{value:4.}},
-vertexShader:ppVert,
+uniforms:{tDiffuse:{value:null},resolution:{value:new THREE.Vector2(RES,RES)},intensity:{value:2.},radius:{value:4.}},vertexShader:ppV,
 fragmentShader:`uniform sampler2D tDiffuse;uniform vec2 resolution;uniform float intensity,radius;varying vec2 vUv;
 float h(vec2 u){return dot(texture2D(tDiffuse,u).rgb,vec3(.299,.587,.114));}
 void main(){vec2 tx=1./resolution;float cH=h(vUv);float ao=0.,s=0.;
@@ -256,13 +249,11 @@ ao=1.-clamp(ao/max(s,1.)*intensity*10.,0.,1.);gl_FragColor=vec4(vec3(ao),1.);}`,
 depthTest:false,depthWrite:false});
 
 const metalM=new THREE.ShaderMaterial({
-uniforms:{tDiffuse:{value:null},metalness:{value:.8},threshold:{value:.6},smoothing:{value:.2}},
-vertexShader:ppVert,
+uniforms:{tDiffuse:{value:null},metalness:{value:.9},threshold:{value:.55},smoothing:{value:.25}},vertexShader:ppV,
 fragmentShader:`uniform sampler2D tDiffuse;uniform float metalness,threshold,smoothing;varying vec2 vUv;
 void main(){float l=dot(texture2D(tDiffuse,vUv).rgb,vec3(.299,.587,.114));
 float m=smoothstep(threshold-smoothing,threshold+smoothing,l)*metalness;
-gl_FragColor=vec4(vec3(m),1.);}`,
-depthTest:false,depthWrite:false});
+gl_FragColor=vec4(vec3(m),1.);}`,depthTest:false,depthWrite:false});
 
 // === DEFAULTS ===
 function D(){return{animate:false,time:5,resolution:RES+"",polarConversion:false,tiling:false,normalMap:false,cHeightScale:2,cRadialMask:1,cColorBalanceShadowsR:0,cColorBalanceShadowsG:0,cColorBalanceShadowsB:0,cColorBalanceMidtonesR:0,cColorBalanceMidtonesG:0,cColorBalanceMidtonesB:0,cColorBalanceHighlightsR:0,cColorBalanceHighlightsG:0,cColorBalanceHighlightsB:0,cToonEnable:false,cToonDark:.8,cToonLight:.95,cFrequency:30,cAmplitude:.01,cIntensity:.5,cDirectionX:0,cDirectionY:1,cPowerExponent:1,cRadius:.5,cInnerRadius:1,cInnerRadius2:1,cSize:1,cWidth:1,cHeight:1,cDepth:1,cColor:1,cPetals:6,cOffset:.2,cVolume:3,cBeta:4,cDelta:.05,cScale:1,cInnerWidth:.4,cStrength:1,cPower:1,cRange:2,cEmission:1,cBloom:1,cLightX:1,cLightY:1,cLightZ:1,cAmbient:1,cSmoothness:1,cSmoothnessPower:1,cThickness:1,cThicknessPower:1,cCameraTilt:0,cCameraPan:0,cSpeed:1,cAngle:0,cDensity:1,cAlpha:1,cRepeat:1,cScaleShift:0,cBias:0,cGain:0,cInvert:0,cThreshold:0,cDiamondGearTeeth:18,cDiamondGearMid:.8,cBrushStrokeX1:-.4,cBrushStrokeY1:0,cBrushStrokeX2:1.1,cBrushStrokeY2:.8,cBubblesVariation:1,cFlameEyeInnerFade:1,cFlameEyeOuterFade:1,cFlameEyeBorder:1,cSplatLines:20,cSplatSpotStep:.04,cTrabeculumVariation:2,cLifeTime:.9,cGravity:.26,cCount:300,cExplosionRadius:1.75,cExplosionDownScale:1.25,cExplosionGrain:2,cExplosionSpeed:.3,cExplosionBallness:2,cExplosionGrowth:2.2,cExplosionFade:1.6,cExplosionDensity:1.35,cExplosionContrast:1,cExplosionRollingInitDamp:.3,cExplosionRollingSpeed:2,cExplosionDelayRange:.25,cExplosionBallSpread:1,cExplosionBloom:0,cExplosionEmission:.2,cExplosionColor:1,cNoiseOctave:8,cNoiseFrequency:1,cNoiseAmplitude:.65,cNoisePersistence:.5,cNoiseScale:1,cNoiseSphereEnable:false,cNoiseGraphEnable:false,cNoiseStrength:1,cNoiseDepth:3,cNoiseSize:8,cNoiseLacunarity:2,cTurbulence:0,cRidge:0,cRidgeOffset:.9,cGradientNoise:0,cValueNoise:0,cVoronoiNoise:0,cVoronoiCell:0,cSimplexNoise:1}}
@@ -274,10 +265,8 @@ sh.enable(type.toUpperCase());sh.enable("TOON");sh.enable("GLSL3");
 const u=sh.generateUniforms();
 const mat=sh.createMaterial(u,{defines:sh.generateDefines()});
 const ec=Object.assign(D(),params);
-u.resolution.value.set(RES,RES);
-u.mouse.value.set(.5,.5);
-u.cameraPos.value.set(0,0,3.8);
-u.cameraDir.value.set(0,0,-1);
+u.resolution.value.set(RES,RES);u.mouse.value.set(.5,.5);
+u.cameraPos.value.set(0,0,3.8);u.cameraDir.value.set(0,0,-1);
 for(const k of Object.keys(ec)){if(k==="resolution"||k==="type")continue;
 try{PIXY.FxgenShaderUtils.SetShaderParameter(u,k,ec[k])}catch(e){}}
 PIXY.FxgenShaderUtils.SetShaderParameter(u,"cColorBalanceShadows",new THREE.Vector3(ec.cColorBalanceShadowsR,ec.cColorBalanceShadowsG,ec.cColorBalanceShadowsB));
@@ -285,12 +274,10 @@ PIXY.FxgenShaderUtils.SetShaderParameter(u,"cColorBalanceMidtones",new THREE.Vec
 PIXY.FxgenShaderUtils.SetShaderParameter(u,"cColorBalanceHighlights",new THREE.Vector3(ec.cColorBalanceHighlightsR,ec.cColorBalanceHighlightsG,ec.cColorBalanceHighlightsB));
 PIXY.FxgenShaderUtils.SetShaderParameter(u,"cDirection",new THREE.Vector2(ec.cDirectionX,ec.cDirectionY));
 PIXY.FxgenShaderUtils.SetShaderParameter(u,"tGrunge",grungeTex);
-bScene.overrideMaterial=mat;
-renderer.setRenderTarget(target);renderer.render(bScene,bCam);
-renderer.setRenderTarget(null);bScene.overrideMaterial=null;
-mat.dispose();
+bScene.overrideMaterial=mat;renderer.setRenderTarget(target);
+renderer.render(bScene,bCam);renderer.setRenderTarget(null);
+bScene.overrideMaterial=null;mat.dispose();
 }
-
 function doGrad(inRT,name,outRT){
 gradM.uniforms.tDiffuse.value=inRT.texture;
 gradM.uniforms.tGradient.value=gTex[name];
@@ -298,24 +285,18 @@ gradM.uniformsNeedUpdate=true;gradQ.material=gradM;
 renderer.setRenderTarget(outRT);renderer.clear();
 renderer.render(gradS,gradC);renderer.setRenderTarget(null);
 }
-
 function doBlend(baseRT,blendRT,mode,outRT){
-blendM.uniforms.tBase.value=baseRT.texture;
-blendM.uniforms.tBlend.value=blendRT.texture;
-blendM.uniforms.blendMode.value=mode;
-blendM.uniforms.opacity.value=1;
+blendM.uniforms.tBase.value=baseRT.texture;blendM.uniforms.tBlend.value=blendRT.texture;
+blendM.uniforms.blendMode.value=mode;blendM.uniforms.opacity.value=1;
 blendM.uniformsNeedUpdate=true;blendQ.material=blendM;
 renderer.setRenderTarget(outRT);renderer.clear();
 renderer.render(blendS,blendC);renderer.setRenderTarget(null);
 }
-
 function doPBR(inRT,mat,outRT){
-mat.uniforms.tDiffuse.value=inRT.texture;
-mat.uniformsNeedUpdate=true;ppQ.material=mat;
+mat.uniforms.tDiffuse.value=inRT.texture;mat.uniformsNeedUpdate=true;ppQ.material=mat;
 renderer.setRenderTarget(outRT);renderer.clear();
 renderer.render(ppS,ppC);renderer.setRenderTarget(null);
 }
-
 function toCanvas(srcRT,canvas){
 renderer.readRenderTargetPixels(srcRT,0,0,RES,RES,pixelBuf);
 const ctx=canvas.getContext("2d",{willReadFrequently:true});
@@ -324,7 +305,6 @@ for(let y=0;y<RES;y++){const s=(RES-1-y)*RES*4,d=y*RES*4;
 for(let x=0;x<RES*4;x++)img.data[d+x]=pixelBuf[s+x];}
 ctx.putImageData(img,0,0);
 }
-
 function card(container,name,desc,cls){
 const c=document.createElement("div");c.className="card"+(cls?" "+cls:"");
 const cv=document.createElement("canvas");cv.width=RES;cv.height=RES;c.appendChild(cv);
@@ -332,268 +312,278 @@ const l=document.createElement("div");l.className="lbl";
 l.innerHTML=`<span class="nm">${name}</span><span class="desc">${desc||""}</span>`;
 c.appendChild(l);container.appendChild(c);return cv;
 }
-
-function prog(pct){pbar.style.width=pct+"%";}
+function prog(p){pbar.style.width=p+"%";}
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
 // ===================================================================
-// CHAPTER 1: RAW EFFECTS (grayscale, no color balance)
+// CHAPTER 1: RAW EFFECTS — dramatic effect choices
 // ===================================================================
-async function ch1(){
+function ch1(){
 const g=document.getElementById("grid-raw");
 const demos=[
-{type:"CoherentNoise",p:{time:5,cNoiseOctave:6,cNoiseFrequency:3,cNoiseAmplitude:.8},name:"Coherent Noise",desc:"Organic Perlin-based noise"},
-{type:"VoronoiNoise",p:{time:3,cNoiseOctave:4,cNoiseFrequency:5},name:"Voronoi Noise",desc:"Cell / crystal patterns"},
-{type:"Caustics",p:{time:2.5,cSpeed:.5},name:"Caustics",desc:"Water refraction simulation"},
-{type:"Electric",p:{time:1.5},name:"Electric",desc:"Lightning / energy discharge"}
+{type:"Explosion",p:{time:.8,cExplosionRadius:2,cExplosionBallness:3,cExplosionGrowth:2.5,cExplosionDensity:1.5,cExplosionContrast:1.2,cExplosionGrain:2.5},name:"Explosion",desc:"Volumetric fluid dynamics"},
+{type:"Corona",p:{time:3},name:"Corona",desc:"Solar energy halo"},
+{type:"MagicCircle",p:{time:2,cSpeed:.2},name:"Magic Circle",desc:"Geometric mandala pattern"},
+{type:"Caustics",p:{time:3,cSpeed:.4,tiling:true},name:"Caustics",desc:"Water refraction simulation"},
+{type:"CoherentNoise",p:{time:22.7,cNoiseOctave:6,cNoiseFrequency:24,cNoiseAmplitude:1.9,cNoiseLacunarity:4,cNoisePersistence:.7,cVoronoiNoise:.9,cSimplexNoise:.35,cTurbulence:1,cRidge:1,cRidgeOffset:.15,cScaleShift:.4,cPowerExponent:4.2,cBias:.3,cGain:-.5,cThreshold:.35,cInvert:1,polarConversion:true,cToonEnable:true,cToonDark:.55,cToonLight:.88,cRadialMask:.55},name:"Frozen Lightning",desc:"Ridge+voronoi+toon+polar warp"}
 ];
-for(const d of demos){
-const cv=card(g,d.name,d.desc);
-renderFx(d.type,d.p,rt[0]);toCanvas(rt[0],cv);
-}
+for(const d of demos){const cv=card(g,d.name,d.desc);renderFx(d.type,d.p,rt[0]);toCanvas(rt[0],cv);}
 }
 
 // ===================================================================
 // CHAPTER 2: SAME EFFECTS + COLOR BALANCE
 // ===================================================================
-async function ch2(){
+function ch2(){
 const g=document.getElementById("grid-color");
 const demos=[
-{type:"CoherentNoise",p:{time:5,cNoiseOctave:6,cNoiseFrequency:3,cNoiseAmplitude:.8,
-cColorBalanceShadowsR:.5,cColorBalanceShadowsG:.2,cColorBalanceShadowsB:-.5,
-cColorBalanceMidtonesR:.8,cColorBalanceMidtonesG:.4,cColorBalanceMidtonesB:-.2,
-cColorBalanceHighlightsR:1,cColorBalanceHighlightsG:.9,cColorBalanceHighlightsB:.5},
-name:"Coherent Noise",desc:"+ Warm amber color balance"},
-{type:"VoronoiNoise",p:{time:3,cNoiseOctave:4,cNoiseFrequency:5,
-cColorBalanceShadowsR:-.5,cColorBalanceShadowsG:.3,cColorBalanceShadowsB:.8,
-cColorBalanceMidtonesR:-.3,cColorBalanceMidtonesG:.5,cColorBalanceMidtonesB:.7,
-cColorBalanceHighlightsR:.3,cColorBalanceHighlightsG:.8,cColorBalanceHighlightsB:1},
-name:"Voronoi Noise",desc:"+ Cool ice-blue color balance"},
-{type:"Caustics",p:{time:2.5,cSpeed:.5,
-cColorBalanceShadowsR:-.3,cColorBalanceShadowsG:.5,cColorBalanceShadowsB:.8,
-cColorBalanceMidtonesR:0,cColorBalanceMidtonesG:.3,cColorBalanceMidtonesB:.6,
-cColorBalanceHighlightsR:.5,cColorBalanceHighlightsG:.9,cColorBalanceHighlightsB:1},
-name:"Caustics",desc:"+ Ocean blue color balance"},
-{type:"Electric",p:{time:1.5,
-cColorBalanceShadowsR:.7,cColorBalanceShadowsG:-.5,cColorBalanceShadowsB:-.8,
-cColorBalanceMidtonesR:1,cColorBalanceMidtonesG:.3,cColorBalanceMidtonesB:-.3,
-cColorBalanceHighlightsR:1,cColorBalanceHighlightsG:.8,cColorBalanceHighlightsB:.3},
-name:"Electric",desc:"+ Fire-red color balance"}
+{type:"Explosion",p:{time:.8,cExplosionRadius:2,cExplosionBallness:3,cExplosionGrowth:2.5,cExplosionDensity:1.5,cExplosionContrast:1.2,cExplosionGrain:2.5,
+cColorBalanceShadowsR:.85,cColorBalanceShadowsG:-.8,cColorBalanceShadowsB:-1,
+cColorBalanceMidtonesR:1,cColorBalanceMidtonesG:.4,cColorBalanceMidtonesB:-.6,
+cColorBalanceHighlightsR:1,cColorBalanceHighlightsG:.9,cColorBalanceHighlightsB:.3},
+name:"Explosion",desc:"+ Fire palette (orange/red shadows, yellow highlights)"},
+{type:"Corona",p:{time:3,
+cColorBalanceShadowsR:.6,cColorBalanceShadowsG:.2,cColorBalanceShadowsB:-.8,
+cColorBalanceMidtonesR:.9,cColorBalanceMidtonesG:.6,cColorBalanceMidtonesB:-.2,
+cColorBalanceHighlightsR:1,cColorBalanceHighlightsG:.95,cColorBalanceHighlightsB:.7},
+name:"Corona",desc:"+ Solar gold (warm orange midtones, white-gold highlights)"},
+{type:"MagicCircle",p:{time:2,cSpeed:.2,
+cColorBalanceShadowsR:.3,cColorBalanceShadowsG:-.6,cColorBalanceShadowsB:.8,
+cColorBalanceMidtonesR:.6,cColorBalanceMidtonesG:-.2,cColorBalanceMidtonesB:1,
+cColorBalanceHighlightsR:.9,cColorBalanceHighlightsG:.7,cColorBalanceHighlightsB:1},
+name:"Magic Circle",desc:"+ Arcane purple (violet shadows, cyan-white highlights)"},
+{type:"Caustics",p:{time:3,cSpeed:.4,tiling:true,
+cColorBalanceShadowsR:-.5,cColorBalanceShadowsG:.2,cColorBalanceShadowsB:.9,
+cColorBalanceMidtonesR:-.2,cColorBalanceMidtonesG:.5,cColorBalanceMidtonesB:.8,
+cColorBalanceHighlightsR:.4,cColorBalanceHighlightsG:.95,cColorBalanceHighlightsB:1},
+name:"Caustics",desc:"+ Deep ocean (dark blue shadows, bright aqua highlights)"},
+{type:"CoherentNoise",p:{time:22.7,cNoiseOctave:6,cNoiseFrequency:24,cNoiseAmplitude:1.9,cNoiseLacunarity:4,cNoisePersistence:.7,cVoronoiNoise:.9,cSimplexNoise:.35,cTurbulence:1,cRidge:1,cRidgeOffset:.15,cScaleShift:.4,cPowerExponent:4.2,cBias:.3,cGain:-.5,cThreshold:.35,cInvert:1,polarConversion:true,cToonEnable:true,cToonDark:.55,cToonLight:.88,cRadialMask:.55,
+cColorBalanceShadowsR:-.9,cColorBalanceShadowsG:-.7,cColorBalanceShadowsB:.85,
+cColorBalanceMidtonesR:.6,cColorBalanceMidtonesG:.1,cColorBalanceMidtonesB:1,
+cColorBalanceHighlightsR:1,cColorBalanceHighlightsG:1,cColorBalanceHighlightsB:1},
+name:"Frozen Lightning",desc:"+ Electric blue (deep indigo shadows, white highlights)"}
 ];
-for(const d of demos){
-const cv=card(g,d.name,d.desc);
-renderFx(d.type,d.p,rt[0]);toCanvas(rt[0],cv);
-}
+for(const d of demos){const cv=card(g,d.name,d.desc);renderFx(d.type,d.p,rt[0]);toCanvas(rt[0],cv);}
 }
 
 // ===================================================================
-// CHAPTER 3: ONE EFFECT × 10 GRADIENT PALETTES
+// CHAPTER 3: EXPLOSION × 10 GRADIENT PALETTES
+// High-contrast Explosion base = dramatic gradient mapping
 // ===================================================================
-async function ch3(){
+function ch3(){
 const g=document.getElementById("grid-grad");
-const baseP={time:8,cNoiseOctave:6,cNoiseFrequency:4,cNoiseAmplitude:.9,
-cRidge:.5,cVoronoiNoise:.3,cNoiseLacunarity:2,cNoisePersistence:.5};
-
-// Render base once
-renderFx("CoherentNoise",baseP,rt[0]);
-const cv0=card(g,"Original","No gradient — raw grayscale");
-toCanvas(rt[0],cv0);
-
+// Explosion has amazing dynamic range — bright core fading to black
+renderFx("Explosion",{time:.7,cExplosionRadius:2.2,cExplosionBallness:4,cExplosionGrowth:2.8,cExplosionDensity:1.6,cExplosionContrast:1.3,cExplosionGrain:2},rt[0]);
+const cv0=card(g,"Original","Raw explosion — grayscale");toCanvas(rt[0],cv0);
 for(const name of Object.keys(GRADS)){
-const cv=card(g,name+" Gradient","Luminance → "+name+" palette","highlight");
+const cv=card(g,name,"Luminance → "+name,"highlight");
 doGrad(rt[0],name,rt[1]);toCanvas(rt[1],cv);
 }
 }
 
 // ===================================================================
-// CHAPTER 4: TWO LAYERS × 9 BLEND MODES
+// CHAPTER 4: ORGANIC vs DIGITAL — 9 BLEND MODES
 // ===================================================================
-async function ch4(){
+function ch4(){
 const g=document.getElementById("grid-blend");
 const MODES=["Normal","Multiply","Screen","Overlay","Add","Subtract","SoftLight","HardLight","Difference"];
-
-// Layer A: smooth organic noise
-const layerAP={time:5,cNoiseOctave:5,cNoiseFrequency:2,cNoiseAmplitude:.7};
-renderFx("CoherentNoise",layerAP,rt[0]);
-const cvA=card(g,"Layer A","CoherentNoise — smooth organic");
-toCanvas(rt[0],cvA);
-
-// Layer B: sharp cellular pattern
-const layerBP={time:3,cNoiseOctave:4,cNoiseFrequency:6,cVoronoiCell:.5};
-renderFx("VoronoiNoise",layerBP,rt[1]);
-const cvB=card(g,"Layer B","VoronoiNoise — sharp cells");
-toCanvas(rt[1],cvB);
-
-// 9 blend modes
+// Layer A: organic flowing caustics
+renderFx("Caustics",{time:3,cSpeed:.4,tiling:true},rt[0]);
+const cvA=card(g,"Layer A","Caustics — organic water patterns");toCanvas(rt[0],cvA);
+// Layer B: digital matrix
+renderFx("BinaryMatrix",{time:2},rt[1]);
+const cvB=card(g,"Layer B","BinaryMatrix — digital code rain");toCanvas(rt[1],cvB);
 for(let i=0;i<MODES.length;i++){
-const cv=card(g,MODES[i]+" Blend","A + B blended","highlight");
+const cv=card(g,MODES[i],"Organic + Digital blended","highlight");
 doBlend(rt[0],rt[1],i,rt[2]);toCanvas(rt[2],cv);
 }
 }
 
 // ===================================================================
-// CHAPTER 5: COMPOSITE + GRADIENT (full pipeline)
+// CHAPTER 5: FULL PIPELINE — Layer A + B → Blend → Gradient
 // ===================================================================
-async function ch5(){
+function ch5(){
 const g=document.getElementById("grid-combined");
 const combos=[
-{a:{type:"CoherentNoise",p:{time:5,cNoiseOctave:5,cNoiseFrequency:3,cNoiseAmplitude:.8}},
- b:{type:"VoronoiNoise",p:{time:3,cNoiseOctave:4,cNoiseFrequency:6}},
- mode:2,modeName:"Screen",grad:"Fire",desc:"Organic noise screened with cells → volcanic fire"},
-{a:{type:"Electric",p:{time:1.8}},
- b:{type:"Caustics",p:{time:2.5,cSpeed:.5}},
- mode:3,modeName:"Overlay",grad:"Neon",desc:"Lightning overlaid on water → electric neon"},
-{a:{type:"CoherentNoise",p:{time:12,cNoiseOctave:6,cNoiseFrequency:4,cRidge:1,cRidgeOffset:.3}},
+{a:{type:"Explosion",p:{time:.7,cExplosionRadius:2,cExplosionBallness:3,cExplosionGrowth:2.5,cExplosionGrain:2}},
+ b:{type:"CoherentNoise",p:{time:5,cNoiseOctave:6,cNoiseFrequency:4,cRidge:.8,cVoronoiNoise:.4,cNoiseAmplitude:1}},
+ mode:2,modeName:"Screen",grad:"Fire",desc:"Volcanic eruption with magma veins"},
+{a:{type:"Electric",p:{time:1.5}},
+ b:{type:"MagicCircle",p:{time:2,cSpeed:.15}},
+ mode:4,modeName:"Add",grad:"Neon",desc:"Arcane lightning ritual"},
+{a:{type:"Caustics",p:{time:3,tiling:true}},
  b:{type:"Trabeculum",p:{time:1,cTrabeculumVariation:3}},
- mode:1,modeName:"Multiply",grad:"Toxic",desc:"Ridge noise multiplied with biology → toxic alien surface"},
-{a:{type:"FbmNoise2",p:{time:4,cNoiseOctave:6,cNoiseFrequency:3}},
- b:{type:"VoronoiNoise",p:{time:8,cNoiseOctave:3,cNoiseFrequency:8,cVoronoiCell:.8}},
- mode:4,modeName:"Add",grad:"Frost",desc:"FBM noise added to Voronoi cells → crystalline frost"}
+ mode:3,modeName:"Overlay",grad:"Ocean",desc:"Deep sea bioluminescent coral"},
+{a:{type:"Corona",p:{time:3}},
+ b:{type:"CoherentNoise",p:{time:12,cNoiseOctave:6,cNoiseFrequency:12,cNoiseAmplitude:1.6,cNoiseLacunarity:3,cVoronoiNoise:.7,cTurbulence:.65,cRidge:.8,cRidgeOffset:.35}},
+ mode:2,modeName:"Screen",grad:"Plasma",desc:"Supernova nebula with chromatic plasma"}
 ];
-
 for(const c of combos){
 const row=document.createElement("div");row.className="pipeline-row";g.appendChild(row);
-
-// Render layer A
 renderFx(c.a.type,c.a.p,rt[0]);
 const cvA=card(row,"Layer A",c.a.type);toCanvas(rt[0],cvA);
-
-const arr1=document.createElement("span");arr1.className="pipe-arrow";arr1.textContent="+";row.appendChild(arr1);
-
-// Render layer B
+const a1=document.createElement("span");a1.className="pipe-arrow";a1.textContent="+";row.appendChild(a1);
 renderFx(c.b.type,c.b.p,rt[1]);
 const cvB=card(row,"Layer B",c.b.type);toCanvas(rt[1],cvB);
-
-const arr2=document.createElement("span");arr2.className="pipe-arrow";arr2.textContent="→";row.appendChild(arr2);
-
-// Blend
+const a2=document.createElement("span");a2.className="pipe-arrow";a2.textContent="→";row.appendChild(a2);
 doBlend(rt[0],rt[1],c.mode,rt[2]);
-const cvBl=card(row,c.modeName+" Blend","Composite result");toCanvas(rt[2],cvBl);
-
-const arr3=document.createElement("span");arr3.className="pipe-arrow";arr3.textContent="→";row.appendChild(arr3);
-
-// Apply gradient
+const cvBl=card(row,c.modeName,"Blended");toCanvas(rt[2],cvBl);
+const a3=document.createElement("span");a3.className="pipe-arrow";a3.textContent="→";row.appendChild(a3);
 doGrad(rt[2],c.grad,rt[3]);
-const cvFinal=card(row,c.grad+" Gradient",c.desc,"highlight");toCanvas(rt[3],cvFinal);
+const cvF=card(row,c.grad+" Gradient",c.desc,"highlight");toCanvas(rt[3],cvF);
 }
 }
 
 // ===================================================================
-// CHAPTER 6: PBR MAPS
+// CHAPTER 6: PBR MAPS — from colorful composite
 // ===================================================================
-async function ch6(){
+function ch6(){
 const g=document.getElementById("grid-pbr");
 
-// Use a nice marble noise for PBR demo
-const marbleP={time:10,cNoiseOctave:6,cNoiseFrequency:4,cNoiseAmplitude:1,
-cNoiseLacunarity:2,cNoisePersistence:.5,cRidge:.4,cVoronoiNoise:.2};
-renderFx("CoherentNoise",marbleP,pbrRT.color);
+// Create an interesting structural texture (tileable ridge noise + voronoi cells)
+const structP={time:8,tiling:true,cNoiseOctave:5,cNoiseFrequency:4,cNoiseAmplitude:1,
+cNoiseLacunarity:2,cNoisePersistence:.5,cRidge:.6,cRidgeOffset:.5,cVoronoiNoise:.3,cVoronoiCell:.2};
+renderFx("CoherentNoise",structP,pbrRT.struct);
 
-// Render all PBR maps
-doPBR(pbrRT.color,normalM,pbrRT.normal);
-doPBR(pbrRT.color,roughM,pbrRT.rough);
-doPBR(pbrRT.color,aoM,pbrRT.ao);
-doPBR(pbrRT.color,metalM,pbrRT.metal);
+// Apply Ember gradient for a rich colored version
+doGrad(pbrRT.struct,"Ember",pbrRT.color);
+
+// Generate PBR maps from the structural (pre-gradient) texture
+doPBR(pbrRT.struct,normalM,pbrRT.normal);
+doPBR(pbrRT.struct,roughM,pbrRT.rough);
+doPBR(pbrRT.struct,aoM,pbrRT.ao);
+doPBR(pbrRT.struct,metalM,pbrRT.metal);
 
 const maps=[
-{rt:pbrRT.color,name:"Color / Height",desc:"Base texture (input)"},
-{rt:pbrRT.normal,name:"Normal Map",desc:"Sobel filter → surface detail"},
-{rt:pbrRT.rough,name:"Roughness",desc:"Inverted luminance → surface polish"},
-{rt:pbrRT.ao,name:"Ambient Occlusion",desc:"Height diff → shadowed crevices"},
-{rt:pbrRT.metal,name:"Metallic",desc:"Threshold → metallic regions"}
+{rt:pbrRT.color,name:"Color (Ember Gradient)",desc:"Gradient-mapped color — what you see"},
+{rt:pbrRT.normal,name:"Normal Map",desc:"Sobel filter — surface bumps and ridges"},
+{rt:pbrRT.rough,name:"Roughness",desc:"Inverted luminance — shiny peaks, rough valleys"},
+{rt:pbrRT.ao,name:"Ambient Occlusion",desc:"Height analysis — darkened crevices"},
+{rt:pbrRT.metal,name:"Metallic",desc:"Threshold mask — bright areas become metallic"}
 ];
-for(const m of maps){
-const cv=card(g,m.name,m.desc);toCanvas(m.rt,cv);
-}
+for(const m of maps){const cv=card(g,m.name,m.desc);toCanvas(m.rt,cv);}
 }
 
 // ===================================================================
-// CHAPTER 7: 3D PREVIEW
+// CHAPTER 7: 3D PREVIEW — with environment and multiple objects
 // ===================================================================
-let preview3d=null;
 function ch7(){
 const g=document.getElementById("grid-3d");
 
-// Create a separate renderer for 3D
-const r3=new THREE.WebGLRenderer({antialias:true,alpha:true});
-r3.setSize(500,500);r3.setPixelRatio(Math.min(window.devicePixelRatio,2));
-r3.toneMapping=THREE.ACESFilmicToneMapping;r3.toneMappingExposure=1.3;
-r3.domElement.style.cssText="border-radius:8px;border:1px solid #1a1a2e;background:#111;cursor:grab";
+const r3=new THREE.WebGLRenderer({antialias:true,alpha:false});
+const W=580,H=500;
+r3.setSize(W,H);r3.setPixelRatio(Math.min(window.devicePixelRatio,2));
+r3.toneMapping=THREE.ACESFilmicToneMapping;r3.toneMappingExposure=1.5;
+r3.shadowMap.enabled=true;r3.shadowMap.type=THREE.PCFSoftShadowMap;
+r3.domElement.style.cssText="border-radius:10px;border:1px solid #222;cursor:grab";
 g.appendChild(r3.domElement);
 
-const info=document.createElement("div");info.className="preview-info";
-info.innerHTML=`
-<p><strong style="color:#e0e0ff">Interactive 3D Preview</strong></p>
-<p>The marble texture from Chapter 6 applied as a full PBR material with normal, roughness, AO, and metallic maps.</p>
-<p>Lighting: 3-point system (key + fill + rim) with ACES filmic tone mapping.</p>
-<p><kbd>Drag</kbd> to orbit &nbsp; <kbd>Scroll</kbd> to zoom</p>
-<p style="color:#555;margin-top:16px">Material: MeshStandardMaterial<br>
-Normal strength: 1.0<br>
-Maps: Color + Normal + Roughness + AO + Metallic</p>`;
-g.appendChild(info);
-
 const scene3=new THREE.Scene();
-scene3.background=new THREE.Color(0x0a0a12);
+scene3.background=new THREE.Color(0x08080f);
 
-const cam3=new THREE.PerspectiveCamera(45,1,.1,100);
-cam3.position.set(0,0,3.2);
+const cam3=new THREE.PerspectiveCamera(40,W/H,.1,100);
+cam3.position.set(2.5,2,4);cam3.lookAt(0,.2,0);
 
 const ctrl=new OrbitControls(cam3,r3.domElement);
-ctrl.enableDamping=true;ctrl.dampingFactor=.05;
+ctrl.enableDamping=true;ctrl.dampingFactor=.06;ctrl.target.set(0,.2,0);
+
+// Environment map from hemisphere for reflections
+const pmrem=new THREE.PMREMGenerator(r3);
+const envScene=new THREE.Scene();
+envScene.add(new THREE.HemisphereLight(0x334466,0x111111,2));
+const envLight=new THREE.DirectionalLight(0xffeedd,.8);envLight.position.set(3,5,3);envScene.add(envLight);
+const envRT=pmrem.fromScene(envScene,0,.1,100);
+pmrem.dispose();
 
 // Lighting
-scene3.add(new THREE.AmbientLight(0x404040,.4));
-const d1=new THREE.DirectionalLight(0xffffff,1.8);d1.position.set(3,3,3);scene3.add(d1);
-const d2=new THREE.DirectionalLight(0x6688cc,.7);d2.position.set(-2,1,-1);scene3.add(d2);
-const d3=new THREE.DirectionalLight(0xff4444,.25);d3.position.set(0,-2,-3);scene3.add(d3);
+const hemi=new THREE.HemisphereLight(0x445566,0x111111,.6);scene3.add(hemi);
+const key=new THREE.DirectionalLight(0xffeedd,2.5);key.position.set(4,6,4);key.castShadow=true;
+key.shadow.mapSize.set(1024,1024);key.shadow.camera.near=1;key.shadow.camera.far=20;
+key.shadow.camera.left=-3;key.shadow.camera.right=3;key.shadow.camera.top=3;key.shadow.camera.bottom=-3;
+scene3.add(key);
+const fill=new THREE.DirectionalLight(0x6688cc,1);fill.position.set(-3,2,-2);scene3.add(fill);
+const rim=new THREE.PointLight(0xff6633,.8,10);rim.position.set(-2,1,3);scene3.add(rim);
+const accent=new THREE.PointLight(0x4488ff,.4,8);accent.position.set(3,0,-3);scene3.add(accent);
 
-// Material with PBR maps
+// Shared PBR material
 const mat3=new THREE.MeshStandardMaterial({
-color:0xffffff,roughness:.5,metalness:.3,side:THREE.DoubleSide,
+color:0xffffff,roughness:.4,metalness:.6,
 map:pbrRT.color.texture,
 normalMap:pbrRT.normal.texture,
 roughnessMap:pbrRT.rough.texture,
 aoMap:pbrRT.ao.texture,
-metalnessMap:pbrRT.metal.texture
+metalnessMap:pbrRT.metal.texture,
+envMap:envRT.texture,
+envMapIntensity:1.2
 });
-mat3.normalScale.set(1,1);
+mat3.normalScale.set(1.5,1.5);
 
-const sphere=new THREE.Mesh(new THREE.SphereGeometry(1.2,64,64),mat3);
+// Three objects to show the material
+const sphere=new THREE.Mesh(new THREE.SphereGeometry(.8,64,64),mat3);
+sphere.position.set(-1.5,.8,0);sphere.castShadow=true;sphere.receiveShadow=true;
 scene3.add(sphere);
 
-// Animate
+const torus=new THREE.Mesh(new THREE.TorusKnotGeometry(.55,.2,128,32),mat3);
+torus.position.set(.8,1,0);torus.castShadow=true;torus.receiveShadow=true;
+scene3.add(torus);
+
+const cube=new THREE.Mesh(new THREE.BoxGeometry(1,1,1,4,4,4),mat3);
+cube.position.set(2.8,.7,-.5);cube.rotation.y=.5;cube.castShadow=true;cube.receiveShadow=true;
+scene3.add(cube);
+
+// Ground plane
+const ground=new THREE.Mesh(
+new THREE.PlaneGeometry(12,12),
+new THREE.MeshStandardMaterial({color:0x0a0a12,roughness:.95,metalness:0})
+);
+ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;
+scene3.add(ground);
+
 function animate(){
 requestAnimationFrame(animate);
-sphere.rotation.y+=.003;
-ctrl.update();
-r3.render(scene3,cam3);
+sphere.rotation.y+=.004;torus.rotation.y+=.006;torus.rotation.x+=.002;cube.rotation.y+=.003;
+ctrl.update();r3.render(scene3,cam3);
 }
 animate();
-preview3d={renderer:r3,scene:scene3,camera:cam3};
+
+// Info panel
+const info=document.createElement("div");info.className="preview-info";
+info.innerHTML=`
+<h3>Interactive 3D Preview</h3>
+<p>The Ember-gradient texture from Chapter 6 applied as a full PBR material across three geometries.</p>
+<ul class="map-list">
+<li>Color map (Ember gradient-mapped)</li>
+<li>Normal map (Sobel, strength 1.5)</li>
+<li>Roughness map (inverted luminance)</li>
+<li>Ambient Occlusion (height-based)</li>
+<li>Metallic map (threshold mask)</li>
+<li>Environment reflections (PMREM)</li>
+</ul>
+<p><kbd>Drag</kbd> orbit &nbsp; <kbd>Scroll</kbd> zoom</p>
+<p style="color:#444;margin-top:12px">Renderer: WebGL2 + ACES filmic<br>
+Shadows: PCF soft shadow mapping<br>
+Lighting: hemisphere + key + fill + rim + accent</p>`;
+g.appendChild(info);
 }
 
 // ===================================================================
-// INIT — render everything chapter by chapter
+// INIT
 // ===================================================================
 async function init(){
 prog(5);await sleep(50);
-
-ch1();prog(15);await sleep(30);
-ch2();prog(30);await sleep(30);
-ch3();prog(45);await sleep(30);
-ch4();prog(60);await sleep(30);
-await ch5();prog(78);await sleep(30);
-ch6();prog(90);await sleep(30);
+ch1();prog(12);await sleep(20);
+ch2();prog(25);await sleep(20);
+ch3();prog(40);await sleep(20);
+ch4();prog(55);await sleep(20);
+ch5();prog(72);await sleep(20);
+ch6();prog(88);await sleep(20);
 ch7();prog(100);await sleep(200);
-
 document.getElementById("loading").style.display="none";
 document.getElementById("chapters").style.display="block";
 document.getElementById("outro").style.display="block";
 }
 
 init().catch(e=>{
-document.getElementById("loading").textContent="Error: "+e.message;
-console.error(e);
+document.getElementById("loading").textContent="Error: "+e.message;console.error(e);
 });
 </script>
 </body>
