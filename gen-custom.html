@@ -418,17 +418,19 @@ void main(){
   // Radial blur/speed lines
   float speed=exp(-r*1.5)*0.3;
 
-  // Chromatic aberration effect
-  float v=stars+max(walls,0.0)+core+speed;
-  vec3 col;
-  col.r=stars*1.2+max(walls,0.0)*0.5+core*0.8+speed*0.6;
-  col.g=stars*0.8+max(walls,0.0)*0.7+core*1.0+speed*0.8;
-  col.b=stars*1.5+max(walls,0.0)*1.0+core*1.2+speed*1.0;
+  // SPLIT-COMPLEMENTARY: blue-violet (240) + yellow-orange (40) + red-orange (20)
+  // Stars: cool blue-white. Walls: warm amber accent. Core: violet-white.
+  float w=max(walls,0.0);
+  vec3 starCol=vec3(0.65,0.75,1.0);  // desaturated blue-white
+  vec3 wallCol=vec3(1.0,0.7,0.25);   // amber accent (split-comp warm)
+  vec3 coreCol=vec3(0.8,0.7,1.0);    // violet-white
+  vec3 col=starCol*stars+wallCol*w+coreCol*(core+speed*0.5);
 
   gl_FragColor=vec4(col,1);
 }`;
 
-// 6b. WARP TUNNEL - INFERNO (red/orange, tighter spiral)
+// 6b. WARP INFERNO — ANALOGOUS WARM: red(0) → orange(30) → gold(50)
+// Narrow hue range for intensity with value contrast for depth
 SHADERS.warp_inferno=`
 uniform float time;
 uniform vec2 resolution;
@@ -457,7 +459,6 @@ void main(){
     }
   }
 
-  // Fire walls
   float walls=0.0;
   for(int i=0;i<4;i++){
     float fi=float(i);
@@ -468,15 +469,21 @@ void main(){
   }
 
   float core=exp(-r*r*10.0)*0.5;
-  vec3 col;
-  col.r=stars*1.5+walls*1.2+core*1.0;
-  col.g=stars*0.6+walls*0.4+core*0.4;
-  col.b=stars*0.2+walls*0.1+core*0.1;
+
+  // Analogous warm: streaks=gold, walls=orange, core=deep red-orange
+  // Stars are hottest (gold-white), walls mid-heat (orange), core deep ember
+  vec3 starCol=vec3(1.0,0.85,0.4);   // gold (high value)
+  vec3 wallCol=vec3(0.95,0.45,0.08);  // burnt orange (mid value)
+  vec3 coreCol=vec3(0.7,0.15,0.05);  // deep ember (low value, high sat)
+  vec3 col=starCol*stars+wallCol*walls+coreCol*core;
+  // Subtle cool shadow in dark areas for contrast
+  col+=vec3(0.03,0.0,0.06)*exp(-r*1.5)*(1.0-min(stars+walls+core,1.0));
 
   gl_FragColor=vec4(col,1);
 }`;
 
-// 6c. WARP TUNNEL - VOID (purple/dark, slow, ominous)
+// 6c. WARP VOID — TRIADIC: violet(270) + teal(180-shifted) + muted gold(60)
+// Dominated by violet, teal accents, gold only as rare spark highlights
 SHADERS.warp_void=`
 uniform float time;
 uniform vec2 resolution;
@@ -491,7 +498,6 @@ void main(){
   float tunnel=1.0/(r+0.001);
   float twist=a+time*0.2+tunnel*0.15;
 
-  // Sparse dim stars
   float stars=0.0;
   for(int i=0;i<3;i++){
     float fi=float(i);
@@ -506,7 +512,6 @@ void main(){
     }
   }
 
-  // Dark matter tendrils
   float tendrils=0.0;
   for(int i=0;i<5;i++){
     float fi=float(i);
@@ -515,19 +520,23 @@ void main(){
     tendrils+=max(n,0.0)*0.2/(r+0.4);
   }
 
-  // Void glow (dark purple center)
   float core=exp(-r*r*5.0)*0.3;
   float voidRing=exp(-pow((r-0.15)*10.0,2.0))*0.4;
 
-  vec3 col;
-  col.r=stars*0.5+tendrils*0.4+core*0.3+voidRing*0.2;
-  col.g=stars*0.2+tendrils*0.1+core*0.1+voidRing*0.05;
-  col.b=stars*0.8+tendrils*0.8+core*0.6+voidRing*0.5;
+  // Triadic: dominant violet, teal accents on tendrils, muted gold on rare stars
+  vec3 violetDeep=vec3(0.15,0.03,0.25); // dark violet (dominant)
+  vec3 violetMid=vec3(0.35,0.12,0.55);  // mid violet
+  vec3 tealAcc=vec3(0.08,0.3,0.35);     // desaturated teal (secondary)
+  vec3 goldSpark=vec3(0.7,0.6,0.2);     // muted gold (tertiary, rare)
+  vec3 col=violetDeep*core*2.0+violetMid*voidRing
+    +tealAcc*tendrils*2.0+goldSpark*stars*0.6
+    +violetMid*stars*0.3;
 
   gl_FragColor=vec4(col,1);
 }`;
 
-// 6d. WARP TUNNEL - ELECTRIC (cyan/white, very fast, dense streaks)
+// 6d. WARP ELECTRIC — COMPLEMENTARY: cyan(185) + warm coral(5)
+// Cyan dominates, coral appears only in arc highlights for maximum contrast
 SHADERS.warp_electric=`
 uniform float time;
 uniform vec2 resolution;
@@ -542,7 +551,6 @@ void main(){
   float tunnel=1.0/(r+0.001);
   float twist=a+time*1.0+tunnel*0.4;
 
-  // Dense fast streaks
   float stars=0.0;
   for(int i=0;i<6;i++){
     float fi=float(i);
@@ -557,7 +565,6 @@ void main(){
     }
   }
 
-  // Electric arcs along tunnel walls
   float arcs=0.0;
   for(int i=0;i<3;i++){
     float fi=float(i);
@@ -569,19 +576,30 @@ void main(){
 
   float core=exp(-r*r*12.0)*0.6;
 
-  vec3 col;
-  col.r=stars*0.3+arcs*0.2+core*0.4;
-  col.g=stars*0.9+arcs*0.9+core*0.9;
-  col.b=stars*1.2+arcs*1.0+core*1.0;
+  // Complementary: cyan streaks/core + coral arc tips
+  vec3 cyanDeep=vec3(0.05,0.4,0.5);    // deep cyan (shadow)
+  vec3 cyanBright=vec3(0.4,0.95,1.0);  // bright cyan (midtone)
+  vec3 cyanWhite=vec3(0.8,0.98,1.0);   // near-white cyan (highlight)
+  vec3 coral=vec3(1.0,0.35,0.2);       // warm coral (complement, accent only)
+  vec3 col=cyanBright*stars+cyanDeep*arcs*0.6+coral*arcs*0.5
+    +cyanWhite*core;
 
   gl_FragColor=vec4(col,1);
 }`;
 
-// 6e. WARP TUNNEL - RAINBOW (full spectrum, psychedelic)
+// 6e. WARP RAINBOW — ANALOGOUS COOL shifting: teal(180) → blue(220) → violet(280)
+// Smooth gradient, not a raw rainbow. Depth shifts hue through the range.
 SHADERS.warp_rainbow=`
 uniform float time;
 uniform vec2 resolution;
 ${NOISE_LIB}
+
+// HSV to RGB
+vec3 hsv2rgb(vec3 c){
+  vec4 K=vec4(1.,2./3.,1./3.,3.);
+  vec3 p=abs(fract(c.xxx+K.xyz)*6.-K.www);
+  return c.z*mix(K.xxx,clamp(p-K.xxx,0.,1.),c.y);
+}
 
 void main(){
   vec2 uv=gl_FragCoord.xy/resolution;
@@ -618,14 +636,18 @@ void main(){
   float core=exp(-r*r*8.0)*0.5;
   float intensity=stars+walls+core;
 
-  // Rainbow based on angle + depth
-  float hue=a/6.28318+tunnel*0.1+time*0.2;
-  vec3 col=0.5+0.5*vec3(
-    cos(hue*6.28318),
-    cos((hue+0.333)*6.28318),
-    cos((hue+0.666)*6.28318)
-  );
-  col*=intensity;
+  // Analogous cool sweep: hue 0.5(teal) → 0.6(blue) → 0.78(violet)
+  // Depth drives hue, angle adds variation, time slowly rotates
+  float hueBase=0.5;  // teal start
+  float hueRange=0.28; // teal → violet span
+  float depthHue=fract(tunnel*0.05+time*0.06);
+  float angleVar=sin(a*2.0+time*0.3)*0.04;
+  float hue=hueBase+depthHue*hueRange+angleVar;
+  // Saturation decreases at high intensity (white-hot center)
+  float sat=mix(0.8,0.15,clamp(core*2.0,0.0,1.0));
+  // Value from intensity
+  float val=clamp(intensity*1.2,0.0,1.0);
+  vec3 col=hsv2rgb(vec3(hue,sat,val));
 
   gl_FragColor=vec4(col,1);
 }`;
