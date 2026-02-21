@@ -450,6 +450,41 @@ scene.add(magic.points);
 scene.add(sparks.points);
 scene.add(embers.points);
 
+// ── Static preview quads (one per sprite sheet, loops animation in place) ──
+const previewQuadV=`
+varying vec2 vUv;
+void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`;
+const previewQuadF=`
+uniform sampler2D uMap;
+uniform float uGrid;
+uniform float uFrame;
+varying vec2 vUv;
+void main(){
+float f0=floor(uFrame);
+float f1=min(f0+1.,uGrid*uGrid-1.);
+float blend=fract(uFrame);
+float invG=1./uGrid;
+vec2 uv0=vec2(mod(f0,uGrid),floor(f0/uGrid))*invG+vUv*invG;
+vec2 uv1=vec2(mod(f1,uGrid),floor(f1/uGrid))*invG+vUv*invG;
+vec4 c=mix(texture2D(uMap,uv0),texture2D(uMap,uv1),blend);
+if(c.a<.01)discard;
+gl_FragColor=c;
+}`;
+const previewQuads=[];
+const previewSpacing=3;
+const previewLabels=["Fire Burst","Magic Aura","Lightning Arc","Flame Flicker"];
+for(let i=0;i<4;i++){
+const mat=new THREE.ShaderMaterial({
+uniforms:{uMap:{value:sheetTextures[i].tex},uGrid:{value:GRID},uFrame:{value:0}},
+vertexShader:previewQuadV,fragmentShader:previewQuadF,
+transparent:true,side:THREE.DoubleSide,depthWrite:false});
+const quad=new THREE.Mesh(new THREE.PlaneGeometry(2,2),mat);
+quad.position.set((i-1.5)*previewSpacing,2,-5);
+quad.visible=false;
+scene.add(quad);
+previewQuads.push(quad);
+}
+
 // ── Bloom ──
 const composer=new EffectComposer(r3);
 composer.addPass(new RenderPass(scene,cam));
@@ -536,6 +571,24 @@ s.obj.points.visible=true;btn.classList.add("active");
 }else{s.obj.points.visible=!s.obj.points.visible;btn.classList.toggle("active",s.obj.points.visible);}
 };togBar.appendChild(btn);
 }
+// Preview mode button
+const prevBtn=document.createElement("button");
+prevBtn.className="toggle-btn";prevBtn.textContent="Static Preview";
+prevBtn.style.borderColor="#44ff88";prevBtn.dataset.on="0";
+prevBtn.onclick=()=>{
+const on=prevBtn.dataset.on==="1";prevBtn.dataset.on=on?"0":"1";
+prevBtn.classList.toggle("active",!on);
+const show=!on;
+previewQuads.forEach(q=>q.visible=show);
+if(show){systems.forEach(s=>{s.obj.points.visible=false;});
+document.querySelectorAll(".toggle-btn").forEach(b=>{if(b!==prevBtn)b.classList.remove("active");});
+crystal.visible=false;ped.visible=false;
+}else{systems.forEach(s=>{s.obj.points.visible=true;});
+document.querySelectorAll(".toggle-btn").forEach(b=>b.classList.add("active"));
+crystal.visible=true;ped.visible=true;
+}
+};
+togBar.appendChild(prevBtn);
 
 // ══════════════════════════════════════════════════════════════════
 // ANIMATION LOOP
@@ -555,6 +608,11 @@ embers.update(dt,t);
 crystal.rotation.y=t*.3;
 fireLight.intensity=.2+Math.sin(t*3)*.05;
 magicLight.intensity=.12+Math.sin(t*2+1)*.03;
+
+// Animate static preview quads (loop through frames at ~8fps)
+for(const q of previewQuads){
+if(q.visible)q.material.uniforms.uFrame.value=(t*8)%(FRAMES);
+}
 
 ctrl.update();
 composer.render();
