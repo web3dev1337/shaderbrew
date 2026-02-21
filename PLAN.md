@@ -114,29 +114,29 @@ Created 5 basic V1 presets + 8 advanced V2 presets with intentional parameter in
 
 ## Implementation Plan
 
-### Phase 0: Deobfuscate & Structure
-**Files:** Create `src/` directory
+### Phase 0: Deobfuscate & Structure -- DONE (commit ff2d265)
+**Files created:** `src/app.js`, `src/pixy-api.js`, `src/defaults.js`, `src/render-pipeline.js`, `src/sprite-sheet.js`, `src/alpha-export.js`, `src/noise-sphere.js`, `src/preset-loader.js`, `src/ui/gui-setup.js`, `editor.html`
 
-1. Deobfuscate `fxgen.module.min.js` into readable `src/fxgen.js` (beautify + rename variables using our reverse-engineering knowledge)
-2. Create typed `pixy-api.js` facade - a clean wrapper around the pixy exports we need (do NOT deobfuscate pixy itself - too large, too risky)
-3. Update `index.html` to load from `src/fxgen.js`
-4. Verify everything still works identically
+- [x] Deobfuscated fxgen.module.min.js into 10 focused modules in src/
+- [x] Created pixy-api.js facade
+- [x] Created editor.html loading from src/
+- [ ] Verify everything works identically (needs browser test)
 
-### Phase 1: Multi-Layer Compositing
-**Files:** `src/layer-manager.js`, `src/compositor.js`, `src/shaders/blend.glsl`
+### Phase 1: Multi-Layer Compositing -- DONE (commit 2f156ec)
+**Files created:** `src/layer-manager.js`, `src/compositor.js`, `src/shaders/blend.js`, `src/ui/layer-panel.js`
 
-1. **LayerManager class** - Array of layer objects, each with: effect type, parameters, opacity, blend mode, visibility, render target
-2. **Blend mode shader** - Single GLSL shader with `#define` for mode selection:
-   - Normal, Multiply, Screen, Overlay, Add, Subtract, SoftLight, HardLight, Difference
-3. **Compositor class** - Ping-pong render targets, iterates layers bottom-to-top, applies blend mode between each
-4. **UI** - Layer panel (left side) with drag-to-reorder, per-layer visibility toggle, opacity slider, blend mode dropdown
+- [x] LayerManager class with add/remove/reorder/duplicate/serialize
+- [x] 9 blend modes as GLSL shader (Normal, Multiply, Screen, Overlay, Add, Subtract, SoftLight, HardLight, Difference)
+- [x] Compositor class with ping-pong render targets
+- [x] Layer panel UI with drag-to-reorder, visibility, opacity, blend mode, effect type
 
-### Phase 2: Custom Color Ramp / Gradient Editor
-**Files:** `src/gradient.js`, `src/shaders/gradient-map.glsl`
+### Phase 2: Custom Color Ramp / Gradient Editor -- DONE (commit 29bac47)
+**Files created:** `src/gradient-editor.js`, `src/gradient-pass.js`, `src/shaders/gradient-map.js`
 
-1. **Canvas-based multi-stop gradient editor** - Click to add stops, drag to position, color picker per stop
-2. **Gradient-map post-processing shader** - Maps grayscale luminance to gradient colors (replaces the limited 9-value color balance)
-3. This is the single biggest quality leap - turns monochrome shader output into ANY color palette
+- [x] Canvas-based multi-stop gradient editor with drag, color picker, double-click to add, right-click to remove
+- [x] Gradient-map GLSL shader mapping luminance to gradient colors
+- [x] 5 built-in gradient presets (Fire, Ice, Neon, Earth, Toxic)
+- [x] Integrated into app.js render loop (commit de60a9e)
 
 ### Phase 3: Enhanced UI Layout
 **Files:** `src/ui/layout.js`, `src/ui/layer-panel.js`, new `index.html`
