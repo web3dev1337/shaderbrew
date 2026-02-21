@@ -1,0 +1,31 @@
+{
+	"type": "Caustics",
+	"animate": true,
+	"time": 0,
+	"resolution": "1024",
+	"polarConversion": false,
+	"tiling": true,
+	"normalMap": false,
+	"cHeightScale": 2,
+	"cRadialMask": 1.0,
+
+	"cColorBalanceShadowsR": -0.90,
+	"cColorBalanceShadowsG": -0.55,
+	"cColorBalanceShadowsB": 0.30,
+
+	"cColorBalanceMidtonesR": -0.85,
+	"cColorBalanceMidtonesG": 0.70,
+	"cColorBalanceMidtonesB": 0.45,
+
+	"cColorBalanceHighlightsR": -0.30,
+	"cColorBalanceHighlightsG": 1.0,
+	"cColorBalanceHighlightsB": 0.75,
+
+	"cToonEnable": false,
+	"cToonDark": 0.8,
+	"cToonLight": 0.95,
+
+	"cScale": 3.2,
+	"cSpeed": 1.4,
+	"cColor": 0.35
+}

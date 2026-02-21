@@ -1,0 +1,43 @@
+{
+	"type": "Explosion",
+	"animate": true,
+	"time": 0.85,
+	"resolution": "1024",
+	"polarConversion": true,
+	"tiling": false,
+	"normalMap": false,
+	"cHeightScale": 2,
+	"cRadialMask": 0.88,
+
+	"cColorBalanceShadowsR": -0.30,
+	"cColorBalanceShadowsG": -0.25,
+	"cColorBalanceShadowsB": 0.40,
+
+	"cColorBalanceMidtonesR": -0.50,
+	"cColorBalanceMidtonesG": -0.15,
+	"cColorBalanceMidtonesB": 0.25,
+
+	"cColorBalanceHighlightsR": 0.95,
+	"cColorBalanceHighlightsG": 0.95,
+	"cColorBalanceHighlightsB": 1.0,
+
+	"cToonEnable": false,
+	"cToonDark": 0.8,
+	"cToonLight": 0.95,
+
+	"cCameraTilt": 0.50,
+	"cCameraPan": 0.50,
+	"cExplosionRadius": 1.95,
+	"cExplosionDownScale": 1.85,
+	"cExplosionGrain": 4.8,
+	"cExplosionSpeed": 0.12,
+	"cExplosionBallness": 45,
+	"cExplosionGrowth": 0.80,
+	"cExplosionFade": 4.5,
+	"cExplosionDensity": 3.8,
+	"cExplosionContrast": 1.8,
+	"cExplosionRollingInitDamp": 0.15,
+	"cExplosionRollingSpeed": 3.8,
+	"cExplosionDelayRange": 1.8,
+	"cExplosionBallSpread": 4.5
+}

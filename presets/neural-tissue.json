@@ -1,0 +1,35 @@
+{
+	"type": "Trabeculum",
+	"animate": true,
+	"time": 0,
+	"resolution": "1024",
+	"polarConversion": false,
+	"tiling": false,
+	"normalMap": false,
+	"cHeightScale": 2,
+	"cRadialMask": 1.0,
+
+	"cColorBalanceShadowsR": 0.15,
+	"cColorBalanceShadowsG": -0.70,
+	"cColorBalanceShadowsB": 0.20,
+
+	"cColorBalanceMidtonesR": 0.85,
+	"cColorBalanceMidtonesG": 0.25,
+	"cColorBalanceMidtonesB": 0.65,
+
+	"cColorBalanceHighlightsR": 1.0,
+	"cColorBalanceHighlightsG": 0.80,
+	"cColorBalanceHighlightsB": 0.90,
+
+	"cToonEnable": false,
+	"cToonDark": 0.8,
+	"cToonLight": 0.95,
+
+	"cDensity": 0.95,
+	"cScale": 0.55,
+	"cIntensity": 0.70,
+	"cTrabeculumVariation": 2,
+	"cCameraTilt": 0.50,
+	"cCameraPan": 0.50,
+	"cColor": 0.75
+}
