@@ -21,6 +21,8 @@ import { GradientEditor } from "./gradient-editor.js";
 import { GradientPass } from "./gradient-pass.js";
 import { TilePreviewPass } from "./tile-preview-pass.js";
 import { Toolbar } from "./ui/toolbar.js";
+import { PBRGenerator } from "./pbr-generator.js";
+import { PBRPanel } from "./ui/pbr-panel.js";
 
 if (!WebGL.isWebGL2Available()) {
 	document.body.appendChild(WebGL.getWebGLErrorMessage());
@@ -40,6 +42,7 @@ class App {
 		this._initLayers();
 		this._initGradient();
 		this._initTilePreview();
+		this._initPBR();
 		this._initNoiseSphere();
 		this._initSpriteSheet();
 		this._initAlphaExport();
@@ -111,6 +114,12 @@ class App {
 		this.tilePreviewPass = new TilePreviewPass(this.renderer, this.canvas.width, this.canvas.height);
 	}
 
+	_initPBR() {
+		this.pbrGenerator = new PBRGenerator(this.renderer, this.canvas.width, this.canvas.height);
+		this.pbrPanel = new PBRPanel(this.pbrGenerator, () => this.render());
+		this.pbrPanel.build();
+	}
+
 	_initToolbar() {
 		this.toolbar = new Toolbar(this);
 		this.toolbar.build();
@@ -128,6 +137,15 @@ class App {
 		gradBtn.addEventListener("mouseenter", () => { gradBtn.style.background = "#0f3460"; gradBtn.style.borderColor = "#e94560"; });
 		gradBtn.addEventListener("mouseleave", () => { gradBtn.style.background = "#1a1a2e"; gradBtn.style.borderColor = "#555"; });
 		document.body.appendChild(gradBtn);
+
+		// PBR toggle button
+		const pbrBtn = document.createElement("button");
+		pbrBtn.textContent = "PBR Maps";
+		pbrBtn.style.cssText = "padding:8px 16px;border:1px solid #555;border-radius:4px;background:#1a1a2e;color:#e0e0ff;font-family:monospace;font-size:13px;cursor:pointer;transition:all 0.2s;position:fixed;bottom:55px;right:110px;z-index:9999";
+		pbrBtn.addEventListener("click", () => this.pbrPanel.toggle());
+		pbrBtn.addEventListener("mouseenter", () => { pbrBtn.style.background = "#0f3460"; pbrBtn.style.borderColor = "#e94560"; });
+		pbrBtn.addEventListener("mouseleave", () => { pbrBtn.style.background = "#1a1a2e"; pbrBtn.style.borderColor = "#555"; });
+		document.body.appendChild(pbrBtn);
 	}
 
 	_onLayerChange() {
@@ -361,6 +379,15 @@ class App {
 				this.tilePreviewPass.apply(lastRT.texture, null);
 			}
 		}
+
+		// PBR map generation
+		if (this.pbrGenerator.enabled) {
+			const lastRT = this.pipeline.layers[this.pipeline.layers.length - 2]?.renderTarget;
+			if (lastRT) {
+				this.pbrGenerator.generate(lastRT.texture);
+				this.pbrPanel.updatePreviews(this.renderer, lastRT.texture);
+			}
+		}
 	}
 
 	_onResize() {
@@ -369,6 +396,7 @@ class App {
 		this.layerManager.resize(this.canvas.width, this.canvas.height);
 		this.compositor.resize(this.canvas.width, this.canvas.height);
 		this.gradientPass.resize(this.canvas.width, this.canvas.height);
+		this.pbrGenerator.resize(this.canvas.width, this.canvas.height);
 		this.spriteSheet.resize(this.canvas.width, this.canvas.height);
 		if (this.toolbar) this.toolbar.updateResolution(this.canvas.width, this.canvas.height);
 		this.render();
