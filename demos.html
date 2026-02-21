@@ -528,7 +528,7 @@ pL.position.set(px,2.5,pz);scene.add(pL);
 // ══════════════════════════════════════════════════════════════════
 const composer=new EffectComposer(r3);
 composer.addPass(new RenderPass(scene,cam));
-const bloomPass=new UnrealBloomPass(new THREE.Vector2(W,H),.5,.3,.85);
+const bloomPass=new UnrealBloomPass(new THREE.Vector2(W,H),.2,.3,.85);
 composer.addPass(bloomPass);
 composer.addPass(new OutputPass());
 
