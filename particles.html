@@ -409,7 +409,7 @@ cam.position.set(0,4,10);cam.lookAt(0,2,0);
 
 const ctrl=new OrbitControls(cam,r3.domElement);
 ctrl.enableDamping=true;ctrl.dampingFactor=.06;
-ctrl.target.set(0,2,0);ctrl.maxDistance=25;ctrl.minDistance=3;
+ctrl.target.set(0,2,0);ctrl.maxDistance=25;ctrl.minDistance=.5;
 ctrl.autoRotate=true;ctrl.autoRotateSpeed=.6;
 
 // Environment
