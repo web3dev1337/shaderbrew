@@ -403,7 +403,7 @@ ctrl.autoRotate=true;ctrl.autoRotateSpeed=.6;
 const pmrem=new THREE.PMREMGenerator(r3);
 const envS=new THREE.Scene();
 envS.add(new THREE.HemisphereLight(0x222233,0x060608,2));
-envS.add(Object.assign(new THREE.DirectionalLight(0xffeedd,1.5),{position:new THREE.Vector3(5,8,5)}));
+const envD=new THREE.DirectionalLight(0xffeedd,1.5);envD.position.set(5,8,5);envS.add(envD);
 scene.environment=pmrem.fromScene(envS,0,.1,100).texture;
 pmrem.dispose();
 
@@ -422,10 +422,9 @@ clearcoat:1,clearcoatRoughness:.05,envMapIntensity:2}));
 crystal.position.set(0,1.5,0);crystal.scale.set(1,2.5,1);scene.add(crystal);
 
 // Pedestal
-scene.add(Object.assign(new THREE.Mesh(
-new THREE.CylinderGeometry(.8,1,.3,6),
-new THREE.MeshStandardMaterial({color:0x0a0a12,roughness:.6,metalness:.5})),
-{position:new THREE.Vector3(0,.15,0)}));
+const ped=new THREE.Mesh(new THREE.CylinderGeometry(.8,1,.3,6),
+new THREE.MeshStandardMaterial({color:0x0a0a12,roughness:.6,metalness:.5}));
+ped.position.set(0,.15,0);scene.add(ped);
 
 // Ground
 const ground=new THREE.Mesh(
