@@ -65,6 +65,8 @@ background:#111;color:#aaa;cursor:pointer;transition:all .2s}
 <button id="browsePrev">&larr; Prev</button>
 <div><div class="browse-label" id="browseLabel">—</div><div class="browse-sub" id="browseSub"></div><div class="browse-counter" id="browseCounter"></div></div>
 <button id="browseNext">Next &rarr;</button>
+<button id="savePng" style="margin-left:16px;border-color:#44ff88">Save PNG</button>
+<button id="saveAll" style="border-color:#ffaa00">Save All 100</button>
 </div>
 <div class="info-bar">
 <kbd>Drag</kbd> orbit &nbsp; <kbd>Scroll</kbd> zoom &nbsp; | &nbsp;
@@ -801,6 +803,40 @@ if(!browseActive)return;
 if(e.key==="ArrowLeft"&&browseIdx>0){showBrowse(browseIdx-1);e.preventDefault();}
 if(e.key==="ArrowRight"&&browseIdx<CATALOG.length-1){showBrowse(browseIdx+1);e.preventDefault();}
 });
+
+// Save current sprite sheet as PNG
+function savePng(idx){
+const sheet=genBrowseSheet(idx);
+const name=CATALOG[idx].name.toLowerCase().replace(/\s+/g,"-");
+const a=document.createElement("a");
+a.href=sheet.canvas.toDataURL("image/png");
+a.download=name+"-spritesheet.png";
+a.click();
+}
+document.getElementById("savePng").onclick=()=>{if(browseIdx>=0)savePng(browseIdx);};
+
+// Save all 100 as PNGs (batch generate + download)
+document.getElementById("saveAll").onclick=async()=>{
+const btn=document.getElementById("saveAll");
+btn.textContent="Generating...";btn.disabled=true;
+for(let i=0;i<CATALOG.length;i++){
+browseCounter.textContent="Rendering "+(i+1)+" / "+CATALOG.length;
+genBrowseSheet(i);
+if(i%5===4)await new Promise(r=>setTimeout(r,0));
+}
+browseCounter.textContent="Downloading...";
+for(let i=0;i<CATALOG.length;i++){
+const sheet=browseCache[i];
+const name=CATALOG[i].name.toLowerCase().replace(/\s+/g,"-");
+const a=document.createElement("a");
+a.href=sheet.canvas.toDataURL("image/png");
+a.download=(String(i+1).padStart(3,"0"))+"-"+name+"-spritesheet.png";
+a.click();
+await new Promise(r=>setTimeout(r,100));
+}
+btn.textContent="Save All 100";btn.disabled=false;
+browseCounter.textContent=(browseIdx+1)+" / "+CATALOG.length;
+};
 
 // ══════════════════════════════════════════════════════════════════
 // ANIMATION LOOP
