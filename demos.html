@@ -303,7 +303,7 @@ layers:[
 ],
 blend:2,gradient:"PlasmaCore",animated:true,animSpeed:.35,
 geo:new THREE.SphereGeometry(1,64,64),
-mat:{roughness:.05,metalness:.1,emissive:0xff44ff,emissiveIntensity:1.5,normalStrength:.6,
+mat:{roughness:.05,metalness:.1,emissive:0xff44ff,emissiveIntensity:.5,normalStrength:.6,
 clearcoat:1,clearcoatRoughness:0,transmission:.5,thickness:1.5,ior:2.4,opacity:.85,transparent:true}
 },
 {
@@ -315,7 +315,7 @@ layers:[
 ],
 blend:4,gradient:"NeonCircuit",animated:false,
 geo:new THREE.BoxGeometry(1.6,1.6,.3,8,8,2),
-mat:{roughness:.15,metalness:.7,emissive:0x0088ff,emissiveIntensity:.8,normalStrength:1.8}
+mat:{roughness:.15,metalness:.7,emissive:0x0088ff,emissiveIntensity:.4,normalStrength:1.8}
 },
 {
 name:"Alien Membrane",
@@ -337,7 +337,7 @@ layers:[
 ],
 blend:null,gradient:"RuneGlow",animated:false,
 geo:new THREE.DodecahedronGeometry(1,0),
-mat:{roughness:.1,metalness:.4,emissive:0xaa44ff,emissiveIntensity:1,normalStrength:1}
+mat:{roughness:.1,metalness:.4,emissive:0xaa44ff,emissiveIntensity:.4,normalStrength:1}
 },
 {
 name:"Solar Corona",
@@ -348,7 +348,7 @@ layers:[
 ],
 blend:4,gradient:"Solar",animated:true,animSpeed:.2,
 geo:new THREE.SphereGeometry(1.2,64,64),
-mat:{roughness:.1,metalness:.05,emissive:0xff8800,emissiveIntensity:2,normalStrength:.5}
+mat:{roughness:.1,metalness:.05,emissive:0xff8800,emissiveIntensity:.6,normalStrength:.5}
 },
 {
 name:"Void Crystal",
@@ -517,9 +517,8 @@ ped.position.set(px,.1,pz);ped.receiveShadow=true;ped.castShadow=true;
 scene.add(ped);
 
 // Per-object glow light
-if(def.mat.emissiveIntensity>.2){
-const glow=def.mat.emissiveIntensity>1?2:.8;
-const pL=new THREE.PointLight(def.mat.emissive,glow,5);
+if(def.mat.emissiveIntensity>.3){
+const pL=new THREE.PointLight(def.mat.emissive,.4,4);
 pL.position.set(px,2.5,pz);scene.add(pL);
 }
 }
@@ -529,7 +528,7 @@ pL.position.set(px,2.5,pz);scene.add(pL);
 // ══════════════════════════════════════════════════════════════════
 const composer=new EffectComposer(r3);
 composer.addPass(new RenderPass(scene,cam));
-const bloomPass=new UnrealBloomPass(new THREE.Vector2(W,H),1.0,.4,.65);
+const bloomPass=new UnrealBloomPass(new THREE.Vector2(W,H),.5,.3,.85);
 composer.addPass(bloomPass);
 composer.addPass(new OutputPass());
 
@@ -627,10 +626,6 @@ if(i===2)objects[i].rotation.x+=.002; // plasma wobble
 if(i===4){objects[i].rotation.x=Math.sin(t*.5)*.15;} // alien pulse
 if(i===6)objects[i].rotation.z+=.001; // solar tilt
 }
-
-// ── Pulsing lights ──
-const pulse=Math.sin(t*2)*.3+.7;
-backLight.intensity=pulse*1.2;
 
 // ── Render with bloom ──
 ctrl.update();
