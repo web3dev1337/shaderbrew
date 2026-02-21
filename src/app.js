@@ -25,6 +25,8 @@ import { PBRGenerator } from "./pbr-generator.js";
 import { PBRPanel } from "./ui/pbr-panel.js";
 import { Preview3D } from "./preview-3d.js";
 import { History } from "./history.js";
+import { ExportManager } from "./export.js";
+import { ExportPanel } from "./ui/export-panel.js";
 
 if (!WebGL.isWebGL2Available()) {
 	document.body.appendChild(WebGL.getWebGLErrorMessage());
@@ -53,6 +55,7 @@ class App {
 		this._initLayerPanel();
 		this._initToolbar();
 		this._initHistory();
+		this._initExport();
 		this._initPresets();
 		console.log("[fxgen] initialized");
 	}
@@ -134,6 +137,12 @@ class App {
 		this.toolbar.build();
 	}
 
+	_initExport() {
+		this.exportManager = new ExportManager(this);
+		this.exportPanel = new ExportPanel(this.exportManager);
+		this.exportPanel.build();
+	}
+
 	_initHistory() {
 		this.history = new History();
 		this.history.init(
@@ -180,6 +189,15 @@ class App {
 		previewBtn.addEventListener("mouseenter", () => { previewBtn.style.background = "#0f3460"; previewBtn.style.borderColor = "#e94560"; });
 		previewBtn.addEventListener("mouseleave", () => { previewBtn.style.background = "#1a1a2e"; previewBtn.style.borderColor = "#555"; });
 		document.body.appendChild(previewBtn);
+
+		// Export toggle button
+		const exportBtn = document.createElement("button");
+		exportBtn.textContent = "Export";
+		exportBtn.style.cssText = "padding:8px 16px;border:1px solid #e94560;border-radius:4px;background:#2a1030;color:#ff6b8a;font-family:monospace;font-size:13px;cursor:pointer;transition:all 0.2s;position:fixed;bottom:55px;right:340px;z-index:9999";
+		exportBtn.addEventListener("click", () => this.exportPanel.toggle());
+		exportBtn.addEventListener("mouseenter", () => { exportBtn.style.background = "#0f3460"; exportBtn.style.borderColor = "#e94560"; exportBtn.style.color = "#fff"; });
+		exportBtn.addEventListener("mouseleave", () => { exportBtn.style.background = "#2a1030"; exportBtn.style.borderColor = "#e94560"; exportBtn.style.color = "#ff6b8a"; });
+		document.body.appendChild(exportBtn);
 	}
 
 	_onLayerChange() {
