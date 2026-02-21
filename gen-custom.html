@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Generate Custom GLSL Sprites</title></head>
+<body>
+<div id="status">Loading...</div>
+<script type="importmap">
+{"imports":{"three":"https://unpkg.com/three@0.174.0/build/three.module.min.js"}}
+</script>
+<script type="module">
+import * as THREE from "three";
+
+const SRES=192,GRID=6,FRAMES=GRID*GRID,SHEET=SRES*GRID;
+const status=document.getElementById("status");
+
+const cv=document.createElement("canvas");cv.width=SRES;cv.height=SRES;
+const r3=new THREE.WebGLRenderer({canvas:cv,alpha:true,preserveDrawingBuffer:true});
+r3.setSize(SRES,SRES,false);r3.autoClear=true;
+function makeRT(){return new THREE.WebGLRenderTarget(SRES,SRES,{minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter,type:THREE.UnsignedByteType});}
+
+const ppV=`varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.0,1.0);}`;
+
+// Circle mask pass
+const maskScene=new THREE.Scene(),maskCam=new THREE.Camera();
+const maskMat=new THREE.ShaderMaterial({
+uniforms:{tDiffuse:{value:null}},vertexShader:ppV,
+fragmentShader:`uniform sampler2D tDiffuse;varying vec2 vUv;
+void main(){vec4 c=texture2D(tDiffuse,vUv);float d=length(vUv-.5)*2.;
+float mask=1.-smoothstep(.3,1.,d);
+float lum=dot(c.rgb,vec3(.299,.587,.114));
+float kill=smoothstep(.0,.04,lum);
+float alpha=mask*kill;
+gl_FragColor=vec4(c.rgb*alpha,alpha);}`,
+depthTest:false,depthWrite:false});
+maskScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),maskMat));
+
+// ==================== NOISE LIBRARY ====================
+const NOISE_LIB=`
+vec3 mod289(vec3 x){return x-floor(x*(1./289.))*289.;}
+vec4 mod289(vec4 x){return x-floor(x*(1./289.))*289.;}
+vec4 permute(vec4 x){return mod289(((x*34.)+1.)*x);}
+vec4 taylorInvSqrt(vec4 r){return 1.79284291400159-.85373472095314*r;}
+
+float snoise(vec3 v){
+  const vec2 C=vec2(1./6.,1./3.);
+  const vec4 D=vec4(0.,.5,1.,2.);
+  vec3 i=floor(v+dot(v,C.yyy));
+  vec3 x0=v-i+dot(i,C.xxx);
+  vec3 g=step(x0.yzx,x0.xyz);
+  vec3 l=1.-g;
+  vec3 i1=min(g.xyz,l.zxy);
+  vec3 i2=max(g.xyz,l.zxy);
+  vec3 x1=x0-i1+C.xxx;
+  vec3 x2=x0-i2+C.yyy;
+  vec3 x3=x0-D.yyy;
+  i=mod289(i);
+  vec4 p=permute(permute(permute(
+    i.z+vec4(0.,i1.z,i2.z,1.))
+    +i.y+vec4(0.,i1.y,i2.y,1.))
+    +i.x+vec4(0.,i1.x,i2.x,1.));
+  float n_=.142857142857;
+  vec3 ns=n_*D.wyz-D.xzx;
+  vec4 j=p-49.*floor(p*ns.z*ns.z);
+  vec4 x_=floor(j*ns.z);
+  vec4 y_=floor(j-7.*x_);
+  vec4 x=x_*ns.x+ns.yyyy;
+  vec4 y=y_*ns.x+ns.yyyy;
+  vec4 h=1.-abs(x)-abs(y);
+  vec4 b0=vec4(x.xy,y.xy);
+  vec4 b1=vec4(x.zw,y.zw);
+  vec4 s0=floor(b0)*2.+1.;
+  vec4 s1=floor(b1)*2.+1.;
+  vec4 sh=-step(h,vec4(0.));
+  vec4 a0=b0.xzyw+s0.xzyw*sh.xxyy;
+  vec4 a1=b1.xzyw+s1.xzyw*sh.zzww;
+  vec3 p0=vec3(a0.xy,h.x);
+  vec3 p1=vec3(a0.zw,h.y);
+  vec3 p2=vec3(a1.xy,h.z);
+  vec3 p3=vec3(a1.zw,h.w);
+  vec4 norm=taylorInvSqrt(vec4(dot(p0,p0),dot(p1,p1),dot(p2,p2),dot(p3,p3)));
+  p0*=norm.x;p1*=norm.y;p2*=norm.z;p3*=norm.w;
+  vec4 m=max(.6-vec4(dot(x0,x0),dot(x1,x1),dot(x2,x2),dot(x3,x3)),0.);
+  m=m*m;
+  return 42.*dot(m*m,vec4(dot(p0,x0),dot(p1,x1),dot(p2,x2),dot(p3,x3)));
+}
+
+float fbm(vec3 p,int oct){
+  float v=0.,a=.5;
+  for(int i=0;i<8;i++){
+    if(i>=oct)break;
+    v+=a*snoise(p);
+    p*=2.03;
+    a*=.48;
+  }
+  return v;
+}
+
+float fbm5(vec3 p){return fbm(p,5);}
+float fbm7(vec3 p){return fbm(p,7);}
+
+// Hash for cheap randomness
+float hash(float n){return fract(sin(n)*43758.5453);}
+float hash21(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+
+// Rotation matrix
+mat2 rot2(float a){float c=cos(a),s=sin(a);return mat2(c,-s,s,c);}
+`;
+
+// ==================== CUSTOM SHADERS ====================
+
+const SHADERS = {};
+
+// 1. RAYMARCHED VOLUMETRIC NEBULA
+SHADERS.volumetric_nebula=`
+uniform float time;
+uniform vec2 resolution;
+${NOISE_LIB}
+
+float nebulaDensity(vec3 p, float t){
+  vec3 q=p*1.2+vec3(t*0.08,t*0.05,-t*0.03);
+  float n=fbm7(q);
+  n+=0.5*fbm5(q*2.5+vec3(0,t*0.1,0));
+  float sphere=1.-smoothstep(0.0,1.8,length(p));
+  return max(n*sphere,0.);
+}
+
+void main(){
+  vec2 uv=gl_FragCoord.xy/resolution;
+  vec2 p=(uv-0.5)*2.0;
+  vec3 ro=vec3(0,0,-3.5);
+  vec3 rd=normalize(vec3(p,1.8));
+  vec3 col=vec3(0);
+  float transmittance=1.0;
+  float t=0.5;
+  for(int i=0;i<80;i++){
+    vec3 pos=ro+rd*t;
+    float d=nebulaDensity(pos,time);
+    if(d>0.01){
+      float dt=0.07;
+      vec3 emit=vec3(0.6+0.4*d,0.2+0.3*d,0.8)*d*2.5;
+      col+=emit*transmittance*dt;
+      transmittance*=exp(-d*3.0*dt);
+      if(transmittance<0.01)break;
+    }
+    t+=0.07;
+    if(t>5.0)break;
+  }
+  gl_FragColor=vec4(col,1);
+}`;
+
+// 2. BLACK HOLE WITH ACCRETION DISK
+SHADERS.black_hole=`
+uniform float time;
+uniform vec2 resolution;
+${NOISE_LIB}
+
+void main(){
+  vec2 uv=gl_FragCoord.xy/resolution;
+  vec2 p=(uv-0.5)*2.0;
+  float r=length(p);
+  float a=atan(p.y,p.x);
+
+  // Gravitational lensing distortion
+  float schwarzschild=0.15;
+  float bendFactor=schwarzschild/(r*r+0.001);
+  vec2 bent=p+normalize(p)*bendFactor;
+  float bentR=length(bent);
+  float bentA=atan(bent.y,bent.x);
+
+  // Event horizon
+  float horizon=smoothstep(0.12,0.14,r);
+
+  // Accretion disk - thin torus
+  float diskR=length(vec2(bentR-0.55,bent.y*3.0));
+  float disk=exp(-diskR*diskR*15.0);
+
+  // Disk rotation + turbulence
+  float diskAngle=bentA+time*0.5+snoise(vec3(bentA*2.0,bentR*5.0,time*0.3))*0.3;
+  float diskNoise=snoise(vec3(cos(diskAngle)*3.0,sin(diskAngle)*3.0,time*0.2));
+  disk*=(0.7+0.3*diskNoise);
+
+  // Disk color: hot inner (white/blue) to cool outer (red/orange)
+  float temp=1.0-smoothstep(0.3,0.8,bentR);
+  vec3 hotColor=vec3(0.9,0.95,1.0);
+  vec3 warmColor=vec3(1.0,0.6,0.15);
+  vec3 coolColor=vec3(0.8,0.15,0.05);
+  vec3 diskCol=mix(coolColor,mix(warmColor,hotColor,temp),temp);
+
+  // Photon ring (bright ring at ~1.5x schwarzschild)
+  float photonRing=exp(-pow((r-0.2)*20.0,2.0))*0.6;
+
+  // Star field background
+  float stars=0.0;
+  for(int i=0;i<3;i++){
+    vec2 sp=bent*float(20+i*15);
+    vec2 id=floor(sp);
+    float h=hash21(id+float(i)*100.0);
+    if(h>0.95){
+      vec2 o=fract(sp)-0.5;
+      stars+=exp(-dot(o,o)*50.0)*(h-0.95)*20.0;
+    }
+  }
+
+  // Compose
+  vec3 col=vec3(0);
+  col+=diskCol*disk*3.0;
+  col+=vec3(0.7,0.8,1.0)*photonRing;
+  col+=vec3(0.8,0.85,1.0)*stars*0.3;
+  col*=horizon; // Black inside event horizon
+
+  // Glow around hole
+  float glow=exp(-r*3.0)*0.15;
+  col+=vec3(0.3,0.2,0.5)*glow;
+
+  gl_FragColor=vec4(col,1);
+}`;
+
+// 3. SHOCKWAVE RING
+SHADERS.shockwave=`
+uniform float time;
+uniform vec2 resolution;
+${NOISE_LIB}
+
+void main(){
+  vec2 uv=gl_FragCoord.xy/resolution;
+  vec2 p=(uv-0.5)*2.0;
+  float r=length(p);
+  float a=atan(p.y,p.x);
+
+  // Expanding ring
+  float ringR=time*0.3;
+  float ring=exp(-pow((r-ringR)*12.0,2.0));
+
+  // Ring turbulence
+  float turb=snoise(vec3(cos(a)*5.0,sin(a)*5.0,time*2.0))*0.05;
+  float ring2=exp(-pow((r-ringR+turb)*10.0,2.0));
+
+  // Secondary inner ring
+  float ringR2=ringR*0.6;
+  float inner=exp(-pow((r-ringR2)*8.0,2.0))*0.5;
+
+  // Central flash (fades quickly)
+  float flash=exp(-time*3.0)*exp(-r*r*8.0)*2.0;
+
+  // Debris field behind ring
+  float debris=0.0;
+  if(r<ringR){
+    float fade=smoothstep(ringR,ringR*0.2,r);
+    debris=snoise(vec3(p*8.0,time*0.5))*fade*0.3;
+    debris=max(debris,0.0)*exp(-time*0.5);
+  }
+
+  // Distortion halo
+  float halo=exp(-pow((r-ringR)*5.0,2.0))*0.3;
+
+  float v=ring*1.5+ring2+inner+flash+debris+halo;
+  gl_FragColor=vec4(vec3(clamp(v,0.0,1.0)),1);
+}`;
+
+// 4. PLASMA CONTAINMENT SPHERE
+SHADERS.plasma_sphere=`
+uniform float time;
+uniform vec2 resolution;
+${NOISE_LIB}
+
+float plasmaDensity(vec3 p,float t){
+  vec3 q=p;
+  q.xz*=rot2(t*0.3);
+  q.yz*=rot2(t*0.2);
+  float n=snoise(q*3.0+t*0.5)*0.5
+    +snoise(q*6.0-t*0.8)*0.25
+    +snoise(q*12.0+t*1.2)*0.125;
+  return n;
+}
+
+void main(){
+  vec2 uv=gl_FragCoord.xy/resolution;
+  vec2 p=(uv-0.5)*2.0;
+  vec3 ro=vec3(0,0,-3.0);
+  vec3 rd=normalize(vec3(p,1.5));
+
+  // Ray-sphere intersection (sphere r=1.2)
+  float b=dot(ro,rd);
+  float c=dot(ro,ro)-1.44;
+  float disc=b*b-c;
+
+  vec3 col=vec3(0);
+  if(disc>0.0){
+    float t0=max(-b-sqrt(disc),0.0);
+    float t1=-b+sqrt(disc);
+
+    // March through sphere volume
+    float transmit=1.0;
+    for(int i=0;i<40;i++){
+      float t=t0+float(i)/40.0*(t1-t0);
+      vec3 pos=ro+rd*t;
+      float r=length(pos);
+
+      // Shell concentration (bright at edges)
+      float shell=exp(-pow((r-1.0)*5.0,2.0));
+      // Core
+      float core=exp(-r*r*3.0);
+
+      float d=plasmaDensity(pos,time);
+      float density=(shell*0.7+core*0.3)*max(d+0.3,0.0);
+
+      // Emission
+      vec3 emit=vec3(0.3,0.5,1.0)*density*shell
+        +vec3(1.0,0.8,0.3)*density*core*2.0
+        +vec3(0.8,0.2,1.0)*density*0.5;
+      col+=emit*transmit*0.08;
+      transmit*=exp(-density*2.0*0.08);
+    }
+
+    // Fresnel rim on sphere edge
+    vec3 hitN=normalize(ro+rd*t0);
+    float fresnel=pow(1.0-abs(dot(rd,hitN)),3.0);
+    col+=vec3(0.3,0.5,1.0)*fresnel*0.5;
+  }
+
+  // Outer glow
+  float outerGlow=exp(-length(p)*2.0)*0.1;
+  col+=vec3(0.2,0.3,0.8)*outerGlow;
+
+  gl_FragColor=vec4(col,1);
+}`;
+
+// 5. FRACTAL JULIA SET MORPH
+SHADERS.fractal_julia=`
+uniform float time;
+uniform vec2 resolution;
+${NOISE_LIB}
+
+void main(){
+  vec2 uv=gl_FragCoord.xy/resolution;
+  vec2 z=(uv-0.5)*3.0;
+
+  // Morphing Julia constant
+  float t=time*0.15;
+  vec2 c=vec2(
+    0.355+0.1*sin(t*1.3)+0.05*cos(t*2.7),
+    0.355+0.1*cos(t*1.7)+0.05*sin(t*2.1)
+  );
+
+  float iter=0.0;
+  float maxIter=80.0;
+  float escape=4.0;
+
+  // Smooth iteration count
+  for(float i=0.0;i<80.0;i++){
+    if(dot(z,z)>escape){iter=i;break;}
+    z=vec2(z.x*z.x-z.y*z.y,2.0*z.x*z.y)+c;
+    iter=i;
+  }
+
+  if(dot(z,z)<=escape){
+    gl_FragColor=vec4(0,0,0,1);
+    return;
+  }
+
+  // Smooth coloring
+  float sl=iter-log2(log2(dot(z,z)))+4.0;
+  float t2=sl/maxIter;
+
+  // Rich color palette
+  vec3 col;
+  col.r=0.5+0.5*sin(3.0+t2*6.28*2.0+time*0.3);
+  col.g=0.5+0.5*sin(3.5+t2*6.28*2.0+time*0.2);
+  col.b=0.5+0.5*sin(4.0+t2*6.28*2.0+time*0.4);
+  col=pow(col,vec3(0.8))*1.2;
+
+  gl_FragColor=vec4(col,1);
+}`;
+
+// 6. WARP TUNNEL / HYPERSPACE
+SHADERS.warp_tunnel=`
+uniform float time;
+uniform vec2 resolution;
+${NOISE_LIB}
+
+void main(){
+  vec2 uv=gl_FragCoord.xy/resolution;
+  vec2 p=(uv-0.5)*2.0;
+  float r=length(p);
+  float a=atan(p.y,p.x);
+
+  // Tunnel coordinates
+  float tunnel=1.0/(r+0.001);
+  float twist=a+time*0.5+tunnel*0.3;
+
+  // Streaking stars
+  float stars=0.0;
+  for(int i=0;i<4;i++){
+    float fi=float(i);
+    float scale=2.0+fi*3.0;
+    vec2 sp=vec2(twist*scale,tunnel*scale-time*(3.0+fi));
+    vec2 id=floor(sp);
+    vec2 f=fract(sp)-0.5;
+    float h=hash21(id+fi*77.0);
+    if(h>0.85){
+      // Elongated streaks
+      float streak=exp(-f.x*f.x*30.0-f.y*f.y*2.0);
+      stars+=streak*(h-0.85)*10.0;
+    }
+  }
+
+  // Tunnel walls (noise rings)
+  float walls=0.0;
+  for(int i=0;i<3;i++){
+    float fi=float(i);
+    float z=tunnel*2.0-time*(2.0+fi*0.5)+fi*3.0;
+    float n=snoise(vec3(cos(a)*2.0,sin(a)*2.0,z));
+    float ring=exp(-pow(fract(z*0.5)*2.0-1.0,2.0)*3.0);
+    walls+=n*ring*0.3/(r+0.3);
+  }
+
+  // Central bright core
+  float core=exp(-r*r*8.0)*0.8;
+
+  // Radial blur/speed lines
+  float speed=exp(-r*1.5)*0.3;
+
+  // Chromatic aberration effect
+  float v=stars+max(walls,0.0)+core+speed;
+  vec3 col;
+  col.r=stars*1.2+max(walls,0.0)*0.5+core*0.8+speed*0.6;
+  col.g=stars*0.8+max(walls,0.0)*0.7+core*1.0+speed*0.8;
+  col.b=stars*1.5+max(walls,0.0)*1.0+core*1.2+speed*1.0;
+
+  gl_FragColor=vec4(col,1);
+}`;
+
+// 7. TORNADO VORTEX
+SHADERS.tornado=`
+uniform float time;
+uniform vec2 resolution;
+${NOISE_LIB}
+
+float tornadoDensity(vec3 p,float t){
+  // Funnel shape: narrow at top, wide at bottom
+  float y=p.y;
+  float funnelR=mix(0.1,0.8,smoothstep(-1.5,1.5,y));
+  float r=length(p.xz);
+
+  // Rotation increases toward center
+  float twist=t*2.0+(1.0-r/(funnelR+0.01))*8.0;
+  vec3 q=p;
+  q.xz*=rot2(twist+y*3.0);
+
+  float n=snoise(q*vec3(3,1.5,3)+vec3(0,t*0.5,0));
+  n+=0.5*snoise(q*vec3(6,3,6)-vec3(0,t*0.8,0));
+
+  float funnel=exp(-pow((r-funnelR*0.5)/funnelR,2.0)*4.0);
+  float yMask=smoothstep(-1.8,1.8,y)*smoothstep(2.0,1.5,y);
+
+  return max(n*funnel*yMask,0.0);
+}
+
+void main(){
+  vec2 uv=gl_FragCoord.xy/resolution;
+  vec2 p=(uv-0.5)*2.0;
+  vec3 ro=vec3(2.5,0.5,-2.5);
+  vec3 target=vec3(0,0.3,0);
+  vec3 fwd=normalize(target-ro);
+  vec3 right=normalize(cross(fwd,vec3(0,1,0)));
+  vec3 up=cross(right,fwd);
+  vec3 rd=normalize(fwd+right*p.x+up*p.y);
+
+  vec3 col=vec3(0);
+  float transmit=1.0;
+  float t=0.0;
+  for(int i=0;i<60;i++){
+    vec3 pos=ro+rd*t;
+    float d=tornadoDensity(pos,time);
+    if(d>0.01){
+      vec3 emit=vec3(0.4+d*0.3,0.35+d*0.2,0.3)*d*1.5;
+      col+=emit*transmit*0.1;
+      transmit*=exp(-d*2.5*0.1);
+      if(transmit<0.01)break;
+    }
+    t+=0.08;
+    if(t>8.0)break;
+  }
+
+  // Ground dust
+  float groundY=(-0.8-ro.y)/rd.y;
+  if(groundY>0.0&&groundY<8.0){
+    vec3 gp=ro+rd*groundY;
+    float dust=snoise(vec3(gp.xz*2.0,time*0.3))*exp(-length(gp.xz)*0.5);
+    col+=vec3(0.3,0.25,0.2)*max(dust,0.0)*transmit*0.5;
+  }
+
+  gl_FragColor=vec4(col,1);
+}`;
+
+// 8. BIOLUMINESCENT ORGANISM
+SHADERS.bioluminescent=`
+uniform float time;
+uniform vec2 resolution;
+${NOISE_LIB}
+
+void main(){
+  vec2 uv=gl_FragCoord.xy/resolution;
+  vec2 p=(uv-0.5)*2.0;
+  float r=length(p);
+  float a=atan(p.y,p.x);
+
+  // Organic body shape (deformed circle)
+  float bodyR=0.5+0.1*sin(a*3.0+time*0.5)+0.05*sin(a*5.0-time*0.7)
+    +0.08*snoise(vec3(cos(a)*2.0,sin(a)*2.0,time*0.3));
+  float body=smoothstep(bodyR+0.05,bodyR-0.1,r);
+
+  // Internal structure (veins/organelles)
+  float veins=0.0;
+  for(int i=0;i<3;i++){
+    float fi=float(i);
+    float vn=snoise(vec3(p*4.0+fi*3.0,time*0.2+fi));
+    veins+=exp(-abs(vn)*5.0)*0.4;
+  }
+
+  // Pulsing glow
+  float pulse=0.7+0.3*sin(time*1.5+r*3.0);
+  float pulse2=0.8+0.2*sin(time*2.3-a*2.0);
+
+  // Nucleus
+  float nucleus=exp(-length(p-vec2(0.05*sin(time),0.05*cos(time*0.7)))*15.0);
+
+  // Tentacle-like extensions
+  float tentacles=0.0;
+  for(int i=0;i<5;i++){
+    float fi=float(i);
+    float ta=fi*1.2566+time*0.2;
+    vec2 dir=vec2(cos(ta),sin(ta));
+    float along=dot(p,dir);
+    float perp=abs(dot(p,vec2(-dir.y,dir.x)));
+    float tentacle=smoothstep(0.1,0.0,perp)*smoothstep(0.4,0.8,along)*smoothstep(1.2,0.9,along);
+    float wave=0.02*sin(along*20.0+time*3.0+fi);
+    tentacle*=smoothstep(0.08+wave,0.0,perp);
+    tentacles+=tentacle*0.5;
+  }
+
+  // Bioluminescent color
+  vec3 col=vec3(0);
+  vec3 bioColor1=vec3(0.0,0.8,0.6);
+  vec3 bioColor2=vec3(0.1,0.4,1.0);
+  vec3 bioColor3=vec3(0.6,0.1,0.8);
+
+  vec3 bodyCol=mix(bioColor1,bioColor2,r/bodyR);
+  col+=bodyCol*body*pulse*0.6;
+  col+=bioColor2*veins*body*0.4;
+  col+=vec3(0.8,1.0,0.9)*nucleus*1.5;
+  col+=mix(bioColor1,bioColor3,0.5)*tentacles*pulse2;
+
+  // Outer glow
+  float glow=exp(-(r-bodyR)*5.0)*body*0.3;
+  col+=bioColor1*glow;
+
+  gl_FragColor=vec4(col,1);
+}`;
+
+// 9. SINGULARITY COLLAPSE/IMPLOSION
+SHADERS.singularity=`
+uniform float time;
+uniform vec2 resolution;
+${NOISE_LIB}
+
+void main(){
+  vec2 uv=gl_FragCoord.xy/resolution;
+  vec2 p=(uv-0.5)*2.0;
+  float r=length(p);
+  float a=atan(p.y,p.x);
+
+  // Collapse phase: stuff pulls inward over time
+  float collapse=time*0.15;
+  float distort=max(1.0-collapse,0.1);
+  vec2 pulled=p*distort+p/max(r,0.01)*collapse*0.1;
+  float pr=length(pulled);
+  float pa=atan(pulled.y,pulled.x);
+
+  // Infall streams (spiral arms being sucked in)
+  float streams=0.0;
+  for(int i=0;i<6;i++){
+    float fi=float(i);
+    float sa=fi*1.047+pa+log(max(pr,0.01))*2.0+time*0.5;
+    float stream=exp(-pow(sin(sa)*pr*3.0,2.0));
+    stream*=smoothstep(0.0,0.2,pr)*smoothstep(1.5,0.3,pr);
+    streams+=stream;
+  }
+
+  // Central singularity (grows over time)
+  float singR=collapse*0.2;
+  float sing=smoothstep(singR+0.02,singR,r);
+
+  // Energy release ring
+  float ringR=singR+0.05+0.02*sin(time*5.0);
+  float ring=exp(-pow((r-ringR)*30.0,2.0))*2.0;
+
+  // Accretion turbulence
+  float turb=snoise(vec3(pa*3.0,pr*5.0-time,time*0.5));
+
+  // Gravitational lensing of background
+  float lens=0.05/(r*r+0.01);
+  vec2 lensed=p+normalize(p)*lens;
+  float bg=snoise(vec3(lensed*4.0,time*0.1))*0.15;
+  bg=max(bg,0.0)*smoothstep(singR+0.1,1.0,r);
+
+  // Compose
+  vec3 col=vec3(0);
+  vec3 streamCol=vec3(0.8,0.4,0.1)+vec3(0.2,0.1,0.4)*turb;
+  col+=streamCol*streams*0.8;
+  col+=vec3(1.0,0.9,0.7)*ring;
+  col+=vec3(0.2,0.15,0.3)*bg;
+  col*=(1.0-sing); // Black at center
+
+  // Hawking radiation glow
+  float hawking=exp(-pow((r-singR-0.01)*50.0,2.0))*0.5;
+  col+=vec3(0.3,0.4,1.0)*hawking;
+
+  gl_FragColor=vec4(col,1);
+}`;
+
+// 10. AURORA BOREALIS
+SHADERS.aurora=`
+uniform float time;
+uniform vec2 resolution;
+${NOISE_LIB}
+
+void main(){
+  vec2 uv=gl_FragCoord.xy/resolution;
+  vec2 p=(uv-0.5)*2.0;
+
+  vec3 col=vec3(0);
+
+  // Multiple curtain layers
+  for(int i=0;i<5;i++){
+    float fi=float(i);
+    float depth=0.5+fi*0.2;
+
+    // Curtain wave
+    float wave=sin(p.x*3.0+fi*1.5+time*0.3+snoise(vec3(p.x*2.0,fi,time*0.2))*1.5);
+    wave+=0.5*sin(p.x*7.0+fi*2.3-time*0.5);
+
+    // Vertical structure
+    float curtainY=wave*0.3+fi*0.15-0.2;
+    float vert=smoothstep(curtainY-0.3,curtainY,p.y)*smoothstep(curtainY+0.6,curtainY+0.1,p.y);
+
+    // Shimmer
+    float shimmer=snoise(vec3(p.x*5.0,p.y*10.0+time*2.0,fi+time*0.3));
+    vert*=(0.6+0.4*shimmer);
+
+    // Vertical rays
+    float rays=snoise(vec3(p.x*8.0,fi*3.0,time*0.5));
+    rays=max(rays,0.0);
+    float rayStr=exp(-abs(p.y-curtainY-0.15)*5.0)*rays*0.5;
+
+    // Color varies with height and layer
+    float h=smoothstep(curtainY-0.1,curtainY+0.5,p.y);
+    vec3 green=vec3(0.1,0.9,0.3);
+    vec3 teal=vec3(0.1,0.7,0.7);
+    vec3 purple=vec3(0.5,0.1,0.8);
+    vec3 red=vec3(0.8,0.15,0.2);
+
+    vec3 curtainCol=mix(green,teal,h+fi*0.15);
+    curtainCol=mix(curtainCol,purple,smoothstep(0.5,1.0,h));
+    curtainCol=mix(curtainCol,red,smoothstep(0.8,1.0,h)*0.3);
+
+    col+=curtainCol*(vert+rayStr)*0.4/depth;
+  }
+
+  // Star background
+  float stars=0.0;
+  vec2 sp=p*20.0;
+  vec2 id=floor(sp);
+  float h=hash21(id);
+  if(h>0.92){
+    vec2 o=fract(sp)-0.5;
+    stars=exp(-dot(o,o)*80.0)*(h-0.92)*12.0;
+  }
+  col+=vec3(0.8,0.85,1.0)*stars*0.2;
+
+  gl_FragColor=vec4(col,1);
+}`;
+
+// 11. COSMIC JELLYFISH
+SHADERS.cosmic_jellyfish=`
+uniform float time;
+uniform vec2 resolution;
+${NOISE_LIB}
+
+void main(){
+  vec2 uv=gl_FragCoord.xy/resolution;
+  vec2 p=(uv-0.5)*2.0;
+  float r=length(p);
+  float a=atan(p.y,p.x);
+
+  // Bell shape (dome top)
+  vec2 bellCenter=vec2(0,0.15);
+  float bellR=length(p-bellCenter);
+  float bellA=atan(p.y-bellCenter.y,p.x-bellCenter.x);
+
+  // Pulsating bell
+  float bellPulse=0.45+0.08*sin(time*1.5);
+  float bellShape=smoothstep(bellPulse,bellPulse-0.15,bellR);
+  bellShape*=smoothstep(-0.2,0.1,p.y-bellCenter.y+bellR*0.3);
+
+  // Bell internal pattern
+  float bellPattern=snoise(vec3(bellA*3.0,bellR*5.0,time*0.5));
+  bellPattern=0.5+0.5*bellPattern;
+
+  // Tentacles
+  float tentacles=0.0;
+  for(int i=0;i<8;i++){
+    float fi=float(i);
+    float tx=fi*0.08-0.28+0.02*sin(fi);
+
+    // Wave motion
+    float wave=sin(p.y*6.0-time*2.0+fi*0.8)*0.04*(0.5-p.y);
+    float tentX=tx+wave;
+
+    float dist=abs(p.x-tentX);
+    float width=0.015+0.01*sin(p.y*10.0+time+fi);
+    float tent=smoothstep(width,0.0,dist);
+    tent*=smoothstep(-0.8,0.0,p.y)*smoothstep(0.1,-0.1,p.y);
+
+    // Fade toward tips
+    tent*=smoothstep(-0.8,-0.3,p.y);
+
+    tentacles+=tent;
+  }
+
+  // Colors
+  vec3 col=vec3(0);
+  vec3 bellCol=mix(vec3(0.2,0.1,0.8),vec3(0.8,0.2,0.6),bellR/bellPulse);
+  col+=bellCol*bellShape*(0.5+0.5*bellPattern);
+
+  vec3 tentCol=mix(vec3(0.6,0.2,0.9),vec3(0.2,0.8,1.0),(-p.y+0.1)/0.9);
+  col+=tentCol*tentacles*0.7;
+
+  // Glow
+  float glow=exp(-bellR*3.0)*0.2;
+  col+=vec3(0.4,0.2,0.8)*glow;
+
+  // Bioluminescent spots
+  for(int i=0;i<6;i++){
+    float fi=float(i);
+    vec2 spotP=vec2(0.15*sin(fi*1.3+time*0.3),0.15*cos(fi*1.7+time*0.4)+0.15);
+    float spot=exp(-length(p-spotP)*20.0)*bellShape;
+    col+=vec3(0.3,0.9,1.0)*spot;
+  }
+
+  gl_FragColor=vec4(col,1);
+}`;
+
+// 12. DIVINE LIGHT / GOD RAYS
+SHADERS.god_rays=`
+uniform float time;
+uniform vec2 resolution;
+${NOISE_LIB}
+
+void main(){
+  vec2 uv=gl_FragCoord.xy/resolution;
+  vec2 p=(uv-0.5)*2.0;
+  float r=length(p);
+  float a=atan(p.y,p.x);
+
+  // Central light source
+  float source=exp(-r*r*4.0)*2.0;
+
+  // Volumetric rays
+  float rays=0.0;
+  for(int i=0;i<12;i++){
+    float fi=float(i);
+    float rayAngle=fi*0.5236+time*0.1;
+
+    // Ray width varies
+    float width=0.04+0.02*sin(fi*2.3+time);
+    float rayA=mod(a-rayAngle+3.14159,6.28318)-3.14159;
+    float ray=exp(-rayA*rayA/(width*width));
+
+    // Ray fades with distance and has noise
+    float rayNoise=snoise(vec3(r*3.0+fi,a*2.0,time*0.5+fi));
+    ray*=exp(-r*1.5)*(0.6+0.4*rayNoise);
+
+    // Cloud occlusion
+    float cloud=snoise(vec3(cos(a+fi)*3.0,sin(a+fi)*3.0,time*0.2));
+    ray*=smoothstep(-0.2,0.2,cloud);
+
+    rays+=ray;
+  }
+
+  // Dust motes in the light
+  float dust=0.0;
+  for(int i=0;i<3;i++){
+    float fi=float(i);
+    vec2 dp=p*float(10+i*5);
+    vec2 did=floor(dp);
+    float h=hash21(did+fi*50.0);
+    if(h>0.9){
+      vec2 o=fract(dp)-0.5;
+      float mote=exp(-dot(o,o)*40.0);
+      float drift=sin(time*0.5+h*6.28)*0.02;
+      dust+=mote*(h-0.9)*5.0*exp(-r*2.0);
+    }
+  }
+
+  // Halo ring
+  float halo=exp(-pow((r-0.3)*8.0,2.0))*0.3;
+
+  // Golden-white color
+  float v=source+rays*0.5+dust*0.3+halo;
+  vec3 col=vec3(1.0,0.95,0.8)*source;
+  col+=vec3(1.0,0.9,0.7)*rays*0.5;
+  col+=vec3(1.0,0.95,0.85)*dust*0.3;
+  col+=vec3(1.0,0.85,0.6)*halo;
+
+  gl_FragColor=vec4(col,1);
+}`;
+
+// 13. REALITY GLITCH / DIGITAL CORRUPTION
+SHADERS.reality_glitch=`
+uniform float time;
+uniform vec2 resolution;
+${NOISE_LIB}
+
+void main(){
+  vec2 uv=gl_FragCoord.xy/resolution;
+  vec2 p=(uv-0.5)*2.0;
+
+  // Glitch displacement
+  float glitchT=floor(time*8.0)/8.0;
+  float glitchStrength=pow(sin(time*1.5)*0.5+0.5,3.0);
+
+  float band=floor(uv.y*20.0)/20.0;
+  float bandNoise=hash(band+glitchT*7.3);
+  float displacement=(bandNoise-0.5)*0.3*glitchStrength;
+
+  vec2 gp=uv+vec2(displacement,0);
+
+  // RGB split
+  float split=0.02*glitchStrength;
+
+  // Base pattern: digital grid
+  vec2 grid=fract(gp*16.0);
+  float gridLine=smoothstep(0.02,0.0,min(grid.x,grid.y));
+
+  // Scan lines
+  float scan=0.5+0.5*sin(gp.y*200.0+time*30.0);
+
+  // Data corruption blocks
+  float blocks=0.0;
+  for(int i=0;i<4;i++){
+    float fi=float(i);
+    float bt=floor(time*4.0+fi*0.25)/4.0;
+    vec2 blockPos=vec2(hash(bt+fi*3.1),hash(bt+fi*7.3+1.0));
+    vec2 blockSize=vec2(0.1+0.1*hash(bt+fi*2.0),0.05+0.05*hash(bt+fi*4.0));
+    vec2 d=abs(gp-blockPos)/blockSize;
+    if(d.x<1.0&&d.y<1.0)blocks+=0.5;
+  }
+
+  // Static noise
+  float staticN=hash21(floor(gp*resolution)+time*100.0);
+  staticN=mix(0.0,staticN,glitchStrength*0.5);
+
+  // Compose with RGB separation
+  vec3 col;
+  vec2 rUV=gp+vec2(split,0);
+  vec2 bUV=gp-vec2(split,0);
+
+  float patternR=gridLine+blocks+staticN;
+  float patternG=gridLine+blocks+staticN;
+  float patternB=gridLine+blocks+staticN;
+
+  // Matrix-style rain
+  float rain=0.0;
+  for(int i=0;i<8;i++){
+    float fi=float(i);
+    float rx=floor(gp.x*30.0+fi*3.7)/30.0;
+    float ry=fract(gp.y-time*(0.5+hash(rx+fi)*0.5)+hash(rx)*10.0);
+    float trail=smoothstep(0.3,0.0,ry)*smoothstep(0.0,0.02,abs(gp.x-rx-0.017));
+    rain+=trail*0.3;
+  }
+
+  col.r=patternR*0.3+rain*0.2+displacement*2.0;
+  col.g=patternG*0.5+rain*1.0;
+  col.b=patternB*0.3+rain*0.3+displacement*2.0;
+  col*=0.7+0.3*scan;
+
+  // Bright center
+  float center=exp(-length(p)*2.0)*0.3;
+  col+=vec3(0.1,0.8,0.3)*center;
+
+  gl_FragColor=vec4(col,1);
+}`;
+
+// 14. CRYSTALLINE GEODE
+SHADERS.crystal_geode=`
+uniform float time;
+uniform vec2 resolution;
+${NOISE_LIB}
+
+void main(){
+  vec2 uv=gl_FragCoord.xy/resolution;
+  vec2 p=(uv-0.5)*2.0;
+  float r=length(p);
+  float a=atan(p.y,p.x);
+
+  // Outer rock shell
+  float shellR=0.85+0.1*snoise(vec3(a*3.0,0,time*0.1));
+  float shell=smoothstep(shellR-0.05,shellR,r);
+
+  // Crystal facets (Voronoi-like)
+  vec3 col=vec3(0);
+  float minDist=10.0;
+  vec3 closestCol=vec3(0);
+
+  // Crystal points growing from shell inward
+  for(int i=0;i<15;i++){
+    float fi=float(i);
+    float ca=fi*0.4189+0.3*sin(fi*1.3);
+    float cr=0.7-fi*0.02+0.05*sin(fi*2.7+time*0.3);
+    vec2 crystal=vec2(cos(ca),sin(ca))*cr;
+
+    // Crystal tip grows inward
+    float growDir=0.3+0.1*sin(fi*3.1+time*0.5);
+    vec2 tip=crystal*(1.0-growDir);
+
+    float d=length(p-tip);
+
+    // Faceted distance (angular modulation)
+    float facetA=atan(p.y-tip.y,p.x-tip.x);
+    float facets=1.0+0.15*sin(facetA*6.0+fi);
+    d*=facets;
+
+    if(d<minDist){
+      minDist=d;
+      // Each crystal has different color
+      float hue=fi*0.3+time*0.1;
+      closestCol=0.5+0.5*vec3(sin(hue),sin(hue+2.1),sin(hue+4.2));
+    }
+  }
+
+  // Crystal internal glow
+  float crystalGlow=exp(-minDist*8.0);
+  float facetEdge=smoothstep(0.02,0.0,abs(fract(minDist*20.0)-0.5)-0.45)*0.5;
+
+  // Internal refraction sparkle
+  float sparkle=snoise(vec3(p*20.0,time*2.0));
+  sparkle=pow(max(sparkle,0.0),3.0)*2.0;
+
+  // Geode interior (within shell)
+  float interior=1.0-shell;
+  col+=closestCol*crystalGlow*interior*1.5;
+  col+=vec3(1)*facetEdge*interior*0.3;
+  col+=closestCol*sparkle*interior*0.4;
+
+  // Dark rock shell
+  col+=vec3(0.1,0.08,0.06)*shell*0.5;
+
+  // Ambient glow from crystals
+  float ambientGlow=exp(-r*2.0)*interior*0.2;
+  col+=vec3(0.5,0.3,0.8)*ambientGlow;
+
+  gl_FragColor=vec4(col,1);
+}`;
+
+// 15. PHOENIX REBIRTH
+SHADERS.phoenix=`
+uniform float time;
+uniform vec2 resolution;
+${NOISE_LIB}
+
+void main(){
+  vec2 uv=gl_FragCoord.xy/resolution;
+  vec2 p=(uv-0.5)*2.0;
+  p.y-=0.1;
+  float r=length(p);
+  float a=atan(p.y,p.x);
+
+  // Wing shapes
+  float wings=0.0;
+  for(int side=-1;side<=1;side+=2){
+    vec2 wp=vec2(p.x*float(side),p.y);
+    float wa=atan(wp.y-0.1,wp.x);
+    float wr=length(wp-vec2(0,0.1));
+
+    // Wing arc
+    float wingArc=smoothstep(0.5,0.3,abs(wa-0.8))*smoothstep(0.1,0.3,wr)*smoothstep(1.0,0.5,wr);
+
+    // Feather rays
+    float feathers=sin(wa*15.0+time*2.0+wr*5.0)*0.5+0.5;
+    wings+=wingArc*(0.5+0.5*feathers);
+  }
+
+  // Body
+  float body=exp(-pow(p.x*4.0,2.0)-pow((p.y-0.1)*2.0,2.0));
+
+  // Rising flames
+  float flames=0.0;
+  for(int i=0;i<5;i++){
+    float fi=float(i);
+    float fx=p.x+0.05*sin(fi*2.3);
+    float n=snoise(vec3(fx*4.0+fi,p.y*3.0-time*2.0,fi+time*0.5));
+    float flame=exp(-fx*fx*8.0)*smoothstep(-0.5,0.5,p.y+n*0.3)*smoothstep(1.0,0.3,p.y);
+    flames+=flame*0.4;
+  }
+
+  // Ember particles
+  float embers=0.0;
+  for(int i=0;i<10;i++){
+    float fi=float(i);
+    float ex=0.4*sin(fi*2.7+time*0.5);
+    float ey=fract(fi*0.37+time*0.3)*1.5-0.5;
+    float ember=exp(-length(p-vec2(ex,ey))*15.0);
+    embers+=ember;
+  }
+
+  // Color: fire gradient
+  vec3 col=vec3(0);
+  vec3 fireHot=vec3(1.0,0.95,0.7);
+  vec3 fireMid=vec3(1.0,0.5,0.1);
+  vec3 fireCool=vec3(0.8,0.1,0.05);
+
+  float intensity=body+wings*0.7+flames+embers*0.5;
+  vec3 fireCol=mix(fireCool,mix(fireMid,fireHot,clamp(intensity,0.,1.)),clamp(intensity*0.7,0.,1.));
+  col=fireCol*intensity;
+
+  // Golden glow
+  col+=vec3(1.0,0.8,0.3)*exp(-r*2.0)*0.3;
+
+  gl_FragColor=vec4(col,1);
+}`;
+
+// ==================== CATALOG ====================
+
+const CUSTOM_CATALOG=[
+{name:"Volumetric Nebula",cat:"cosmic",shader:"volumetric_nebula",tStart:0,tEnd:20,fps:6,mask:true},
+{name:"Black Hole",cat:"cosmic",shader:"black_hole",tStart:0,tEnd:25,fps:5,mask:false},
+{name:"Shockwave Pulse",cat:"energy",shader:"shockwave",tStart:0.1,tEnd:3.0,fps:10,mask:true},
+{name:"Plasma Containment",cat:"energy",shader:"plasma_sphere",tStart:0,tEnd:20,fps:7,mask:false},
+{name:"Julia Fractal Morph",cat:"abstract",shader:"fractal_julia",tStart:0,tEnd:40,fps:5,mask:false},
+{name:"Warp Tunnel",cat:"cosmic",shader:"warp_tunnel",tStart:0,tEnd:15,fps:10,mask:false},
+{name:"Tornado Vortex",cat:"nature",shader:"tornado",tStart:0,tEnd:20,fps:7,mask:false},
+{name:"Bioluminescent",cat:"nature",shader:"bioluminescent",tStart:0,tEnd:20,fps:6,mask:false},
+{name:"Singularity",cat:"cosmic",shader:"singularity",tStart:0.5,tEnd:8,fps:7,mask:true},
+{name:"Aurora Borealis",cat:"nature",shader:"aurora",tStart:0,tEnd:25,fps:5,mask:false},
+{name:"Cosmic Jellyfish",cat:"nature",shader:"cosmic_jellyfish",tStart:0,tEnd:20,fps:6,mask:false},
+{name:"God Rays",cat:"energy",shader:"god_rays",tStart:0,tEnd:20,fps:6,mask:true},
+{name:"Reality Glitch",cat:"abstract",shader:"reality_glitch",tStart:0,tEnd:10,fps:10,mask:false},
+{name:"Crystal Geode",cat:"abstract",shader:"crystal_geode",tStart:0,tEnd:20,fps:5,mask:false},
+{name:"Phoenix Rebirth",cat:"fire",shader:"phoenix",tStart:0,tEnd:15,fps:8,mask:false}
+];
+
+// ==================== RENDERING ====================
+
+const pixBuf=new Uint8Array(SRES*SRES*4);
+const fxScene=new THREE.Scene(),fxCam=new THREE.Camera();
+const fxPlane=new THREE.Mesh(new THREE.PlaneGeometry(2,2));
+fxScene.add(fxPlane);
+
+function renderCustom(shaderSrc,t,target){
+  const mat=new THREE.ShaderMaterial({
+    uniforms:{time:{value:t},resolution:{value:new THREE.Vector2(SRES,SRES)}},
+    vertexShader:ppV,
+    fragmentShader:shaderSrc,
+    depthTest:false,depthWrite:false
+  });
+  fxPlane.material=mat;
+  r3.setRenderTarget(target);r3.clear();
+  r3.render(fxScene,fxCam);
+  r3.setRenderTarget(null);
+  mat.dispose();
+}
+
+function doMask(inRT,outRT){
+  maskMat.uniforms.tDiffuse.value=inRT.texture;
+  maskMat.uniformsNeedUpdate=true;
+  r3.setRenderTarget(outRT);r3.clear();
+  r3.render(maskScene,maskCam);r3.setRenderTarget(null);
+}
+
+function makeSpriteSheet(shaderSrc,tStart,tEnd,useMask){
+  const canvas=document.createElement("canvas");
+  canvas.width=SHEET;canvas.height=SHEET;
+  const ctx=canvas.getContext("2d",{willReadFrequently:true});
+  const fxRT=makeRT(),maskedRT=makeRT();
+  for(let f=0;f<FRAMES;f++){
+    const t=tStart+(f/(FRAMES-1))*(tEnd-tStart);
+    renderCustom(shaderSrc,t,fxRT);
+    let readRT=fxRT;
+    if(useMask){doMask(fxRT,maskedRT);readRT=maskedRT;}
+    r3.readRenderTargetPixels(readRT,0,0,SRES,SRES,pixBuf);
+    const col=f%GRID,row=Math.floor(f/GRID);
+    const img=ctx.createImageData(SRES,SRES);
+    for(let y=0;y<SRES;y++){
+      const s=(SRES-1-y)*SRES*4,d=y*SRES*4;
+      for(let x=0;x<SRES*4;x++)img.data[d+x]=pixBuf[s+x];
+    }
+    ctx.putImageData(img,col*SRES,row*SRES);
+  }
+  fxRT.dispose();maskedRT.dispose();
+  return canvas;
+}
+
+// ==================== GENERATE ALL ====================
+window.__sprites=[];
+window.__done=false;
+
+async function generateAll(){
+  for(let i=0;i<CUSTOM_CATALOG.length;i++){
+    const p=CUSTOM_CATALOG[i];
+    status.textContent=`Generating ${i+1}/${CUSTOM_CATALOG.length}: ${p.name}`;
+    const src=SHADERS[p.shader];
+    if(!src){status.textContent=`ERROR: no shader ${p.shader}`;continue;}
+    const canvas=makeSpriteSheet(src,p.tStart,p.tEnd,p.mask);
+    const name=String(i+101).padStart(3,"0")+"-"+p.name.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/-$/,"");
+    window.__sprites.push({name,data:canvas.toDataURL("image/png")});
+    await new Promise(r=>setTimeout(r,0));
+  }
+  status.textContent="Done! "+CUSTOM_CATALOG.length+" custom sprites generated.";
+  window.__done=true;
+}
+generateAll();
+</script>
+</body></html>
