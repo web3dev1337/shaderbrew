@@ -260,8 +260,8 @@ float f0=floor(vFrame);
 float f1=min(f0+1.,uFrames-1.);
 float blend=fract(vFrame);
 float invG=1./uGrid;
-vec2 uv0=vec2(mod(f0,uGrid),floor(f0/uGrid))*invG+gl_PointCoord*invG;
-vec2 uv1=vec2(mod(f1,uGrid),floor(f1/uGrid))*invG+gl_PointCoord*invG;
+vec2 uv0=vec2(mod(f0,uGrid),uGrid-1.-floor(f0/uGrid))*invG+gl_PointCoord*invG;
+vec2 uv1=vec2(mod(f1,uGrid),uGrid-1.-floor(f1/uGrid))*invG+gl_PointCoord*invG;
 vec4 c0=texture2D(uMap,uv0);
 vec4 c1=texture2D(uMap,uv1);
 vec4 c=mix(c0,c1,blend);
@@ -464,8 +464,8 @@ float f0=floor(uFrame);
 float f1=min(f0+1.,uGrid*uGrid-1.);
 float blend=fract(uFrame);
 float invG=1./uGrid;
-vec2 uv0=vec2(mod(f0,uGrid),floor(f0/uGrid))*invG+vUv*invG;
-vec2 uv1=vec2(mod(f1,uGrid),floor(f1/uGrid))*invG+vUv*invG;
+vec2 uv0=vec2(mod(f0,uGrid),uGrid-1.-floor(f0/uGrid))*invG+vUv*invG;
+vec2 uv1=vec2(mod(f1,uGrid),uGrid-1.-floor(f1/uGrid))*invG+vUv*invG;
 vec4 c=mix(texture2D(uMap,uv0),texture2D(uMap,uv1),blend);
 if(c.a<.01)discard;
 gl_FragColor=c;
@@ -614,7 +614,7 @@ magicLight.intensity=.12+Math.sin(t*2+1)*.03;
 
 // Animate static preview quads (loop through frames at ~8fps)
 for(const q of previewQuads){
-if(q.visible)q.material.uniforms.uFrame.value=(t*8)%(FRAMES);
+if(q.visible)q.material.uniforms.uFrame.value=(t*3)%(FRAMES);
 }
 
 ctrl.update();
