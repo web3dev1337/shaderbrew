@@ -75,7 +75,7 @@ const clock=new THREE.Clock();
 const W=1400,H=700;
 const r3=new THREE.WebGLRenderer({antialias:true,powerPreference:"high-performance"});
 r3.setSize(W,H);r3.setPixelRatio(Math.min(window.devicePixelRatio,2));
-r3.toneMapping=THREE.ACESFilmicToneMapping;r3.toneMappingExposure=1.8;
+r3.toneMapping=THREE.ACESFilmicToneMapping;r3.toneMappingExposure=1.2;
 r3.autoClear=true;
 r3.domElement.style.cssText="cursor:grab;display:block;width:100%;height:auto";
 
@@ -398,8 +398,8 @@ pmrem.dispose();
 // Lighting
 scene.add(new THREE.AmbientLight(0x111115,.5));
 scene.add(new THREE.HemisphereLight(0x223344,0x111111,.8));
-const fireLight=new THREE.PointLight(0xff5500,.8,12);fireLight.position.set(0,2,0);scene.add(fireLight);
-const magicLight=new THREE.PointLight(0xaa44ff,.5,10);magicLight.position.set(0,4,0);scene.add(magicLight);
+const fireLight=new THREE.PointLight(0xff5500,.3,8);fireLight.position.set(0,2,0);scene.add(fireLight);
+const magicLight=new THREE.PointLight(0xaa44ff,.2,8);magicLight.position.set(0,4,0);scene.add(magicLight);
 
 // Central dark crystal
 const crystalGeo=new THREE.OctahedronGeometry(.6,0);
@@ -430,7 +430,7 @@ scene.add(embers.points);
 // ── Bloom ──
 const composer=new EffectComposer(r3);
 composer.addPass(new RenderPass(scene,cam));
-composer.addPass(new UnrealBloomPass(new THREE.Vector2(W,H),.35,.4,.75));
+composer.addPass(new UnrealBloomPass(new THREE.Vector2(W,H),.15,.3,.9));
 composer.addPass(new OutputPass());
 
 prog(100);
@@ -459,8 +459,8 @@ const pulse=Math.sin(t*1.5)*.05+.25;
 crystalMat.emissiveIntensity=pulse;
 
 // Dynamic lights
-fireLight.intensity=.6+Math.sin(t*3)*.15;
-magicLight.intensity=.4+Math.sin(t*2+1)*.1;
+fireLight.intensity=.25+Math.sin(t*3)*.05;
+magicLight.intensity=.15+Math.sin(t*2+1)*.05;
 
 ctrl.update();
 composer.render();
