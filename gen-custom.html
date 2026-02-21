@@ -1251,6 +1251,1566 @@ void main(){
   gl_FragColor=vec4(col,1);
 }`;
 
+// 20. SUPERNOVA — star death: expanding shell, neutron star remnant, light echo
+// TETRADIC color: blue-white core + gold ejecta + magenta shockfront + teal afterglow
+SHADERS.supernova=`
+uniform float time;
+uniform vec2 resolution;
+${NOISE_LIB}
+
+void main(){
+  vec2 uv=gl_FragCoord.xy/resolution;
+  vec2 p=(uv-0.5)*2.0;
+  float r=length(p);
+  float a=atan(p.y,p.x);
+
+  float phase=time*0.12; // slow evolution
+
+  // Expanding ejecta shell
+  float shellR=phase*0.6;
+  float shellThick=0.08+0.04*sin(a*7.0+time);
+  float shell=exp(-pow((r-shellR)/shellThick,2.0));
+  float shellTurb=snoise(vec3(a*4.0,r*8.0-time,time*0.3));
+  shell*=(0.6+0.5*shellTurb);
+
+  // Filamentary ejecta (Rayleigh-Taylor fingers)
+  float filaments=0.0;
+  for(int i=0;i<8;i++){
+    float fi=float(i);
+    float fa=fi*0.7854+phase*0.3;
+    float spread=shellR*(0.8+0.4*sin(fi*2.3+time*0.5));
+    vec2 fp=vec2(cos(fa),sin(fa))*spread;
+    float fd=length(p-fp);
+    float finger=exp(-fd*fd*60.0);
+    // Stretch radially
+    float radial=dot(normalize(p-fp+0.001),normalize(fp));
+    finger*=smoothstep(-0.3,0.5,radial);
+    filaments+=finger;
+  }
+
+  // Neutron star remnant (tiny, intensely bright, pulsing)
+  float pulsar=exp(-r*r*200.0)*(1.5+0.5*sin(time*15.0));
+
+  // Light echo rings (expanding at speed of light)
+  float echo1=exp(-pow((r-phase*0.8)*20.0,2.0))*0.3*smoothstep(0.3,1.0,phase);
+  float echo2=exp(-pow((r-phase*0.5)*15.0,2.0))*0.2*smoothstep(0.6,1.5,phase);
+
+  // Reverse shock (inward-moving)
+  float revShock=exp(-pow((r-max(shellR-0.15,0.0))*25.0,2.0))*0.4;
+
+  // Color composition — tetradic harmony
+  vec3 col=vec3(0);
+  col+=vec3(0.9,0.95,1.0)*pulsar;                    // blue-white core
+  col+=vec3(1.0,0.75,0.2)*shell*1.5;                 // gold ejecta
+  col+=vec3(0.9,0.2,0.6)*filaments*0.8;              // magenta fingers
+  col+=vec3(0.2,0.7,0.8)*(echo1+echo2);              // teal echo
+  col+=vec3(1.0,0.4,0.7)*revShock;                   // pink reverse shock
+
+  // Radial streaks from explosion
+  float streaks=pow(max(sin(a*20.0+snoise(vec3(a*5.0,r,time))*3.0),0.0),4.0);
+  streaks*=exp(-r*3.0)*shell*0.5;
+  col+=vec3(1.0,0.9,0.6)*streaks;
+
+  gl_FragColor=vec4(col,1);
+}`;
+
+// 21. DIMENSIONAL PORTAL — swirling ring with reality distortion
+// ANALOGOUS COOL: deep indigo → electric blue → cyan, warm orange sparks at edges
+SHADERS.portal=`
+uniform float time;
+uniform vec2 resolution;
+${NOISE_LIB}
+
+void main(){
+  vec2 uv=gl_FragCoord.xy/resolution;
+  vec2 p=(uv-0.5)*2.0;
+  float r=length(p);
+  float a=atan(p.y,p.x);
+
+  // Portal ring geometry
+  float ringR=0.55;
+  float ringDist=abs(r-ringR);
+  float ringWidth=0.12+0.03*sin(a*6.0+time*2.0);
+
+  // Swirling energy in ring
+  float swirl=0.0;
+  for(int i=0;i<6;i++){
+    float fi=float(i);
+    float sa=a+time*(0.8+fi*0.2)+fi*1.047;
+    float sr=r+0.02*sin(sa*3.0+fi);
+    float sn=snoise(vec3(cos(sa)*3.0,sin(sa)*3.0,sr*5.0+time*0.5+fi));
+    float band=exp(-pow((sr-ringR)/(ringWidth+fi*0.01),2.0));
+    swirl+=sn*band*0.4;
+  }
+
+  // Interior void — reality distortion
+  float interior=smoothstep(ringR-0.05,ringR-0.15,r);
+  vec2 distP=p/max(r,0.001);
+  float warp=snoise(vec3(distP*3.0+time*0.3,time*0.2));
+  vec2 warped=p+distP*warp*0.15*interior;
+  float voidPattern=fbm5(vec3(warped*4.0,time*0.4));
+  voidPattern=abs(voidPattern)*interior;
+
+  // Energy arcs jumping across ring
+  float arcs=0.0;
+  for(int i=0;i<4;i++){
+    float fi=float(i);
+    float arcA=fi*1.571+time*1.5+sin(time*0.7+fi)*0.5;
+    vec2 arcP=vec2(cos(arcA),sin(arcA))*ringR;
+    float arcD=length(p-arcP);
+    float arc=exp(-arcD*arcD*80.0)*(0.5+0.5*sin(time*8.0+fi*2.0));
+    arcs+=arc;
+  }
+
+  // Particle spray from ring
+  float particles=0.0;
+  for(int i=0;i<12;i++){
+    float fi=float(i);
+    float pa=fi*0.524+time*0.3;
+    float pr=ringR+0.1+0.15*hash(fi+floor(time*2.0));
+    vec2 pp=vec2(cos(pa),sin(pa))*pr;
+    float particle=exp(-length(p-pp)*30.0);
+    particles+=particle*0.3;
+  }
+
+  // Color — analogous cool with warm accent
+  vec3 col=vec3(0);
+  float ringMask=exp(-ringDist*ringDist/(ringWidth*ringWidth));
+  vec3 indigoDeep=vec3(0.15,0.05,0.4);
+  vec3 electricBlue=vec3(0.2,0.4,1.0);
+  vec3 cyanBright=vec3(0.3,0.85,1.0);
+  vec3 orangeSpark=vec3(1.0,0.5,0.1);
+
+  col+=electricBlue*ringMask*1.2;
+  col+=cyanBright*max(swirl,0.0)*1.5;
+  col+=indigoDeep*voidPattern*2.0;
+  col+=cyanBright*arcs*2.0;
+  col+=orangeSpark*particles;
+
+  // Rim glow
+  float rimGlow=exp(-ringDist*5.0)*0.3;
+  col+=vec3(0.2,0.15,0.5)*rimGlow;
+
+  // Inner void darkness with subtle pattern
+  col=mix(col,indigoDeep*voidPattern*0.8,interior*0.5);
+
+  gl_FragColor=vec4(col,1);
+}`;
+
+// 22. DEEP OCEAN — underwater caustics with volumetric light shafts
+// MONOCHROMATIC blue with value variation + complementary amber sunbeams
+SHADERS.deep_ocean=`
+uniform float time;
+uniform vec2 resolution;
+${NOISE_LIB}
+
+void main(){
+  vec2 uv=gl_FragCoord.xy/resolution;
+  vec2 p=(uv-0.5)*2.0;
+
+  // Underwater caustics — overlapping wave interference
+  float caustics=0.0;
+  for(int i=0;i<4;i++){
+    float fi=float(i);
+    float scale=3.0+fi*2.0;
+    float speed=0.3+fi*0.1;
+    vec2 q=p*scale;
+    q+=vec2(time*speed*0.7,time*speed);
+    q+=0.5*vec2(sin(time*0.3+fi),cos(time*0.4+fi));
+
+    // Two overlapping sine waves create caustic pattern
+    float c1=sin(q.x+sin(q.y*1.3+time*speed))*0.5+0.5;
+    float c2=sin(q.y*1.1+sin(q.x*0.9+time*speed*0.8))*0.5+0.5;
+    float c=c1*c2;
+    caustics+=pow(c,2.0)*0.4;
+  }
+
+  // Light shafts from above (volumetric crepuscular rays)
+  float shafts=0.0;
+  for(int i=0;i<6;i++){
+    float fi=float(i);
+    float sx=0.4*sin(fi*1.9+time*0.15)-p.x;
+    float shaft=exp(-sx*sx*20.0);
+    // Shaft wavers
+    shaft*=0.5+0.5*sin(p.y*3.0+time*0.5+fi*1.3);
+    // Fade with depth
+    shaft*=smoothstep(-1.0,0.8,p.y);
+    // Surface wave occlusion
+    float occ=snoise(vec3(p.x*2.0+fi,p.y+time*0.3,fi));
+    shaft*=smoothstep(-0.3,0.2,occ);
+    shafts+=shaft*0.15;
+  }
+
+  // Floating particles (marine snow)
+  float particles=0.0;
+  for(int i=0;i<8;i++){
+    float fi=float(i);
+    vec2 pp=vec2(
+      sin(fi*3.7+time*0.1)*0.8,
+      fract(fi*0.31-time*0.05)*2.0-1.0
+    );
+    float pd=length(p-pp);
+    particles+=exp(-pd*30.0)*0.2;
+  }
+
+  // Depth fog gradient
+  float depth=smoothstep(1.0,-1.0,p.y);
+
+  // Color — monochromatic blue + amber shafts (complement)
+  vec3 deepBlue=vec3(0.02,0.05,0.15);
+  vec3 midBlue=vec3(0.05,0.15,0.35);
+  vec3 shallowBlue=vec3(0.1,0.3,0.5);
+  vec3 causticCyan=vec3(0.15,0.5,0.6);
+  vec3 shaftAmber=vec3(0.9,0.75,0.4);
+
+  vec3 col=mix(shallowBlue,deepBlue,depth);
+  col+=causticCyan*caustics*(1.0-depth*0.7);
+  col+=shaftAmber*shafts;
+  col+=vec3(0.2,0.3,0.4)*particles;
+
+  gl_FragColor=vec4(col,1);
+}`;
+
+// 23. GALAXY SPIRAL — proper logarithmic spiral arms with star formation regions
+// WARM-COOL split: blue-white young stars + amber core + magenta nebulae
+SHADERS.galaxy=`
+uniform float time;
+uniform vec2 resolution;
+${NOISE_LIB}
+
+void main(){
+  vec2 uv=gl_FragCoord.xy/resolution;
+  vec2 p=(uv-0.5)*2.0;
+  float r=length(p);
+  float a=atan(p.y,p.x);
+
+  // Galaxy rotation (differential — inner faster)
+  float rotation=time*0.1/(r+0.3);
+  float ga=a+rotation;
+
+  // Logarithmic spiral arms (2 main + 2 minor)
+  float arms=0.0;
+  for(int i=0;i<4;i++){
+    float fi=float(i);
+    float armOff=fi*1.5708; // 90 degrees apart
+    float spiral=ga-log(max(r,0.001))*2.5+armOff;
+    float arm=exp(-pow(sin(spiral)*r*3.0,2.0));
+    // Arms are thinner in center, wider at edges
+    arm*=smoothstep(0.05,0.2,r)*smoothstep(1.2,0.6,r);
+    // Major arms are brighter
+    float brightness=(i<2)?1.0:0.4;
+    arms+=arm*brightness;
+  }
+
+  // Star field in arms (density follows arm structure)
+  float stars=0.0;
+  for(int i=0;i<5;i++){
+    float fi=float(i);
+    float scale=30.0+fi*20.0;
+    vec2 sp=p*scale;
+    sp+=vec2(rotation*scale*0.1); // rotate with galaxy
+    vec2 id=floor(sp);
+    vec2 f=fract(sp)-0.5;
+    float h=hash21(id+fi*100.0);
+    if(h>0.88){
+      float star=exp(-dot(f,f)*(40.0+fi*20.0));
+      // Brighter in arms
+      float armDensity=arms;
+      star*=(0.3+armDensity*2.0);
+      stars+=star*(h-0.88)*8.0;
+    }
+  }
+
+  // Galactic core — bright central bulge
+  float core=exp(-r*r*12.0)*1.5;
+  float coreDust=snoise(vec3(a*3.0,r*8.0,time*0.2));
+  core*=(0.7+0.3*coreDust);
+
+  // HII regions (star formation — bright pink knots in arms)
+  float hii=0.0;
+  for(int i=0;i<6;i++){
+    float fi=float(i);
+    float ha=fi*1.047+time*0.05+log(0.3+fi*0.1)*2.5;
+    float hr=0.2+fi*0.1;
+    vec2 hp=vec2(cos(ha),sin(ha))*hr;
+    float h=exp(-length(p-hp)*20.0)*arms;
+    hii+=h;
+  }
+
+  // Dust lanes (dark absorption along arms)
+  float dust=snoise(vec3(p*5.0+time*0.05,time*0.1));
+  float dustLane=smoothstep(0.1,0.4,dust)*arms*0.3;
+
+  // Color composition
+  vec3 col=vec3(0);
+  vec3 coreAmber=vec3(1.0,0.8,0.4);
+  vec3 armBlue=vec3(0.5,0.6,1.0);
+  vec3 starWhite=vec3(0.9,0.92,1.0);
+  vec3 hiiPink=vec3(0.9,0.2,0.5);
+
+  col+=coreAmber*core;
+  col+=armBlue*arms*0.4;
+  col+=starWhite*stars;
+  col+=hiiPink*hii*1.5;
+  col*=(1.0-dustLane); // Dust absorption
+
+  // Background glow
+  col+=vec3(0.03,0.02,0.05)*smoothstep(1.5,0.0,r);
+
+  gl_FragColor=vec4(col,1);
+}`;
+
+// 24. MANDELBROT DEEP ZOOM — smooth zooming into interesting region
+// SPLIT-COMPLEMENTARY: deep violet + gold + teal
+SHADERS.mandelbrot_zoom=`
+uniform float time;
+uniform vec2 resolution;
+${NOISE_LIB}
+
+void main(){
+  vec2 uv=gl_FragCoord.xy/resolution;
+
+  // Target: Seahorse valley
+  vec2 target=vec2(-0.743643887037151,0.131825904205330);
+
+  // Zoom exponentially over time
+  float zoom=pow(2.0,3.0+time*0.5);
+  vec2 c=target+(uv-0.5)*2.0/zoom;
+
+  vec2 z=vec2(0);
+  float iter=0.0;
+  float maxIter=150.0;
+
+  for(float i=0.0;i<150.0;i++){
+    if(dot(z,z)>256.0){iter=i;break;}
+    z=vec2(z.x*z.x-z.y*z.y,2.0*z.x*z.y)+c;
+    iter=i;
+  }
+
+  if(dot(z,z)<=256.0){
+    gl_FragColor=vec4(0,0,0,1);
+    return;
+  }
+
+  // Smooth iteration count (normalized)
+  float sn=iter-log2(log2(dot(z,z)))+4.0;
+  float t=sn/maxIter;
+
+  // Split-complementary palette: violet + gold + teal
+  // Using multiple sine waves at different phases
+  float phase=t*6.28318*3.0+time*0.3;
+  vec3 col;
+  col.r=0.5+0.5*sin(phase+0.0);         // cycles through warm
+  col.g=0.5+0.5*sin(phase+2.5);         // offset for variety
+  col.b=0.5+0.5*sin(phase+4.2);         // offset for blue/violet
+
+  // Darken very low iteration counts (border enhancement)
+  col*=smoothstep(0.0,0.05,t);
+
+  // Brighten high iteration areas (deep zoom detail)
+  col*=1.0+smoothstep(0.3,0.8,t)*0.5;
+
+  gl_FragColor=vec4(col,1);
+}`;
+
+// 25. CHAIN LIGHTNING — electric discharge network with branching
+// COMPLEMENTARY: electric cyan + warm amber ground
+SHADERS.chain_lightning=`
+uniform float time;
+uniform vec2 resolution;
+${NOISE_LIB}
+
+// Lightning bolt between two points using noise displacement
+float bolt(vec2 p,vec2 a,vec2 b,float t,float seed){
+  vec2 ab=b-a;
+  float len=length(ab);
+  vec2 dir=ab/len;
+  vec2 perp=vec2(-dir.y,dir.x);
+
+  float along=dot(p-a,dir)/len;
+  float across=dot(p-a,perp);
+  if(along<0.0||along>1.0)return 0.0;
+
+  // Noise displacement perpendicular to bolt
+  float disp=snoise(vec3(along*8.0+seed,t*5.0+seed*3.0,seed*7.0))*0.15*len;
+  disp+=snoise(vec3(along*20.0+seed,t*8.0,seed*11.0))*0.05*len;
+
+  float d=abs(across-disp);
+  float width=0.01+0.005*sin(along*30.0+t*10.0);
+  return exp(-d*d/(width*width))*smoothstep(0.0,0.1,along)*smoothstep(1.0,0.9,along);
+}
+
+void main(){
+  vec2 uv=gl_FragCoord.xy/resolution;
+  vec2 p=(uv-0.5)*2.0;
+
+  float lightning=0.0;
+  float glow=0.0;
+
+  // Main bolt — strikes from top to center
+  float strikePhase=mod(time*0.4,1.0);
+  float boltStr=smoothstep(0.0,0.05,strikePhase)*smoothstep(0.6,0.3,strikePhase);
+
+  // Retrigger with different boltSeed each strike
+  float boltSeed=floor(time*0.4)*7.13;
+
+  vec2 origin=vec2(0.2*sin(boltSeed),-0.9);
+  vec2 hitPos=vec2(0.1*sin(boltSeed*3.7),0.1*cos(boltSeed*2.3));
+
+  // Main bolt
+  float mainBolt=bolt(p,origin,hitPos,time,boltSeed)*boltStr;
+  lightning+=mainBolt*2.0;
+
+  // Branches
+  for(int i=0;i<5;i++){
+    float fi=float(i);
+    float branchT=0.2+fi*0.15;
+    vec2 branchStart=mix(origin,hitPos,branchT);
+    float branchAngle=hash(boltSeed+fi*3.1)*3.14159-1.5708;
+    vec2 branchEnd=branchStart+vec2(cos(branchAngle),sin(branchAngle))*0.3;
+    float branch=bolt(p,branchStart,branchEnd,time,boltSeed+fi*5.0)*boltStr;
+    lightning+=branch*0.8;
+
+    // Sub-branches
+    for(int j=0;j<2;j++){
+      float fj=float(j);
+      vec2 subStart=mix(branchStart,branchEnd,0.3+fj*0.3);
+      float subAngle=branchAngle+hash(boltSeed+fi*7.0+fj*11.0)*1.0-0.5;
+      vec2 subEnd=subStart+vec2(cos(subAngle),sin(subAngle))*0.15;
+      lightning+=bolt(p,subStart,subEnd,time,boltSeed+fi*13.0+fj*17.0)*boltStr*0.4;
+    }
+  }
+
+  // Secondary bolts (background, fainter)
+  for(int i=0;i<3;i++){
+    float fi=float(i);
+    float s2=boltSeed+fi*23.0+100.0;
+    float phase2=mod(time*0.4+fi*0.15,1.0);
+    float act2=smoothstep(0.0,0.05,phase2)*smoothstep(0.5,0.2,phase2)*0.4;
+    vec2 o2=vec2(hash(s2)*1.6-0.8,-0.9);
+    vec2 t2=vec2(hash(s2+1.0)*0.8-0.4,hash(s2+2.0)*0.4-0.1);
+    lightning+=bolt(p,o2,t2,time,s2)*act2;
+  }
+
+  // Ground glow at strike point
+  float groundGlow=exp(-length(p-hitPos)*8.0)*boltStr*0.5;
+
+  // Atmospheric light scatter
+  float scatter=lightning*exp(-length(p-hitPos)*2.0)*0.3;
+
+  // Color — cyan lightning + amber ground glow
+  vec3 col=vec3(0);
+  vec3 boltCyan=vec3(0.6,0.9,1.0);
+  vec3 boltWhite=vec3(0.95,0.97,1.0);
+  vec3 groundAmber=vec3(1.0,0.7,0.3);
+
+  col+=mix(boltCyan,boltWhite,clamp(lightning,0.0,1.0))*lightning;
+  col+=groundAmber*groundGlow;
+  col+=vec3(0.15,0.2,0.35)*scatter;
+
+  // Ambient dark sky
+  col+=vec3(0.01,0.01,0.03);
+
+  gl_FragColor=vec4(col,1);
+}`;
+
+// 26. SOLAR FLARE — coronal mass ejection from stellar surface
+// ANALOGOUS WARM: deep red → orange → gold → white-yellow
+SHADERS.solar_flare=`
+uniform float time;
+uniform vec2 resolution;
+${NOISE_LIB}
+
+void main(){
+  vec2 uv=gl_FragCoord.xy/resolution;
+  vec2 p=(uv-0.5)*2.0;
+  float r=length(p);
+  float a=atan(p.y,p.x);
+
+  // Star surface (lower portion of frame)
+  float surface=smoothstep(0.05,0.0,p.y+0.6+0.03*sin(p.x*10.0+time));
+  float granules=snoise(vec3(p.x*15.0,time*0.5,p.y*5.0+time*0.3));
+  granules=granules*0.5+0.5;
+
+  // Main flare arc — magnetic loop
+  float arcAngle=0.0+time*0.05;
+  float arcHeight=0.6+0.1*sin(time*0.3);
+  float arcWidth=0.4;
+
+  // Parametric arc — semicircle
+  vec2 arcCenter=vec2(0,-0.6);
+  float arcR=length(p-arcCenter);
+  float arcA=atan(p.y-arcCenter.y,p.x-arcCenter.x);
+  float arcDist=abs(arcR-arcHeight);
+  float arcMask=smoothstep(0.1,0.0,arcDist)*smoothstep(0.0,0.3,arcA)*smoothstep(3.14159,2.8,arcA);
+
+  // Plasma flowing along arc
+  float flow=snoise(vec3(arcA*5.0-time*3.0,arcR*3.0,time*0.5));
+  flow=0.5+0.5*flow;
+  float arcPlasma=arcMask*flow;
+
+  // Secondary smaller loops
+  float loops=0.0;
+  for(int i=0;i<3;i++){
+    float fi=float(i);
+    vec2 lc=vec2(-0.3+fi*0.3,-0.6);
+    float lr=length(p-lc);
+    float la=atan(p.y-lc.y,p.x-lc.x);
+    float loopH=0.25+0.05*sin(fi+time*0.5);
+    float ld=abs(lr-loopH);
+    float lm=smoothstep(0.04,0.0,ld)*smoothstep(0.2,0.5,la)*smoothstep(2.9,2.6,la);
+    float lf=snoise(vec3(la*4.0-time*2.0+fi,lr*5.0,fi+time*0.3));
+    loops+=lm*(0.5+0.5*lf)*0.5;
+  }
+
+  // Erupting plasma column (CME)
+  float cmeX=p.x+0.05*snoise(vec3(p.y*5.0,time*2.0,0));
+  float cme=exp(-cmeX*cmeX*30.0)*smoothstep(-0.5,0.0,p.y)*smoothstep(0.8,0.3,p.y);
+  float cmeFlow=snoise(vec3(cmeX*3.0,p.y*4.0-time*3.0,time*0.5));
+  cme*=(0.5+0.5*cmeFlow);
+
+  // Coronal streamers
+  float corona=0.0;
+  for(int i=0;i<8;i++){
+    float fi=float(i);
+    float ca=fi*0.7854+time*0.05;
+    vec2 cd=vec2(cos(ca),sin(ca));
+    float along=max(dot(p-vec2(0,-0.6),cd),0.0);
+    float perp=abs(dot(p-vec2(0,-0.6),vec2(-cd.y,cd.x)));
+    float streamer=exp(-perp*perp*100.0)*exp(-along*2.0)*0.3;
+    corona+=streamer;
+  }
+  corona*=smoothstep(-0.55,-0.4,p.y);
+
+  // Color — analogous warm gradient
+  vec3 col=vec3(0);
+  vec3 deepRed=vec3(0.6,0.05,0.0);
+  vec3 orange=vec3(1.0,0.5,0.05);
+  vec3 gold=vec3(1.0,0.85,0.3);
+  vec3 whiteHot=vec3(1.0,0.95,0.8);
+
+  // Surface
+  col+=mix(orange,gold,granules)*surface*0.8;
+
+  // Flare plasma — hotter at base, cooler at top
+  float flareHeat=smoothstep(0.5,-0.2,p.y);
+  vec3 flareCol=mix(orange,whiteHot,flareHeat);
+  col+=flareCol*(arcPlasma+loops)*1.5;
+  col+=mix(gold,whiteHot,0.5)*cme*1.2;
+  col+=deepRed*corona;
+
+  // Chromosphere glow above surface
+  float chromosphere=exp(-(p.y+0.55)*10.0)*smoothstep(-0.65,-0.55,p.y);
+  col+=vec3(0.8,0.2,0.05)*chromosphere*0.3;
+
+  gl_FragColor=vec4(col,1);
+}`;
+
+// 27. WHIRLPOOL — tightly spiraling water vortex with foam
+// ANALOGOUS COOL: navy → cerulean → seafoam, white foam accent
+SHADERS.whirlpool=`
+uniform float time;
+uniform vec2 resolution;
+${NOISE_LIB}
+
+void main(){
+  vec2 uv=gl_FragCoord.xy/resolution;
+  vec2 p=(uv-0.5)*2.0;
+  float r=length(p);
+  float a=atan(p.y,p.x);
+
+  // Swirl distortion — tighter toward center
+  float swirl=3.0/(r+0.1)+time*1.5;
+  float sa=a+swirl;
+
+  // Water surface noise (distorted by swirl)
+  vec2 sp=vec2(cos(sa),sin(sa))*r;
+  float water=0.0;
+  water+=snoise(vec3(sp*3.0,time*0.4))*0.5;
+  water+=snoise(vec3(sp*6.0-time*0.3,time*0.6))*0.25;
+  water+=snoise(vec3(sp*12.0+time*0.2,time*0.8))*0.125;
+
+  // Spiral arms (visible surface flow lines)
+  float spirals=0.0;
+  for(int i=0;i<3;i++){
+    float fi=float(i);
+    float spiral=sa+fi*2.094;
+    float arm=pow(max(sin(spiral*2.0-log(max(r,0.01))*4.0),0.0),3.0);
+    arm*=smoothstep(0.0,0.15,r)*smoothstep(1.2,0.5,r);
+    spirals+=arm*0.4;
+  }
+
+  // Foam lines along spiral edges
+  float foam=0.0;
+  for(int i=0;i<3;i++){
+    float fi=float(i);
+    float fsa=sa+fi*2.094+0.3;
+    float foamLine=exp(-pow(sin(fsa*2.0-log(max(r,0.01))*4.0)*r*5.0,2.0));
+    foamLine*=smoothstep(0.1,0.3,r)*smoothstep(1.0,0.5,r);
+    float foamNoise=snoise(vec3(sp*10.0+fi,time+fi));
+    foam+=foamLine*(0.5+0.5*foamNoise)*0.3;
+  }
+
+  // Central vortex darkness (deep hole)
+  float vortex=smoothstep(0.12,0.05,r);
+  float vortexRim=exp(-pow((r-0.1)*20.0,2.0))*0.5;
+
+  // Depth: darker toward center
+  float depth=smoothstep(1.0,0.1,r);
+
+  // Color — analogous cool
+  vec3 navy=vec3(0.02,0.05,0.15);
+  vec3 cerulean=vec3(0.05,0.2,0.45);
+  vec3 seafoam=vec3(0.2,0.5,0.5);
+  vec3 white=vec3(0.9,0.95,1.0);
+
+  vec3 waterCol=mix(cerulean,navy,depth);
+  waterCol+=seafoam*max(water*0.3,0.0);
+  waterCol+=cerulean*spirals;
+
+  vec3 col=waterCol;
+  col+=white*foam;
+  col+=seafoam*vortexRim;
+  col*=(1.0-vortex); // Dark center
+
+  // Specular highlights from swirling water
+  float spec=pow(max(water,0.0),4.0)*0.4*smoothstep(0.2,0.5,r);
+  col+=white*spec;
+
+  gl_FragColor=vec4(col,1);
+}`;
+
+// 28. DNA HELIX — double helix rotating in 3D with base pairs
+// SPLIT-COMPLEMENTARY: cyan strands + magenta connections + gold phosphor glow
+SHADERS.dna_helix=`
+uniform float time;
+uniform vec2 resolution;
+${NOISE_LIB}
+
+void main(){
+  vec2 uv=gl_FragCoord.xy/resolution;
+  vec2 p=(uv-0.5)*2.0;
+
+  // DNA orientation: vertical helix
+  float y=p.y;
+  float phase=y*4.0+time*1.5;
+
+  // Two helical strands
+  float strand1x=sin(phase)*0.25;
+  float strand2x=sin(phase+3.14159)*0.25;
+
+  // Z-depth for occlusion (determines which strand is in front)
+  float z1=cos(phase);
+  float z2=cos(phase+3.14159);
+
+  // Strand thickness
+  float d1=length(vec2(p.x-strand1x,0))*8.0;
+  float d2=length(vec2(p.x-strand2x,0))*8.0;
+  float s1=exp(-d1*d1)*smoothstep(0.0,0.03,1.0/(d1+0.5));
+  float s2=exp(-d2*d2)*smoothstep(0.0,0.03,1.0/(d2+0.5));
+
+  // Base pair rungs connecting the strands
+  float rungs=0.0;
+  for(int i=-8;i<8;i++){
+    float fi=float(i);
+    float rungY=fi*0.15+fract(time*0.238)*0.15;
+    if(abs(y-rungY)<0.03){
+      float rungPhase=rungY*4.0+time*1.5;
+      float rx1=sin(rungPhase)*0.25;
+      float rx2=sin(rungPhase+3.14159)*0.25;
+      float minX=min(rx1,rx2);
+      float maxX=max(rx1,rx2);
+      if(p.x>minX&&p.x<maxX){
+        float rung=smoothstep(0.03,0.0,abs(y-rungY));
+        // Rung has two halves meeting in middle
+        float mid=(rx1+rx2)*0.5;
+        float halfGap=smoothstep(0.01,0.02,abs(p.x-mid));
+        rungs+=rung*halfGap*0.8;
+      }
+    }
+  }
+
+  // Z-ordering: dim the strand that's behind
+  float bright1=mix(0.4,1.0,smoothstep(-1.0,1.0,z1));
+  float bright2=mix(0.4,1.0,smoothstep(-1.0,1.0,z2));
+
+  // Phosphor backbone glow
+  float glow1=exp(-abs(p.x-strand1x)*8.0)*0.3;
+  float glow2=exp(-abs(p.x-strand2x)*8.0)*0.3;
+
+  // Color — split-complementary
+  vec3 col=vec3(0);
+  vec3 cyanStrand=vec3(0.2,0.8,1.0);
+  vec3 tealStrand=vec3(0.1,0.9,0.7);
+  vec3 magentaRung=vec3(0.9,0.2,0.6);
+  vec3 goldGlow=vec3(1.0,0.85,0.3);
+
+  col+=cyanStrand*s1*bright1;
+  col+=tealStrand*s2*bright2;
+  col+=magentaRung*rungs;
+  col+=goldGlow*(glow1*bright1+glow2*bright2)*0.5;
+
+  // Ambient scattered light
+  float ambient=exp(-p.x*p.x*2.0)*0.05;
+  col+=vec3(0.1,0.15,0.25)*ambient;
+
+  gl_FragColor=vec4(col,1);
+}`;
+
+// 29. LAVA FLOW — viscous fluid dynamics with cooling crust
+// ANALOGOUS WARM: black crust + deep red → orange cracks → yellow-white molten
+SHADERS.lava_flow=`
+uniform float time;
+uniform vec2 resolution;
+${NOISE_LIB}
+
+void main(){
+  vec2 uv=gl_FragCoord.xy/resolution;
+  vec2 p=(uv-0.5)*2.0;
+
+  // Slow advection (flow direction)
+  vec2 flow=vec2(0.0,-0.3);
+  vec2 q=p+flow*time*0.3;
+
+  // Multi-octave domain warping for viscous fluid look
+  vec2 warp1=vec2(
+    fbm5(vec3(q*2.0,time*0.15)),
+    fbm5(vec3(q*2.0+vec2(5.2,1.3),time*0.15))
+  );
+  vec2 warp2=vec2(
+    fbm5(vec3((q+warp1*0.8)*2.0+vec2(1.7,9.2),time*0.12)),
+    fbm5(vec3((q+warp1*0.8)*2.0+vec2(8.3,2.8),time*0.12))
+  );
+
+  // Final warped noise — this IS the lava pattern
+  float n=fbm7(vec3((q+warp2*0.6)*3.0,time*0.1));
+
+  // Crust formation — areas where lava has cooled
+  // Higher noise = hotter (cracks), lower = crust
+  float heat=smoothstep(-0.2,0.3,n);
+
+  // Crust plates — Voronoi-like from noise derivatives
+  float crust=smoothstep(0.4,0.0,heat);
+  float crustEdge=smoothstep(0.15,0.2,heat)*smoothstep(0.35,0.25,heat);
+
+  // Molten channels between plates (bright cracks)
+  float cracks=smoothstep(0.0,0.05,heat)*smoothstep(0.3,0.15,heat);
+  cracks*=1.5;
+
+  // Hot spots — intensely bright pools
+  float hotSpot=smoothstep(0.5,0.8,heat);
+
+  // Ember particles floating above
+  float embers=0.0;
+  for(int i=0;i<6;i++){
+    float fi=float(i);
+    vec2 ep=vec2(
+      sin(fi*4.1+time*0.2)*0.8,
+      fract(fi*0.23+time*0.1)*2.0-1.0
+    );
+    float ember=exp(-length(p-ep)*25.0)*0.3;
+    embers+=ember;
+  }
+
+  // Color — analogous warm with value contrast
+  vec3 col=vec3(0);
+  vec3 blackCrust=vec3(0.05,0.02,0.01);
+  vec3 deepRed=vec3(0.4,0.02,0.0);
+  vec3 orange=vec3(1.0,0.4,0.0);
+  vec3 yellowHot=vec3(1.0,0.85,0.3);
+
+  col=blackCrust*crust;
+  col+=deepRed*crustEdge*2.0;
+  col+=orange*cracks;
+  col+=yellowHot*hotSpot*1.5;
+  col+=orange*embers;
+
+  // Subtle glow from cracks illuminating crust edges
+  float crackGlow=heat*0.15;
+  col+=deepRed*crackGlow;
+
+  gl_FragColor=vec4(col,1);
+}`;
+
+// 30. TIME VORTEX — clockwork mechanical + temporal energy
+// TRIADIC: gold gears + cyan energy + magenta time rifts
+SHADERS.time_vortex=`
+uniform float time;
+uniform vec2 resolution;
+${NOISE_LIB}
+
+void main(){
+  vec2 uv=gl_FragCoord.xy/resolution;
+  vec2 p=(uv-0.5)*2.0;
+  float r=length(p);
+  float a=atan(p.y,p.x);
+
+  // Rotating gear rings (3 concentric, different speeds)
+  float gears=0.0;
+  for(int i=0;i<3;i++){
+    float fi=float(i);
+    float gearR=0.25+fi*0.2;
+    float teeth=8.0+fi*6.0;
+    float speed=time*(1.0-fi*0.3)*((mod(fi,2.0)<1.0)?1.0:-1.0);
+    float gearDist=abs(r-gearR);
+    float gearRing=smoothstep(0.06,0.0,gearDist);
+    // Teeth
+    float toothPattern=smoothstep(0.3,0.5,sin((a+speed)*teeth))*0.03;
+    float gearWithTeeth=smoothstep(0.06+toothPattern,0.0,gearDist);
+    gears+=gearWithTeeth*0.6;
+  }
+
+  // Clock hands
+  float hands=0.0;
+  // Hour hand (slow)
+  float hourAngle=time*0.1;
+  float hourD=abs(sin(a-hourAngle))*r;
+  hands+=smoothstep(0.02,0.0,hourD)*smoothstep(0.0,0.05,r)*smoothstep(0.3,0.25,r)*0.5;
+  // Minute hand (medium)
+  float minAngle=time*0.5;
+  float minD=abs(sin(a-minAngle))*r;
+  hands+=smoothstep(0.015,0.0,minD)*smoothstep(0.0,0.03,r)*smoothstep(0.45,0.4,r)*0.4;
+  // Second hand (fast)
+  float secAngle=time*2.0;
+  float secD=abs(sin(a-secAngle))*r;
+  hands+=smoothstep(0.008,0.0,secD)*smoothstep(0.0,0.02,r)*smoothstep(0.5,0.45,r)*0.3;
+
+  // Temporal energy — swirling vortex in background
+  float energy=0.0;
+  for(int i=0;i<4;i++){
+    float fi=float(i);
+    float ea=a+time*0.3*(fi+1.0)+fi*0.785;
+    float en=snoise(vec3(cos(ea)*3.0,sin(ea)*3.0,r*5.0-time+fi));
+    energy+=max(en,0.0)*exp(-abs(r-0.5)*3.0)*0.3;
+  }
+
+  // Time rifts — cracks in spacetime
+  float rifts=0.0;
+  for(int i=0;i<5;i++){
+    float fi=float(i);
+    float riftA=fi*1.257+time*0.1+sin(time*0.5+fi)*0.3;
+    float riftD=abs(sin(a-riftA)*r*5.0-snoise(vec3(r*3.0+fi,a,time))*0.5);
+    float rift=exp(-riftD*riftD*20.0)*smoothstep(0.1,0.3,r)*smoothstep(1.0,0.6,r);
+    rifts+=rift*0.3;
+  }
+
+  // Center hub
+  float hub=exp(-r*r*40.0)*0.8;
+  float hubRing=exp(-pow((r-0.08)*30.0,2.0))*0.5;
+
+  // Color — triadic
+  vec3 col=vec3(0);
+  vec3 goldMech=vec3(0.85,0.7,0.25);
+  vec3 cyanEnergy=vec3(0.3,0.8,1.0);
+  vec3 magentaRift=vec3(0.8,0.15,0.7);
+  vec3 whiteCenter=vec3(0.95,0.9,0.8);
+
+  col+=goldMech*(gears+hands+hubRing);
+  col+=cyanEnergy*energy;
+  col+=magentaRift*rifts;
+  col+=whiteCenter*hub;
+
+  // Ambient clock face glow
+  col+=goldMech*exp(-r*2.0)*0.05;
+
+  gl_FragColor=vec4(col,1);
+}`;
+
+// 31. FLUID SIMULATION — Navier-Stokes-inspired ink in water
+// SPLIT-COMPLEMENTARY: deep purple ink + teal secondary + gold highlight
+SHADERS.fluid_ink=`
+uniform float time;
+uniform vec2 resolution;
+${NOISE_LIB}
+
+void main(){
+  vec2 uv=gl_FragCoord.xy/resolution;
+  vec2 p=(uv-0.5)*2.0;
+
+  // Multiple injection points with different timing
+  float ink=0.0;
+  vec3 inkColor=vec3(0);
+
+  for(int i=0;i<4;i++){
+    float fi=float(i);
+    float phase=time*0.3+fi*1.5;
+
+    // Injection point oscillates
+    vec2 inject=vec2(
+      0.3*sin(phase*0.7+fi*2.1),
+      0.3*cos(phase*0.5+fi*1.7)
+    );
+
+    // Multi-level domain warping — THIS is what makes it look like real fluid
+    vec2 q=p-inject;
+    vec2 w1=vec2(
+      snoise(vec3(q*1.5+vec2(fi),phase*0.4)),
+      snoise(vec3(q*1.5+vec2(fi)+vec2(5.2,1.3),phase*0.4))
+    );
+    vec2 w2=vec2(
+      snoise(vec3((q+w1*0.8)*2.0+vec2(1.7,9.2),phase*0.3+fi)),
+      snoise(vec3((q+w1*0.8)*2.0+vec2(8.3,2.8),phase*0.3+fi))
+    );
+    vec2 w3=vec2(
+      snoise(vec3((q+w2*0.5)*3.0+vec2(3.1,7.4),phase*0.2+fi)),
+      snoise(vec3((q+w2*0.5)*3.0+vec2(6.5,4.1),phase*0.2+fi))
+    );
+
+    float density=fbm5(vec3((q+w3*0.4)*2.0,phase*0.2+fi*3.0));
+    density=smoothstep(-0.1,0.5,density);
+
+    // Falloff from injection point
+    float spread=0.5+phase*0.2;
+    density*=exp(-dot(q,q)/(spread*spread));
+
+    ink+=density;
+
+    // Per-drop color variation
+    vec3 dropCol;
+    if(i==0) dropCol=vec3(0.3,0.05,0.5);     // deep purple
+    else if(i==1) dropCol=vec3(0.05,0.4,0.45); // teal
+    else if(i==2) dropCol=vec3(0.4,0.1,0.6);   // violet
+    else dropCol=vec3(0.1,0.35,0.4);            // dark teal
+    inkColor+=dropCol*density;
+  }
+
+  // Thin filament details
+  float filaments=0.0;
+  vec2 fp=p;
+  vec2 fw=vec2(snoise(vec3(fp*2.0,time*0.3)),snoise(vec3(fp*2.0+5.0,time*0.3)));
+  float fn=snoise(vec3((fp+fw*0.5)*5.0,time*0.2));
+  filaments=exp(-abs(fn)*3.0)*0.3;
+  filaments*=smoothstep(0.0,0.3,ink); // Only visible in ink regions
+
+  // Color composition
+  vec3 col=vec3(0.95,0.93,0.9); // Warm off-white water
+  col=mix(col,inkColor*1.5,clamp(ink,0.0,1.0));
+  col+=vec3(0.8,0.7,0.3)*filaments*0.3; // Gold filament highlights
+
+  // Caustic-like light patterns in clear water
+  float caustic=sin(p.x*10.0+sin(p.y*8.0+time)*0.5)*sin(p.y*10.0+sin(p.x*7.0+time*0.8)*0.5);
+  caustic=caustic*0.5+0.5;
+  col+=vec3(0.05)*caustic*(1.0-clamp(ink*2.0,0.0,1.0));
+
+  gl_FragColor=vec4(col,1);
+}`;
+
+// 32. QUANTUM ENTANGLEMENT — two particles mirroring each other with spooky connection
+// Never seen in any particle library. Two orbiting nodes with visible quantum link.
+SHADERS.quantum_entangle=`
+uniform float time;
+uniform vec2 resolution;
+${NOISE_LIB}
+
+void main(){
+  vec2 uv=gl_FragCoord.xy/resolution;
+  vec2 p=(uv-0.5)*2.0;
+
+  // Two entangled particles orbiting each other
+  float orbit=time*0.8;
+  float orbitR=0.35+0.05*sin(time*0.5);
+  vec2 p1=vec2(cos(orbit),sin(orbit))*orbitR;
+  vec2 p2=-p1; // Perfectly mirrored
+
+  // Particle wavefunctions (probability clouds)
+  float psi1=0.0,psi2=0.0;
+  for(int i=0;i<5;i++){
+    float fi=float(i);
+    float freq=2.0+fi*3.0;
+    float phase1=length(p-p1)*freq-time*2.0+fi;
+    float phase2=length(p-p2)*freq-time*2.0+fi;
+    // Standing wave pattern
+    psi1+=sin(phase1)*exp(-length(p-p1)*(2.0+fi))*0.3;
+    psi2+=sin(phase2)*exp(-length(p-p2)*(2.0+fi))*0.3;
+  }
+
+  // Quantum entanglement link — probability amplitude between particles
+  vec2 linkDir=normalize(p2-p1);
+  vec2 linkPerp=vec2(-linkDir.y,linkDir.x);
+  float along=dot(p-p1,linkDir)/length(p2-p1);
+  float across=dot(p-p1,linkPerp);
+  float linkMask=smoothstep(0.0,0.1,along)*smoothstep(1.0,0.9,along);
+
+  // The link oscillates and shows interference
+  float linkWave=sin(along*30.0-time*5.0)*sin(across*20.0)*exp(-across*across*50.0);
+  float link=abs(linkWave)*linkMask*0.8;
+
+  // Measurement collapse flash (periodic)
+  float collapse=exp(-pow(mod(time,4.0)-2.0,2.0)*5.0);
+  float flash1=exp(-length(p-p1)*15.0)*collapse;
+  float flash2=exp(-length(p-p2)*15.0)*collapse;
+
+  // Probability density (|psi|^2)
+  float prob1=psi1*psi1;
+  float prob2=psi2*psi2;
+
+  // Interference fringes between particles
+  float interference=sin(length(p-p1)*15.0-length(p-p2)*15.0+time)*0.5+0.5;
+  interference*=exp(-length(p)*2.0)*0.3;
+
+  // Color: cool violet particles, warm connection, white flashes
+  vec3 col=vec3(0);
+  vec3 violet=vec3(0.5,0.2,0.9);
+  vec3 cyan=vec3(0.3,0.8,1.0);
+  vec3 warmLink=vec3(1.0,0.6,0.2);
+  vec3 white=vec3(1.0,0.95,0.9);
+
+  col+=violet*prob1*3.0+cyan*prob2*3.0;
+  col+=warmLink*link;
+  col+=white*(flash1+flash2)*2.0;
+  col+=mix(violet,cyan,0.5)*interference;
+
+  // Core glow
+  col+=violet*exp(-length(p-p1)*5.0)*0.3;
+  col+=cyan*exp(-length(p-p2)*5.0)*0.3;
+
+  gl_FragColor=vec4(col,1);
+}`;
+
+// 33. GRAVITY WELL — visible spacetime curvature with test particles
+// Visualizes general relativity. Grid warps around mass. Particles orbit and spiral.
+SHADERS.gravity_well=`
+uniform float time;
+uniform vec2 resolution;
+${NOISE_LIB}
+
+void main(){
+  vec2 uv=gl_FragCoord.xy/resolution;
+  vec2 p=(uv-0.5)*2.0;
+  float r=length(p);
+
+  // Spacetime grid (cartesian, warped by gravity)
+  float mass=0.15;
+  vec2 warped=p+normalize(p+0.0001)*mass/(r*r+0.01);
+
+  // Draw warped grid
+  float grid=0.0;
+  float gx=abs(fract(warped.x*4.0)-0.5)*2.0;
+  float gy=abs(fract(warped.y*4.0)-0.5)*2.0;
+  grid+=exp(-gx*gx*200.0)*0.4;
+  grid+=exp(-gy*gy*200.0)*0.4;
+
+  // Radial grid rings (proper distance markers)
+  float radial=0.0;
+  for(int i=1;i<8;i++){
+    float ri=float(i)*0.15;
+    radial+=exp(-pow((r-ri)*30.0,2.0))*0.2;
+  }
+
+  // Test particles in orbit
+  float particles=0.0;
+  for(int i=0;i<8;i++){
+    float fi=float(i);
+    float orbitR=0.15+fi*0.1;
+    // Kepler: closer orbits are faster (v proportional to 1/sqrt(r))
+    float speed=1.5/sqrt(orbitR);
+    float angle=time*speed+fi*0.785;
+
+    // Slight precession (GR effect!)
+    float precession=time*0.02/(orbitR*orbitR);
+    angle+=precession;
+
+    vec2 pp=vec2(cos(angle),sin(angle))*orbitR;
+    float pd=length(p-pp);
+    particles+=exp(-pd*pd*500.0)*0.8;
+
+    // Motion trail
+    for(int j=1;j<4;j++){
+      float fj=float(j);
+      float trailAngle=angle-fj*0.1*speed;
+      vec2 tp=vec2(cos(trailAngle),sin(trailAngle))*orbitR;
+      particles+=exp(-length(p-tp)*length(p-tp)*500.0)*0.3*exp(-fj*0.5);
+    }
+  }
+
+  // Infalling particle (spiraling in)
+  float infallR=max(0.8-time*0.05,0.06);
+  float infallSpeed=1.5/sqrt(infallR);
+  float infallAngle=time*infallSpeed;
+  vec2 ip=vec2(cos(infallAngle),sin(infallAngle))*infallR;
+  float infall=exp(-length(p-ip)*length(p-ip)*800.0);
+
+  // Central mass glow
+  float massGlow=exp(-r*r*50.0)*0.8;
+
+  // Gravitational lensing ring
+  float lensRing=exp(-pow((r-0.08)*40.0,2.0))*0.3;
+
+  // Color
+  vec3 col=vec3(0);
+  vec3 gridBlue=vec3(0.15,0.3,0.6);
+  vec3 particleWhite=vec3(0.9,0.95,1.0);
+  vec3 massYellow=vec3(1.0,0.9,0.5);
+  vec3 infallRed=vec3(1.0,0.3,0.1);
+  vec3 lensViolet=vec3(0.5,0.3,0.9);
+
+  col+=gridBlue*(grid+radial);
+  col+=particleWhite*particles;
+  col+=infallRed*infall;
+  col+=massYellow*massGlow;
+  col+=lensViolet*lensRing;
+
+  // Depth fade
+  col*=smoothstep(1.5,0.5,r)*0.7+0.3;
+
+  gl_FragColor=vec4(col,1);
+}`;
+
+// 34. SOUND VISUALIZER — reactive audio-style waveform / spectrum
+// Simulates what a music visualizer looks like. Bars, waveform, circular spectrum.
+SHADERS.sound_wave=`
+uniform float time;
+uniform vec2 resolution;
+${NOISE_LIB}
+
+void main(){
+  vec2 uv=gl_FragCoord.xy/resolution;
+  vec2 p=(uv-0.5)*2.0;
+  float r=length(p);
+  float a=atan(p.y,p.x);
+
+  // Simulated audio spectrum (bass-heavy, peaks moving)
+  // "Frequency" mapped to angle around circle
+  float spectrum=0.0;
+  float bass=0.5+0.5*sin(time*2.0);
+  float mid=0.3+0.3*sin(time*3.7+1.0);
+  float high=0.2+0.2*sin(time*5.3+2.0);
+
+  // Build fake spectrum from multiple "frequency bands"
+  for(int i=0;i<16;i++){
+    float fi=float(i);
+    float freq=fi/16.0;
+    // Each band has its own amplitude and beat pattern
+    float amp=0.0;
+    amp+=bass*exp(-freq*3.0); // bass dominates low freq
+    amp+=mid*exp(-pow(freq-0.4,2.0)*20.0); // mid peak
+    amp+=high*exp(-pow(freq-0.8,2.0)*30.0); // high peak
+    amp*=0.5+0.5*sin(time*(2.0+fi*0.5)+fi*0.7);
+    amp*=0.3+snoise(vec3(fi,time*3.0,fi*0.5))*0.3;
+
+    // Map to angle (full circle = full spectrum)
+    float bandA=fi*0.3927-3.14159; // 2*PI/16
+    float bandWidth=0.18;
+    float inBand=exp(-pow((a-bandA)/bandWidth,2.0));
+    // Also check wrapped
+    inBand+=exp(-pow((a-bandA+6.28318)/bandWidth,2.0));
+    inBand+=exp(-pow((a-bandA-6.28318)/bandWidth,2.0));
+
+    // Bar extends from center outward by amplitude
+    float barR=0.15+amp*0.7;
+    float bar=smoothstep(barR,barR-0.02,r)*smoothstep(0.12,0.15,r);
+    spectrum+=bar*inBand*amp;
+  }
+
+  // Center waveform ring
+  float waveR=0.12;
+  float wave=0.0;
+  for(int i=0;i<8;i++){
+    float fi=float(i);
+    wave+=sin(a*(3.0+fi*2.0)+time*(2.0+fi*0.7))*0.01*(0.5+0.5*sin(time+fi));
+  }
+  float waveRing=exp(-pow((r-waveR-wave)*40.0,2.0))*0.5;
+
+  // Reactive particles flying outward on beats
+  float beatPulse=pow(max(sin(time*4.0),0.0),8.0);
+  float burstParticles=0.0;
+  for(int i=0;i<12;i++){
+    float fi=float(i);
+    float pa=fi*0.5236+time*0.2;
+    float pr=0.15+beatPulse*0.6+fract(fi*0.31+time*0.5)*0.4;
+    vec2 pp=vec2(cos(pa),sin(pa))*pr;
+    burstParticles+=exp(-length(p-pp)*20.0)*beatPulse*0.4;
+  }
+
+  // Color — vibrant neon with beat-reactive shifts
+  vec3 col=vec3(0);
+  float hue=a/6.28318+0.5+time*0.05;
+  vec3 neon=0.5+0.5*vec3(sin(hue*6.28),sin(hue*6.28+2.09),sin(hue*6.28+4.19));
+  neon=pow(neon,vec3(0.6))*1.5; // Boost saturation
+
+  col+=neon*spectrum*2.0;
+  col+=vec3(0.8,0.9,1.0)*waveRing;
+  col+=neon*burstParticles;
+
+  // Bass pulse background glow
+  col+=neon*0.05*bass*exp(-r*2.0);
+
+  gl_FragColor=vec4(col,1);
+}`;
+
+// 35. SMOKE RING — physics-accurate toroidal vortex expanding outward
+// Rarely done properly. Raymarched torus with internal circulation.
+SHADERS.smoke_ring=`
+uniform float time;
+uniform vec2 resolution;
+${NOISE_LIB}
+
+// SDF torus (viewed from the side)
+float sdTorus(vec3 p,vec2 t){
+  vec2 q=vec2(length(p.xz)-t.x,p.y);
+  return length(q)-t.y;
+}
+
+void main(){
+  vec2 uv=gl_FragCoord.xy/resolution;
+  vec2 p=(uv-0.5)*2.0;
+
+  // Camera looking at ring from slight angle
+  vec3 ro=vec3(0,1.5,-3.5);
+  vec3 target=vec3(0,0.3,0);
+  vec3 fwd=normalize(target-ro);
+  vec3 right=normalize(cross(fwd,vec3(0,1,0)));
+  vec3 up=cross(right,fwd);
+  vec3 rd=normalize(fwd+right*p.x+up*p.y);
+
+  // Ring expands and rises over time
+  float expand=0.3+time*0.06;
+  float rise=time*0.15;
+  vec3 ringCenter=vec3(0,rise,0);
+
+  vec3 col=vec3(0);
+  float transmit=1.0;
+
+  // Raymarch through smoke volume
+  float t0=0.0;
+  for(int i=0;i<70;i++){
+    vec3 pos=ro+rd*t0;
+    vec3 local=pos-ringCenter;
+
+    // Torus SDF
+    float dist=sdTorus(local,vec2(expand,0.15+expand*0.3));
+
+    if(dist<0.3){
+      // Internal circulation: smoke rotates inside the torus tube
+      vec2 tubePos=vec2(length(local.xz)-expand,local.y);
+      float tubeAngle=atan(tubePos.y,tubePos.x);
+      float ringAngle=atan(local.z,local.x);
+
+      // Poloidal rotation (the circulation inside the ring)
+      float circulation=tubeAngle+time*3.0+ringAngle*0.5;
+
+      // Density varies with circulation and noise
+      vec3 noiseP=local*3.0;
+      noiseP.xz*=rot2(time*0.5);
+      float n=snoise(noiseP+vec3(0,time*0.3,0))*0.5+snoise(noiseP*2.5)*0.25;
+
+      float tubeDist=length(tubePos);
+      float tubeR=0.15+expand*0.3;
+      float density=smoothstep(tubeR,tubeR*0.3,tubeDist);
+      density*=(0.5+0.5*n);
+      density*=0.5+0.3*sin(circulation*3.0);
+
+      if(density>0.01){
+        // Wispy smoke color
+        vec3 smokeCol=vec3(0.6,0.55,0.5)*density;
+        // Lit from above
+        float lighting=0.5+0.5*local.y/(tubeR+0.01);
+        smokeCol*=0.5+lighting*0.5;
+
+        col+=smokeCol*transmit*0.06;
+        transmit*=exp(-density*3.0*0.06);
+        if(transmit<0.01)break;
+      }
+    }
+    t0+=max(dist*0.5,0.04);
+    if(t0>8.0)break;
+  }
+
+  // Subtle ambient haze
+  col+=vec3(0.02,0.02,0.03)*transmit;
+
+  gl_FragColor=vec4(col,1);
+}`;
+
+// 36. MAGIC RUNES — floating arcane symbols with energy connections
+// Game-ready effect. Runes in a circle, energy flowing between them.
+SHADERS.magic_runes=`
+uniform float time;
+uniform vec2 resolution;
+${NOISE_LIB}
+
+// Fake "rune" shape from angular segments
+float runeShape(vec2 p,float seed){
+  float d=10.0;
+  // Random line segments within a small box
+  for(int i=0;i<4;i++){
+    float fi=float(i);
+    vec2 a=vec2(hash(seed+fi*3.1)-0.5,hash(seed+fi*7.3+1.0)-0.5)*0.6;
+    vec2 b=vec2(hash(seed+fi*5.7+2.0)-0.5,hash(seed+fi*11.3+3.0)-0.5)*0.6;
+    // Distance to line segment
+    vec2 pa=p-a,ba=b-a;
+    float h=clamp(dot(pa,ba)/dot(ba,ba),0.0,1.0);
+    float ld=length(pa-ba*h);
+    d=min(d,ld);
+  }
+  // Circle around rune
+  float circle=abs(length(p)-0.35);
+  d=min(d,circle);
+  return d;
+}
+
+void main(){
+  vec2 uv=gl_FragCoord.xy/resolution;
+  vec2 p=(uv-0.5)*2.0;
+  float r=length(p);
+  float a=atan(p.y,p.x);
+
+  float runes=0.0;
+  float runeGlow=0.0;
+
+  // 6 runes in a circle
+  float circleR=0.55;
+  for(int i=0;i<6;i++){
+    float fi=float(i);
+    float ra=fi*1.0472+time*0.15;
+    vec2 runePos=vec2(cos(ra),sin(ra))*circleR;
+
+    // Rune oscillates slightly
+    runePos+=0.02*vec2(sin(time+fi*2.0),cos(time*1.3+fi));
+
+    vec2 local=(p-runePos)*6.0; // Scale up for detail
+    // Rotate rune to face outward
+    float rotAngle=-ra;
+    local=vec2(local.x*cos(rotAngle)-local.y*sin(rotAngle),
+               local.x*sin(rotAngle)+local.y*cos(rotAngle));
+
+    float d=runeShape(local,fi*17.0);
+    float rune=smoothstep(0.08,0.0,d);
+    runes+=rune;
+
+    // Per-rune glow
+    runeGlow+=exp(-length(p-runePos)*8.0)*0.2;
+
+    // Activation pulse (each rune pulses in sequence)
+    float pulse=pow(max(sin(time*2.0-fi*1.047),0.0),4.0);
+    runes+=rune*pulse*0.5;
+    runeGlow+=exp(-length(p-runePos)*5.0)*pulse*0.3;
+  }
+
+  // Energy connections between adjacent runes
+  float connections=0.0;
+  for(int i=0;i<6;i++){
+    float fi=float(i);
+    float a1=fi*1.0472+time*0.15;
+    float a2=(fi+1.0)*1.0472+time*0.15;
+    vec2 rp1=vec2(cos(a1),sin(a1))*circleR;
+    vec2 rp2=vec2(cos(a2),sin(a2))*circleR;
+
+    vec2 dir=rp2-rp1;
+    float len=length(dir);
+    vec2 n=vec2(-dir.y,dir.x)/len;
+    float along=dot(p-rp1,dir/len)/len;
+    float across=dot(p-rp1,n);
+    if(along>0.0&&along<1.0){
+      float wave=sin(along*20.0-time*5.0+fi)*0.01;
+      float conn=exp(-(across-wave)*(across-wave)*500.0);
+      conn*=smoothstep(0.0,0.1,along)*smoothstep(1.0,0.9,along);
+      // Energy flows
+      float flow=pow(max(sin(along*10.0-time*4.0),0.0),2.0);
+      connections+=conn*(0.3+0.7*flow);
+    }
+  }
+
+  // Central summoning glyph
+  float centerGlyph=0.0;
+  // Rotating inner ring
+  float innerRing=exp(-pow((r-0.2)*25.0,2.0))*0.4;
+  // Inscribed triangle
+  for(int i=0;i<3;i++){
+    float fi=float(i);
+    float ta1=fi*2.094+time*0.3;
+    float ta2=(fi+1.0)*2.094+time*0.3;
+    vec2 tp1=vec2(cos(ta1),sin(ta1))*0.18;
+    vec2 tp2=vec2(cos(ta2),sin(ta2))*0.18;
+    vec2 td=tp2-tp1;float tl=length(td);vec2 tn=vec2(-td.y,td.x)/tl;
+    float tal=dot(p-tp1,td/tl)/tl;float tac=dot(p-tp1,tn);
+    if(tal>0.0&&tal<1.0)centerGlyph+=exp(-tac*tac*2000.0)*0.5;
+  }
+
+  // Color — arcane blue-gold
+  vec3 col=vec3(0);
+  vec3 runeBlue=vec3(0.3,0.5,1.0);
+  vec3 energyCyan=vec3(0.4,0.9,1.0);
+  vec3 glowGold=vec3(1.0,0.8,0.3);
+
+  col+=runeBlue*runes*1.5;
+  col+=energyCyan*connections;
+  col+=runeBlue*(innerRing+centerGlyph);
+  col+=glowGold*runeGlow;
+
+  // Ambient magical aura
+  col+=vec3(0.05,0.03,0.1)*exp(-r*1.5);
+
+  gl_FragColor=vec4(col,1);
+}`;
+
+// 37. DISSOLVE / DISINTEGRATE — object breaking apart into particles
+// Incredibly useful for games. Shows a sphere disintegrating.
+SHADERS.dissolve=`
+uniform float time;
+uniform vec2 resolution;
+${NOISE_LIB}
+
+void main(){
+  vec2 uv=gl_FragCoord.xy/resolution;
+  vec2 p=(uv-0.5)*2.0;
+  float r=length(p);
+  float a=atan(p.y,p.x);
+
+  // Dissolve threshold sweeps through noise space
+  float dissolveT=fract(time*0.08); // 0→1 cycle
+
+  // 3D noise field that determines dissolve order
+  float dissolveNoise=snoise(vec3(p*3.0,0));
+  dissolveNoise=dissolveNoise*0.5+0.5; // 0-1 range
+
+  // Original shape (circle/sphere)
+  float shape=smoothstep(0.7,0.65,r);
+
+  // Dissolve edge — the frontier where matter is breaking apart
+  float edgeDist=dissolveNoise-dissolveT;
+  float dissolved=smoothstep(0.0,-0.02,edgeDist); // 1 where dissolved
+  float edge=smoothstep(0.05,0.0,abs(edgeDist))*shape; // bright edge
+  float remaining=shape*(1.0-dissolved);
+
+  // Particles breaking away from edge
+  float particles=0.0;
+  for(int i=0;i<20;i++){
+    float fi=float(i);
+    // Particle spawns at dissolve edge then drifts away
+    float spawnNoise=hash(fi*7.3);
+    float spawnT=spawnNoise; // When this particle's region dissolves
+    float particleAge=dissolveT-spawnT;
+    if(particleAge>0.0&&particleAge<0.3){
+      // Spawn position on the edge
+      float spawnAngle=hash(fi*11.1+1.0)*6.28;
+      float spawnR=0.65*sqrt(hash(fi*13.7+2.0)); // Uniform in circle
+      vec2 spawn=vec2(cos(spawnAngle),sin(spawnAngle))*spawnR;
+
+      // Drift outward and up
+      float drift=particleAge*3.0;
+      vec2 driftDir=normalize(spawn+0.001)+vec2(0,0.5);
+      vec2 pp=spawn+driftDir*drift;
+
+      // Size shrinks
+      float size=smoothstep(0.3,0.0,particleAge);
+      float pd=length(p-pp);
+      particles+=exp(-pd*pd/(0.001*size+0.0001))*size;
+    }
+  }
+
+  // Ember glow along dissolve edge
+  float emberGlow=edge*snoise(vec3(p*10.0,time*3.0));
+  emberGlow=max(emberGlow,0.0);
+
+  // Color
+  vec3 col=vec3(0);
+  vec3 objectCol=vec3(0.6,0.65,0.7); // Gray-blue object
+  vec3 edgeHot=vec3(1.0,0.6,0.1); // Hot orange edge
+  vec3 edgeBright=vec3(1.0,0.95,0.8); // White-hot
+  vec3 particleCol=vec3(1.0,0.4,0.05); // Orange particles
+  vec3 emberCol=vec3(0.8,0.2,0.0);
+
+  col+=objectCol*remaining*0.8;
+  col+=edgeBright*edge*1.5;
+  col+=edgeHot*edge*0.5;
+  col+=particleCol*particles;
+  col+=emberCol*emberGlow;
+
+  gl_FragColor=vec4(col,1);
+}`;
+
+// 38. ENERGY SHIELD — sci-fi hexagonal force field being hit
+// The #1 most requested game VFX. Hex grid + impact ripple + energy crackle.
+SHADERS.energy_shield=`
+uniform float time;
+uniform vec2 resolution;
+${NOISE_LIB}
+
+// Hexagonal grid
+vec2 hexID(vec2 p){
+  vec2 a=mod(p,vec2(1.732,1.0))-vec2(0.866,0.5);
+  vec2 b=mod(p+vec2(0.866,0.5),vec2(1.732,1.0))-vec2(0.866,0.5);
+  return dot(a,a)<dot(b,b)?a:b;
+}
+
+void main(){
+  vec2 uv=gl_FragCoord.xy/resolution;
+  vec2 p=(uv-0.5)*2.0;
+  float r=length(p);
+  float a=atan(p.y,p.x);
+
+  // Shield dome (hemisphere front-projected to circle)
+  float shieldR=0.8;
+  float dome=smoothstep(shieldR+0.02,shieldR,r);
+
+  // 3D-projected hex grid on dome surface
+  float scale=8.0;
+  // Warp UVs to simulate sphere curvature
+  float curvature=1.0-r*r/(shieldR*shieldR);
+  vec2 sphereP=p/max(sqrt(max(curvature,0.01)),0.01);
+  vec2 hexP=hexID(sphereP*scale);
+  float hexDist=length(hexP);
+  float hexEdge=smoothstep(0.02,0.0,abs(hexDist-0.45));
+  hexEdge*=dome;
+
+  // Impact point (moves around)
+  float impactPhase=mod(time*0.3,1.0);
+  vec2 impactPos=vec2(0.3*sin(floor(time*0.3)*7.1),0.3*cos(floor(time*0.3)*11.3));
+
+  // Impact ripple expanding from hit point
+  float impactDist=length(p-impactPos);
+  float rippleR=impactPhase*1.5;
+  float ripple=exp(-pow((impactDist-rippleR)*10.0,2.0));
+  ripple*=smoothstep(1.0,0.0,impactPhase); // Fade over time
+
+  // Hex cells light up near impact
+  float hexLit=exp(-impactDist*3.0)*dome;
+  hexLit+=ripple*dome;
+
+  // Energy crackle from impact (branching lightning)
+  float crackle=0.0;
+  for(int i=0;i<5;i++){
+    float fi=float(i);
+    float ca=fi*1.257+hash(floor(time*0.3)+fi)*3.14;
+    vec2 cd=vec2(cos(ca),sin(ca));
+    float along=dot(p-impactPos,cd);
+    float across=abs(dot(p-impactPos,vec2(-cd.y,cd.x)));
+    float n=snoise(vec3(along*10.0+fi,time*5.0+fi*3.0,fi));
+    across+=n*0.03;
+    float crack=exp(-across*across*500.0)*smoothstep(0.0,0.05,along)*smoothstep(0.5,0.2,along);
+    crackle+=crack*smoothstep(0.8,0.0,impactPhase)*0.5;
+  }
+
+  // Fresnel rim (edges of dome brighter)
+  float fresnel=pow(smoothstep(shieldR-0.3,shieldR,r),2.0)*dome;
+
+  // Scanline effect
+  float scan=0.5+0.5*sin(sphereP.y*scale*3.14159*2.0);
+
+  // Color — sci-fi cyan-blue
+  vec3 col=vec3(0);
+  vec3 shieldCyan=vec3(0.2,0.7,1.0);
+  vec3 shieldWhite=vec3(0.8,0.95,1.0);
+  vec3 impactOrange=vec3(1.0,0.5,0.15);
+  vec3 crackleWhite=vec3(0.9,0.95,1.0);
+
+  // Base hex grid (subtle)
+  col+=shieldCyan*hexEdge*0.3*(0.5+0.5*scan);
+  // Lit hexes near impact
+  col+=shieldCyan*hexLit*0.5;
+  // Impact flash
+  col+=impactOrange*ripple*1.5;
+  // Crackle
+  col+=crackleWhite*crackle;
+  // Fresnel rim
+  col+=shieldCyan*fresnel*0.4;
+  // Overall dome tint
+  col+=shieldCyan*dome*0.03;
+
+  gl_FragColor=vec4(col,1);
+}`;
+
 // ==================== CATALOG ====================
 
 const CUSTOM_CATALOG=[
@@ -1272,7 +2832,26 @@ const CUSTOM_CATALOG=[
 {name:"God Rays",cat:"energy",shader:"god_rays",tStart:0,tEnd:20,fps:6,mask:true},
 {name:"Reality Glitch",cat:"abstract",shader:"reality_glitch",tStart:0,tEnd:10,fps:10,mask:false},
 {name:"Crystal Geode",cat:"abstract",shader:"crystal_geode",tStart:0,tEnd:20,fps:5,mask:false},
-{name:"Phoenix Rebirth",cat:"fire",shader:"phoenix",tStart:0,tEnd:15,fps:8,mask:false}
+{name:"Phoenix Rebirth",cat:"fire",shader:"phoenix",tStart:0,tEnd:15,fps:8,mask:false},
+{name:"Supernova",cat:"cosmic",shader:"supernova",tStart:0.5,tEnd:12,fps:8,mask:true},
+{name:"Dimensional Portal",cat:"magic",shader:"portal",tStart:0,tEnd:20,fps:8,mask:false},
+{name:"Deep Ocean",cat:"nature",shader:"deep_ocean",tStart:0,tEnd:25,fps:6,mask:false},
+{name:"Galaxy Spiral",cat:"cosmic",shader:"galaxy",tStart:0,tEnd:60,fps:4,mask:false},
+{name:"Mandelbrot Zoom",cat:"abstract",shader:"mandelbrot_zoom",tStart:0,tEnd:30,fps:5,mask:false},
+{name:"Chain Lightning",cat:"energy",shader:"chain_lightning",tStart:0,tEnd:8,fps:12,mask:false},
+{name:"Solar Flare",cat:"fire",shader:"solar_flare",tStart:0,tEnd:20,fps:7,mask:false},
+{name:"Whirlpool",cat:"nature",shader:"whirlpool",tStart:0,tEnd:20,fps:7,mask:false},
+{name:"DNA Helix",cat:"abstract",shader:"dna_helix",tStart:0,tEnd:15,fps:8,mask:false},
+{name:"Lava Flow",cat:"fire",shader:"lava_flow",tStart:0,tEnd:30,fps:5,mask:false},
+{name:"Time Vortex",cat:"abstract",shader:"time_vortex",tStart:0,tEnd:20,fps:8,mask:false},
+{name:"Fluid Ink",cat:"abstract",shader:"fluid_ink",tStart:0,tEnd:25,fps:6,mask:false},
+{name:"Quantum Entangle",cat:"energy",shader:"quantum_entangle",tStart:0,tEnd:20,fps:8,mask:false},
+{name:"Gravity Well",cat:"cosmic",shader:"gravity_well",tStart:0,tEnd:30,fps:6,mask:false},
+{name:"Sound Visualizer",cat:"abstract",shader:"sound_wave",tStart:0,tEnd:15,fps:10,mask:false},
+{name:"Smoke Ring",cat:"nature",shader:"smoke_ring",tStart:0,tEnd:20,fps:6,mask:false},
+{name:"Magic Runes",cat:"magic",shader:"magic_runes",tStart:0,tEnd:20,fps:8,mask:false},
+{name:"Dissolve",cat:"energy",shader:"dissolve",tStart:0.5,tEnd:12,fps:8,mask:false},
+{name:"Energy Shield",cat:"magic",shader:"energy_shield",tStart:0,tEnd:12,fps:10,mask:false}
 ];
 
 // ==================== RENDERING ====================
