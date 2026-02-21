@@ -91,13 +91,24 @@ const pixelBuf=new Uint8Array(RES*RES*4);
 const pbar=document.getElementById("pbar");
 function prog(p){pbar.style.width=p+"%";}
 
-// ── 2D texture renderer ──
-const texR=new THREE.WebGLRenderer({alpha:true,antialias:false});
-texR.setSize(RES,RES);texR.autoClear=true;
+// ── SINGLE renderer for everything (textures + 3D share one WebGL context) ──
+const W=1200,H=600;
+const r3=new THREE.WebGLRenderer({antialias:true,powerPreference:"high-performance"});
+r3.setSize(W,H);r3.setPixelRatio(Math.min(window.devicePixelRatio,2));
+r3.toneMapping=THREE.ACESFilmicToneMapping;r3.toneMappingExposure=1.4;
+r3.shadowMap.enabled=true;r3.shadowMap.type=THREE.PCFSoftShadowMap;
+r3.autoClear=true;
+r3.domElement.style.cssText="cursor:grab;display:block;width:100%;height:auto";
+
+// Fullscreen quad scene for texture generation passes
 const texScene=new THREE.Scene();const texCam=new THREE.Camera();
 texScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),new THREE.MeshBasicMaterial()));
 
-function makeRT(){return new THREE.WebGLRenderTarget(RES,RES,{minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter})}
+function makeRT(){
+const rt=new THREE.WebGLRenderTarget(RES,RES,{minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter});
+rt.texture.wrapS=rt.texture.wrapT=THREE.RepeatWrapping;
+return rt;
+}
 
 const grungeTex=await new Promise(ok=>{
 new THREE.TextureLoader().load("images/grunge.png",t=>{
@@ -201,25 +212,25 @@ PIXY.FxgenShaderUtils.SetShaderParameter(u,"cColorBalanceMidtones",new THREE.Vec
 PIXY.FxgenShaderUtils.SetShaderParameter(u,"cColorBalanceHighlights",new THREE.Vector3(ec.cColorBalanceHighlightsR,ec.cColorBalanceHighlightsG,ec.cColorBalanceHighlightsB));
 PIXY.FxgenShaderUtils.SetShaderParameter(u,"cDirection",new THREE.Vector2(ec.cDirectionX,ec.cDirectionY));
 PIXY.FxgenShaderUtils.SetShaderParameter(u,"tGrunge",grungeTex);
-texScene.overrideMaterial=mat;texR.setRenderTarget(target);
-texR.render(texScene,texCam);texR.setRenderTarget(null);texScene.overrideMaterial=null;mat.dispose();
+texScene.overrideMaterial=mat;r3.setRenderTarget(target);
+r3.render(texScene,texCam);r3.setRenderTarget(null);texScene.overrideMaterial=null;mat.dispose();
 }
 function doGrad(inRT,name,outRT){
 gradMat.uniforms.tDiffuse.value=inRT.texture;gradMat.uniforms.tGradient.value=gTex[name];
 gradMat.uniformsNeedUpdate=true;
-texR.setRenderTarget(outRT);texR.clear();texR.render(gradScene,gradCam);texR.setRenderTarget(null);
+r3.setRenderTarget(outRT);r3.clear();r3.render(gradScene,gradCam);r3.setRenderTarget(null);
 }
 function doBlend(baseRT,blendRT,mode,outRT){
 blendMat.uniforms.tBase.value=baseRT.texture;blendMat.uniforms.tBlend.value=blendRT.texture;
 blendMat.uniforms.blendMode.value=mode;blendMat.uniforms.opacity.value=1;blendMat.uniformsNeedUpdate=true;
-texR.setRenderTarget(outRT);texR.clear();texR.render(blendScene,blendCam);texR.setRenderTarget(null);
+r3.setRenderTarget(outRT);r3.clear();r3.render(blendScene,blendCam);r3.setRenderTarget(null);
 }
 function doPBR(inRT,mat,outRT){
 mat.uniforms.tDiffuse.value=inRT.texture;mat.uniformsNeedUpdate=true;ppQuad.material=mat;
-texR.setRenderTarget(outRT);texR.clear();texR.render(ppScene,ppCam);texR.setRenderTarget(null);
+r3.setRenderTarget(outRT);r3.clear();r3.render(ppScene,ppCam);r3.setRenderTarget(null);
 }
 function rtToCanvas(srcRT,canvas){
-texR.readRenderTargetPixels(srcRT,0,0,RES,RES,pixelBuf);
+r3.readRenderTargetPixels(srcRT,0,0,RES,RES,pixelBuf);
 const ctx=canvas.getContext("2d",{willReadFrequently:true});
 const img=ctx.createImageData(RES,RES);
 for(let y=0;y<RES;y++){const s=(RES-1-y)*RES*4,d=y*RES*4;
@@ -317,14 +328,8 @@ prog(10+i*20);
 }
 
 // ══════════════════════════════════════════════════════════════════
-// BUILD 3D SCENE
+// BUILD 3D SCENE (renderer already created at top — same WebGL context)
 // ══════════════════════════════════════════════════════════════════
-const W=1200,H=600;
-const r3=new THREE.WebGLRenderer({antialias:true,powerPreference:"high-performance"});
-r3.setSize(W,H);r3.setPixelRatio(Math.min(window.devicePixelRatio,2));
-r3.toneMapping=THREE.ACESFilmicToneMapping;r3.toneMappingExposure=1.4;
-r3.shadowMap.enabled=true;r3.shadowMap.type=THREE.PCFSoftShadowMap;
-r3.domElement.style.cssText="cursor:grab;display:block;width:100%;height:auto";
 document.getElementById("viewport").appendChild(r3.domElement);
 
 const scene=new THREE.Scene();
