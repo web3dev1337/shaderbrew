@@ -37,10 +37,10 @@ background:#111;color:#aaa;cursor:pointer;transition:all .2s}
 .frame-group{margin-bottom:30px}
 .frame-group h3{font-family:monospace;font-size:12px;color:#e94560;margin-bottom:8px}
 .frame-group .sub{font-family:monospace;font-size:10px;color:#555;margin-bottom:10px}
-.frame-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:6px}
+.frame-grid{display:grid;grid-template-columns:repeat(9,1fr);gap:6px}
 .frame-grid canvas{width:100%;aspect-ratio:1;border-radius:4px;border:1px solid #1a1a2e;background:#000;display:block}
 .frame-grid .frame-num{text-align:center;font-family:monospace;font-size:9px;color:#444;margin-top:2px}
-@media(max-width:900px){.frame-grid{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:900px){.frame-grid{grid-template-columns:repeat(6,1fr)}}
 .links{text-align:center;padding:20px;font-family:monospace;font-size:12px}
 .links a{color:#e94560;text-decoration:none;margin:0 10px}
 </style>
@@ -48,7 +48,7 @@ background:#111;color:#aaa;cursor:pointer;transition:all .2s}
 <body>
 <div class="header">
 <h1>ANIMATED PARTICLE FORGE</h1>
-<p>Each particle plays an animated sprite sheet generated from procedural shaders — 16 frames per effect |
+<p>Each particle plays an animated sprite sheet generated from procedural shaders — 36 frames per effect |
 <a href="editor.html">Editor</a> | <a href="demos.html">Materials</a> | <a href="gallery.html">Gallery</a></p>
 </div>
 <div id="loading">Generating sprite sheets (64 frames)...<div class="bar"><div class="bar-fill" id="pbar"></div></div></div>
@@ -57,7 +57,7 @@ background:#111;color:#aaa;cursor:pointer;transition:all .2s}
 <div class="toggle-bar" id="toggles"></div>
 <div class="info-bar">
 <kbd>Drag</kbd> orbit &nbsp; <kbd>Scroll</kbd> zoom &nbsp; | &nbsp;
-4 animated sprite sheet particle systems &middot; 16 frames each &middot; smooth interpolation
+4 animated sprite sheet particle systems &middot; 36 frames each &middot; smooth interpolation
 </div>
 <div class="sheet-strip" id="sheet-strip"></div>
 <div class="frame-section" id="frame-section">
@@ -83,8 +83,8 @@ import{RenderPass}from"three/addons/postprocessing/RenderPass.js";
 import{UnrealBloomPass}from"three/addons/postprocessing/UnrealBloomPass.js";
 import{OutputPass}from"three/addons/postprocessing/OutputPass.js";
 
-const SRES=256,GRID=4,FRAMES=GRID*GRID; // 4x4 = 16 frames per sheet
-const SHEET=SRES*GRID; // 1024px atlas
+const SRES=192,GRID=6,FRAMES=GRID*GRID; // 6x6 = 36 frames per sheet — double the frames for smoother animation
+const SHEET=SRES*GRID; // 1152px atlas
 const pbar=document.getElementById("pbar");
 function prog(p){pbar.style.width=p+"%";}
 const clock=new THREE.Clock();
@@ -169,7 +169,7 @@ tex.wrapS=tex.wrapT=THREE.ClampToEdgeWrapping;tex.needsUpdate=true;return tex;
 }
 
 // ══════════════════════════════════════════════════════════════════
-// GENERATE SPRITE SHEETS (effect → gradient → mask, 16 frames each)
+// GENERATE SPRITE SHEETS (effect → gradient → mask, 36 frames each)
 // ══════════════════════════════════════════════════════════════════
 prog(5);
 
@@ -212,7 +212,7 @@ const gradEmber=makeGrad([{p:0,c:"#0a0400"},{p:.25,c:"#663300"},{p:.5,c:"#cc6600
 const sheets=[
 {name:"Fire Burst",effect:"Explosion",
 params:{cExplosionRadius:2,cExplosionBallness:4,cExplosionGrowth:3,cExplosionDensity:1.5,cExplosionContrast:1.2,cExplosionGrain:1.5},
-grad:gradFire,tStart:.3,tEnd:1.8},
+grad:gradFire,tStart:.3,tEnd:3.5},
 {name:"Magic Aura",effect:"Corona",
 params:{},
 grad:gradMagic,tStart:2,tEnd:9},
@@ -504,7 +504,7 @@ card.appendChild(cv);
 const lbl=document.createElement("div");lbl.className="label";lbl.textContent=sheets[i].name;
 card.appendChild(lbl);
 const sub=document.createElement("div");sub.className="sub";
-sub.textContent=sheets[i].effect+" → Gradient → 4×4 Sheet (16 frames)";
+sub.textContent=sheets[i].effect+" → Gradient → 6×6 Sheet (36 frames)";
 card.appendChild(sub);
 strip.appendChild(card);
 }
