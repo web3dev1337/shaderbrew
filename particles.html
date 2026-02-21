@@ -583,9 +583,12 @@ previewQuads.forEach(q=>q.visible=show);
 if(show){systems.forEach(s=>{s.obj.points.visible=false;});
 document.querySelectorAll(".toggle-btn").forEach(b=>{if(b!==prevBtn)b.classList.remove("active");});
 crystal.visible=false;ped.visible=false;
+ctrl.autoRotate=false;
+cam.position.set(0,2,8);ctrl.target.set(0,2,0);
 }else{systems.forEach(s=>{s.obj.points.visible=true;});
 document.querySelectorAll(".toggle-btn").forEach(b=>b.classList.add("active"));
 crystal.visible=true;ped.visible=true;
+ctrl.autoRotate=true;
 }
 };
 togBar.appendChild(prevBtn);
