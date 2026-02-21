@@ -126,9 +126,10 @@ const maskMat=new THREE.ShaderMaterial({
 uniforms:{tDiffuse:{value:null}},vertexShader:ppV,
 fragmentShader:`uniform sampler2D tDiffuse;varying vec2 vUv;
 void main(){vec4 c=texture2D(tDiffuse,vUv);float d=length(vUv-.5)*2.;
-float circle=1.-smoothstep(.3,1.,d);
+float mask=1.-smoothstep(.3,1.,d);
 float lum=dot(c.rgb,vec3(.299,.587,.114));
-float alpha=circle*smoothstep(.02,.15,lum);
+float kill=smoothstep(.0,.04,lum);
+float alpha=mask*kill;
 gl_FragColor=vec4(c.rgb*alpha,alpha);}`,
 depthTest:false,depthWrite:false});
 maskScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),maskMat));
