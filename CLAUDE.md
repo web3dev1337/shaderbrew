@@ -9,13 +9,32 @@
 WebGL shader-based procedural texture generator. Originally by mebiusbox (MIT). We're transforming it into a professional multi-layer texture creation tool.
 
 ## Key Files
-- `index.html` - Main editor UI (loads fxgen.module.min.js)
-- `fxgen.module.min.js` - App logic (minified, we added preset loader at lines 29-73)
+- `editor.html` - NEW main editor (loads from src/)
+- `index.html` - Original editor (loads fxgen.module.min.js, kept for compat)
+- `fxgen.module.min.js` - Original minified app (kept for backwards compat)
 - `pixy.module.min.js` - 439KB shader library (DO NOT MODIFY - use ShaderChunk injection instead)
 - `gallery.html` - Live animated gallery of all 70+ effects
 - `presets/*.json` - 13 custom presets (5 basic + 8 advanced)
 - `images/grunge.png` - Texture used by shaders
 - `PLAN.md` - Full implementation plan with sub-agent research findings
+
+## src/ Module Structure (Phase 0-2 COMPLETE)
+- `src/app.js` - Main app coordinator (init, animate, render, event handlers)
+- `src/pixy-api.js` - Clean facade around pixy.module.min.js exports
+- `src/defaults.js` - Effect types, parameters, configs, overrides
+- `src/render-pipeline.js` - 6-pass render pipeline (Base→Polar→CB→Tiling→Normal→Copy)
+- `src/layer-manager.js` - Multi-layer CRUD, reorder, duplicate, serialize
+- `src/compositor.js` - Ping-pong RT compositor with blend modes
+- `src/gradient-editor.js` - Interactive multi-stop gradient editor + presets
+- `src/gradient-pass.js` - Post-process pass applying gradient color ramp
+- `src/sprite-sheet.js` - Sprite sheet capture/export
+- `src/alpha-export.js` - Alpha inference and PNG export
+- `src/noise-sphere.js` - 3D displacement preview
+- `src/preset-loader.js` - Preset bar UI + URL loading
+- `src/ui/gui-setup.js` - lil-gui parameter panels
+- `src/ui/layer-panel.js` - Drag-to-reorder layer panel UI
+- `src/shaders/blend.js` - 9 blend modes as GLSL
+- `src/shaders/gradient-map.js` - Luminance-to-gradient GLSL
 
 ## Architecture (Reverse-Engineered)
 
@@ -55,10 +74,10 @@ WebGL shader-based procedural texture generator. Originally by mebiusbox (MIT). 
 ### V1 Basic (simple slider tweaks):
 - `inferno-vortex`, `alien-nebula`, `plasma-storm`, `ocean-caustics`, `dark-matter`
 
-## Implementation Plan Summary (see PLAN.md for full details)
-- **Phase 0**: Deobfuscate fxgen.module.min.js → src/fxgen.js + create pixy-api.js facade
-- **Phase 1**: Multi-layer compositing (LayerManager, blend modes, Compositor)
-- **Phase 2**: Custom color ramp/gradient editor (biggest quality leap)
+## Implementation Status
+- **Phase 0**: DONE - Deobfuscated into src/ modules
+- **Phase 1**: DONE - Multi-layer compositing (LayerManager, 9 blend modes, Compositor)
+- **Phase 2**: DONE - Gradient map color ramp (editor + 5 presets + GLSL shader)
 - **Phase 3**: Enhanced UI layout (split-pane)
 - **Phase 4**: PBR map generation (Normal, Roughness, AO, Metallic, ORM)
 - **Phase 5**: 3D preview with PBR materials
