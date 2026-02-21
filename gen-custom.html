@@ -428,6 +428,208 @@ void main(){
   gl_FragColor=vec4(col,1);
 }`;
 
+// 6b. WARP TUNNEL - INFERNO (red/orange, tighter spiral)
+SHADERS.warp_inferno=`
+uniform float time;
+uniform vec2 resolution;
+${NOISE_LIB}
+
+void main(){
+  vec2 uv=gl_FragCoord.xy/resolution;
+  vec2 p=(uv-0.5)*2.0;
+  float r=length(p);
+  float a=atan(p.y,p.x);
+
+  float tunnel=1.0/(r+0.001);
+  float twist=a+time*0.8+tunnel*0.6;
+
+  float stars=0.0;
+  for(int i=0;i<5;i++){
+    float fi=float(i);
+    float scale=3.0+fi*4.0;
+    vec2 sp=vec2(twist*scale,tunnel*scale-time*(4.0+fi*1.5));
+    vec2 id=floor(sp);
+    vec2 f=fract(sp)-0.5;
+    float h=hash21(id+fi*91.0);
+    if(h>0.82){
+      float streak=exp(-f.x*f.x*20.0-f.y*f.y*1.5);
+      stars+=streak*(h-0.82)*8.0;
+    }
+  }
+
+  // Fire walls
+  float walls=0.0;
+  for(int i=0;i<4;i++){
+    float fi=float(i);
+    float z=tunnel*1.5-time*(3.0+fi*0.7)+fi*2.0;
+    float n=snoise(vec3(cos(a)*3.0,sin(a)*3.0,z));
+    float ring=exp(-pow(fract(z*0.4)*2.0-1.0,2.0)*2.5);
+    walls+=max(n,0.0)*ring*0.4/(r+0.2);
+  }
+
+  float core=exp(-r*r*10.0)*0.5;
+  vec3 col;
+  col.r=stars*1.5+walls*1.2+core*1.0;
+  col.g=stars*0.6+walls*0.4+core*0.4;
+  col.b=stars*0.2+walls*0.1+core*0.1;
+
+  gl_FragColor=vec4(col,1);
+}`;
+
+// 6c. WARP TUNNEL - VOID (purple/dark, slow, ominous)
+SHADERS.warp_void=`
+uniform float time;
+uniform vec2 resolution;
+${NOISE_LIB}
+
+void main(){
+  vec2 uv=gl_FragCoord.xy/resolution;
+  vec2 p=(uv-0.5)*2.0;
+  float r=length(p);
+  float a=atan(p.y,p.x);
+
+  float tunnel=1.0/(r+0.001);
+  float twist=a+time*0.2+tunnel*0.15;
+
+  // Sparse dim stars
+  float stars=0.0;
+  for(int i=0;i<3;i++){
+    float fi=float(i);
+    float scale=1.5+fi*2.0;
+    vec2 sp=vec2(twist*scale,tunnel*scale-time*(1.0+fi*0.3));
+    vec2 id=floor(sp);
+    vec2 f=fract(sp)-0.5;
+    float h=hash21(id+fi*53.0);
+    if(h>0.9){
+      float streak=exp(-f.x*f.x*40.0-f.y*f.y*3.0);
+      stars+=streak*(h-0.9)*6.0;
+    }
+  }
+
+  // Dark matter tendrils
+  float tendrils=0.0;
+  for(int i=0;i<5;i++){
+    float fi=float(i);
+    float z=tunnel*1.0-time*(0.5+fi*0.2)+fi*4.0;
+    float n=snoise(vec3(cos(a+fi)*2.0,sin(a+fi)*2.0,z));
+    tendrils+=max(n,0.0)*0.2/(r+0.4);
+  }
+
+  // Void glow (dark purple center)
+  float core=exp(-r*r*5.0)*0.3;
+  float voidRing=exp(-pow((r-0.15)*10.0,2.0))*0.4;
+
+  vec3 col;
+  col.r=stars*0.5+tendrils*0.4+core*0.3+voidRing*0.2;
+  col.g=stars*0.2+tendrils*0.1+core*0.1+voidRing*0.05;
+  col.b=stars*0.8+tendrils*0.8+core*0.6+voidRing*0.5;
+
+  gl_FragColor=vec4(col,1);
+}`;
+
+// 6d. WARP TUNNEL - ELECTRIC (cyan/white, very fast, dense streaks)
+SHADERS.warp_electric=`
+uniform float time;
+uniform vec2 resolution;
+${NOISE_LIB}
+
+void main(){
+  vec2 uv=gl_FragCoord.xy/resolution;
+  vec2 p=(uv-0.5)*2.0;
+  float r=length(p);
+  float a=atan(p.y,p.x);
+
+  float tunnel=1.0/(r+0.001);
+  float twist=a+time*1.0+tunnel*0.4;
+
+  // Dense fast streaks
+  float stars=0.0;
+  for(int i=0;i<6;i++){
+    float fi=float(i);
+    float scale=2.0+fi*2.5;
+    vec2 sp=vec2(twist*scale,tunnel*scale-time*(6.0+fi*2.0));
+    vec2 id=floor(sp);
+    vec2 f=fract(sp)-0.5;
+    float h=hash21(id+fi*37.0);
+    if(h>0.78){
+      float streak=exp(-f.x*f.x*50.0-f.y*f.y*1.0);
+      stars+=streak*(h-0.78)*6.0;
+    }
+  }
+
+  // Electric arcs along tunnel walls
+  float arcs=0.0;
+  for(int i=0;i<3;i++){
+    float fi=float(i);
+    float z=tunnel*2.0-time*(5.0+fi)+fi*2.5;
+    float n=snoise(vec3(cos(a)*4.0+fi,sin(a)*4.0,z*2.0));
+    float arc=exp(-pow(abs(n)-0.3,2.0)*80.0);
+    arcs+=arc*0.3/(r+0.3);
+  }
+
+  float core=exp(-r*r*12.0)*0.6;
+
+  vec3 col;
+  col.r=stars*0.3+arcs*0.2+core*0.4;
+  col.g=stars*0.9+arcs*0.9+core*0.9;
+  col.b=stars*1.2+arcs*1.0+core*1.0;
+
+  gl_FragColor=vec4(col,1);
+}`;
+
+// 6e. WARP TUNNEL - RAINBOW (full spectrum, psychedelic)
+SHADERS.warp_rainbow=`
+uniform float time;
+uniform vec2 resolution;
+${NOISE_LIB}
+
+void main(){
+  vec2 uv=gl_FragCoord.xy/resolution;
+  vec2 p=(uv-0.5)*2.0;
+  float r=length(p);
+  float a=atan(p.y,p.x);
+
+  float tunnel=1.0/(r+0.001);
+  float twist=a+time*0.6+tunnel*0.5;
+
+  float stars=0.0;
+  for(int i=0;i<5;i++){
+    float fi=float(i);
+    float scale=2.5+fi*3.0;
+    vec2 sp=vec2(twist*scale,tunnel*scale-time*(3.5+fi));
+    vec2 id=floor(sp);
+    vec2 f=fract(sp)-0.5;
+    float h=hash21(id+fi*61.0);
+    if(h>0.83){
+      float streak=exp(-f.x*f.x*35.0-f.y*f.y*1.5);
+      stars+=streak*(h-0.83)*8.0;
+    }
+  }
+
+  float walls=0.0;
+  for(int i=0;i<3;i++){
+    float fi=float(i);
+    float z=tunnel*2.0-time*(2.5+fi*0.5)+fi*3.0;
+    float n=snoise(vec3(cos(a)*2.5,sin(a)*2.5,z));
+    float ring=exp(-pow(fract(z*0.5)*2.0-1.0,2.0)*3.0);
+    walls+=max(n,0.0)*ring*0.3/(r+0.3);
+  }
+
+  float core=exp(-r*r*8.0)*0.5;
+  float intensity=stars+walls+core;
+
+  // Rainbow based on angle + depth
+  float hue=a/6.28318+tunnel*0.1+time*0.2;
+  vec3 col=0.5+0.5*vec3(
+    cos(hue*6.28318),
+    cos((hue+0.333)*6.28318),
+    cos((hue+0.666)*6.28318)
+  );
+  col*=intensity;
+
+  gl_FragColor=vec4(col,1);
+}`;
+
 // 7. TORNADO VORTEX
 SHADERS.tornado=`
 uniform float time;
@@ -761,8 +963,8 @@ void main(){
   float r=length(p);
   float a=atan(p.y,p.x);
 
-  // Central light source
-  float source=exp(-r*r*4.0)*2.0;
+  // Central light source (soft, not blinding)
+  float source=exp(-r*r*6.0)*0.8;
 
   // Volumetric rays
   float rays=0.0;
@@ -804,12 +1006,11 @@ void main(){
   // Halo ring
   float halo=exp(-pow((r-0.3)*8.0,2.0))*0.3;
 
-  // Golden-white color
-  float v=source+rays*0.5+dust*0.3+halo;
+  // Golden-white color (balanced, not blown out)
   vec3 col=vec3(1.0,0.95,0.8)*source;
-  col+=vec3(1.0,0.9,0.7)*rays*0.5;
-  col+=vec3(1.0,0.95,0.85)*dust*0.3;
-  col+=vec3(1.0,0.85,0.6)*halo;
+  col+=vec3(1.0,0.9,0.7)*rays*0.4;
+  col+=vec3(1.0,0.95,0.85)*dust*0.2;
+  col+=vec3(1.0,0.85,0.6)*halo*0.7;
 
   gl_FragColor=vec4(col,1);
 }`;
@@ -1018,12 +1219,12 @@ void main(){
   vec3 fireMid=vec3(1.0,0.5,0.1);
   vec3 fireCool=vec3(0.8,0.1,0.05);
 
-  float intensity=body+wings*0.7+flames+embers*0.5;
-  vec3 fireCol=mix(fireCool,mix(fireMid,fireHot,clamp(intensity,0.,1.)),clamp(intensity*0.7,0.,1.));
-  col=fireCol*intensity;
+  float intensity=body*0.6+wings*0.5+flames*0.7+embers*0.3;
+  vec3 fireCol=mix(fireCool,mix(fireMid,fireHot,clamp(intensity,0.,1.)),clamp(intensity*0.5,0.,1.));
+  col=fireCol*intensity*0.7;
 
-  // Golden glow
-  col+=vec3(1.0,0.8,0.3)*exp(-r*2.0)*0.3;
+  // Golden glow (subtle)
+  col+=vec3(1.0,0.8,0.3)*exp(-r*3.0)*0.12;
 
   gl_FragColor=vec4(col,1);
 }`;
@@ -1037,6 +1238,10 @@ const CUSTOM_CATALOG=[
 {name:"Plasma Containment",cat:"energy",shader:"plasma_sphere",tStart:0,tEnd:20,fps:7,mask:false},
 {name:"Julia Fractal Morph",cat:"abstract",shader:"fractal_julia",tStart:0,tEnd:40,fps:5,mask:false},
 {name:"Warp Tunnel",cat:"cosmic",shader:"warp_tunnel",tStart:0,tEnd:15,fps:10,mask:false},
+{name:"Warp Inferno",cat:"cosmic",shader:"warp_inferno",tStart:0,tEnd:12,fps:10,mask:false},
+{name:"Warp Void",cat:"cosmic",shader:"warp_void",tStart:0,tEnd:30,fps:6,mask:false},
+{name:"Warp Electric",cat:"cosmic",shader:"warp_electric",tStart:0,tEnd:10,fps:12,mask:false},
+{name:"Warp Rainbow",cat:"cosmic",shader:"warp_rainbow",tStart:0,tEnd:15,fps:9,mask:false},
 {name:"Tornado Vortex",cat:"nature",shader:"tornado",tStart:0,tEnd:20,fps:7,mask:false},
 {name:"Bioluminescent",cat:"nature",shader:"bioluminescent",tStart:0,tEnd:20,fps:6,mask:false},
 {name:"Singularity",cat:"cosmic",shader:"singularity",tStart:0.5,tEnd:8,fps:7,mask:true},
