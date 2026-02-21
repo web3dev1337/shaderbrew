@@ -19,6 +19,8 @@ import { Compositor } from "./compositor.js";
 import { LayerPanel } from "./ui/layer-panel.js";
 import { GradientEditor } from "./gradient-editor.js";
 import { GradientPass } from "./gradient-pass.js";
+import { TilePreviewPass } from "./tile-preview-pass.js";
+import { Toolbar } from "./ui/toolbar.js";
 
 if (!WebGL.isWebGL2Available()) {
 	document.body.appendChild(WebGL.getWebGLErrorMessage());
@@ -37,11 +39,13 @@ class App {
 		this._initPipeline();
 		this._initLayers();
 		this._initGradient();
+		this._initTilePreview();
 		this._initNoiseSphere();
 		this._initSpriteSheet();
 		this._initAlphaExport();
 		this._initGui();
 		this._initLayerPanel();
+		this._initToolbar();
 		this._initPresets();
 		console.log("[fxgen] initialized");
 	}
@@ -101,6 +105,15 @@ class App {
 		this.gradientEditor.buildUI();
 		this.gradientEditor.onChange = () => this.render();
 		this.gradientPass = new GradientPass(this.renderer, this.canvas.width, this.canvas.height);
+	}
+
+	_initTilePreview() {
+		this.tilePreviewPass = new TilePreviewPass(this.renderer, this.canvas.width, this.canvas.height);
+	}
+
+	_initToolbar() {
+		this.toolbar = new Toolbar(this);
+		this.toolbar.build();
 	}
 
 	_initLayerPanel() {
@@ -340,6 +353,14 @@ class App {
 				this.noiseSphere.render(this.renderer, this.camera, secondToLastRT.texture);
 			}
 		}
+
+		// 2x2 tiling preview (final pass, renders to screen)
+		if (this.tilePreviewPass.enabled) {
+			const lastRT = this.pipeline.layers[this.pipeline.layers.length - 2]?.renderTarget;
+			if (lastRT) {
+				this.tilePreviewPass.apply(lastRT.texture, null);
+			}
+		}
 	}
 
 	_onResize() {
@@ -349,6 +370,7 @@ class App {
 		this.compositor.resize(this.canvas.width, this.canvas.height);
 		this.gradientPass.resize(this.canvas.width, this.canvas.height);
 		this.spriteSheet.resize(this.canvas.width, this.canvas.height);
+		if (this.toolbar) this.toolbar.updateResolution(this.canvas.width, this.canvas.height);
 		this.render();
 	}
 }
