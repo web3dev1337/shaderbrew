@@ -2,63 +2,68 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Procedural Textures in Practice — Three.js Demos</title>
+<title>Procedural Material Forge — Live 3D</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#050508;color:#ccc;font-family:'Segoe UI',system-ui,sans-serif}
-.header{text-align:center;padding:30px 20px 20px}
-.header h1{font-size:28px;color:#e0e0ff;letter-spacing:2px;font-family:monospace;margin-bottom:4px}
+body{background:#030306;color:#ccc;font-family:'Segoe UI',system-ui,sans-serif;overflow-x:hidden}
+.header{text-align:center;padding:30px 20px 15px}
+.header h1{font-size:32px;color:#e0e0ff;letter-spacing:3px;font-family:monospace;margin-bottom:4px;
+background:linear-gradient(90deg,#e94560,#aa44ff,#44aaff,#e94560);background-size:300% 100%;
+-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:shine 4s linear infinite}
+@keyframes shine{0%{background-position:0% 50%}100%{background-position:300% 50%}}
 .header p{color:#555;font-size:13px}
 .header a{color:#e94560;text-decoration:none}
 #loading{text-align:center;padding:40px;color:#555;font-family:monospace}
 .bar{width:300px;height:3px;background:#111;margin:10px auto 0;border-radius:3px;overflow:hidden}
-.bar-fill{width:0;height:100%;background:#e94560;transition:width .3s}
+.bar-fill{width:0;height:100%;background:linear-gradient(90deg,#e94560,#aa44ff);transition:width .3s}
 
-/* Main 3D viewport */
-#viewport{width:100%;max-width:1200px;margin:0 auto;position:relative}
-#viewport canvas{width:100%;border-radius:0;display:block}
+#viewport{width:100%;max-width:1400px;margin:0 auto;position:relative;
+border:1px solid #1a1a2e;border-radius:4px;overflow:hidden;
+box-shadow:0 0 60px rgba(233,69,96,.12),0 0 120px rgba(100,50,200,.06)}
+#viewport canvas{width:100%;display:block}
+#viewport::after{content:'';position:absolute;top:0;left:0;right:0;bottom:0;
+background:radial-gradient(ellipse at center,transparent 65%,rgba(0,0,0,.35));pointer-events:none}
 
-/* HUD overlay */
 .hud{position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;overflow:hidden}
 .hud-label{position:absolute;font-family:monospace;font-size:11px;color:#fff;
-background:rgba(5,5,10,.85);padding:4px 10px;border-radius:4px;border:1px solid #333;
-pointer-events:auto;cursor:default;white-space:nowrap;transition:opacity .3s}
-.hud-label .title{color:#e94560;font-weight:bold;display:block;margin-bottom:1px}
-.hud-label .detail{color:#888;font-size:10px}
+background:rgba(3,3,8,.9);padding:5px 12px;border-radius:5px;border:1px solid rgba(233,69,96,.3);
+pointer-events:auto;cursor:default;white-space:nowrap;transition:opacity .3s;
+backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.hud-label .title{color:#e94560;font-weight:bold;display:block;margin-bottom:2px;font-size:12px}
+.hud-label .detail{color:#777;font-size:9px}
 
-/* Material strips below */
-.mat-strips{max-width:1200px;margin:20px auto;padding:0 10px;display:flex;flex-direction:column;gap:20px}
-.mat-row{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap}
-.mat-row .mat-title{flex:0 0 140px;font-family:monospace;padding-top:6px}
-.mat-row .mat-title h3{font-size:13px;color:#e0e0ff;margin-bottom:2px}
-.mat-row .mat-title p{font-size:10px;color:#555}
-.mat-row .maps{display:flex;gap:6px;flex-wrap:wrap}
-.mat-row .map-thumb{width:80px}
-.mat-row .map-thumb canvas{width:80px;height:80px;display:block;border-radius:4px;border:1px solid #1a1a2e;background:#000}
-.mat-row .map-thumb .map-label{text-align:center;font-size:9px;color:#555;font-family:monospace;margin-top:2px}
+.mat-strips{max-width:1400px;margin:20px auto;padding:0 20px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.mat-row{display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;
+background:rgba(10,10,20,.6);border:1px solid #151520;border-radius:6px;padding:10px}
+.mat-row .mat-title{flex:0 0 120px;font-family:monospace;padding-top:4px}
+.mat-row .mat-title h3{font-size:12px;color:#e0e0ff;margin-bottom:2px}
+.mat-row .mat-title p{font-size:9px;color:#555}
+.mat-row .maps{display:flex;gap:4px;flex-wrap:wrap}
+.mat-row .map-thumb{width:64px}
+.mat-row .map-thumb canvas{width:64px;height:64px;display:block;border-radius:3px;border:1px solid #1a1a2e;background:#000}
+.mat-row .map-thumb .map-label{text-align:center;font-size:8px;color:#555;font-family:monospace;margin-top:2px}
 
-.info-bar{max-width:1200px;margin:20px auto;padding:15px;text-align:center;font-family:monospace;font-size:11px;color:#444;border-top:1px solid #111}
+.info-bar{max-width:1400px;margin:20px auto;padding:15px;text-align:center;font-family:monospace;font-size:11px;color:#444;border-top:1px solid #111}
 .info-bar kbd{background:#1a1a2e;padding:2px 6px;border-radius:3px;color:#888;font-size:10px}
-
 .links{text-align:center;padding:20px;font-family:monospace;font-size:12px}
 .links a{color:#e94560;text-decoration:none;margin:0 10px}
 
+@media(max-width:900px){.mat-strips{grid-template-columns:1fr}}
 @media(max-width:700px){
-.mat-row{flex-direction:column}
-.mat-row .mat-title{flex:0 0 auto}
-.hud-label{font-size:9px;padding:3px 6px}
-}
+.mat-row{flex-direction:column}.mat-row .mat-title{flex:0 0 auto}
+.hud-label{font-size:9px;padding:3px 6px}}
 </style>
 </head>
 <body>
 
 <div class="header">
-<h1>Procedural Textures in Practice</h1>
-<p>Generated textures applied to real 3D objects — the kind of materials you'd use in a game | <a href="editor.html">Editor</a> | <a href="showcase.html">Feature Tour</a> | <a href="gallery.html">Gallery</a></p>
+<h1>PROCEDURAL MATERIAL FORGE</h1>
+<p>8 procedural materials with animated textures, bloom, &amp; PBR — all generated from pure math |
+<a href="editor.html">Editor</a> | <a href="showcase.html">Feature Tour</a> | <a href="gallery.html">Gallery</a></p>
 </div>
 
 <div id="loading">
-Generating materials and building scene...
+Forging materials...
 <div class="bar"><div class="bar-fill" id="pbar"></div></div>
 </div>
 
@@ -67,7 +72,7 @@ Generating materials and building scene...
 <div class="hud" id="hud"></div>
 <div class="info-bar">
 <kbd>Drag</kbd> orbit &nbsp; <kbd>Scroll</kbd> zoom &nbsp; <kbd>Right-drag</kbd> pan &nbsp; | &nbsp;
-4 procedural materials, each with 5 PBR maps, generated in real-time from math
+8 procedural materials &middot; 4 animated in real-time &middot; bloom post-processing &middot; floating particles
 </div>
 <div class="mat-strips" id="mat-strips"></div>
 </div>
@@ -85,29 +90,35 @@ Generating materials and building scene...
 import*as THREE from"three";
 import*as PIXY from"pixy";
 import{OrbitControls}from"three/addons/controls/OrbitControls.js";
+import{EffectComposer}from"three/addons/postprocessing/EffectComposer.js";
+import{RenderPass}from"three/addons/postprocessing/RenderPass.js";
+import{UnrealBloomPass}from"three/addons/postprocessing/UnrealBloomPass.js";
+import{OutputPass}from"three/addons/postprocessing/OutputPass.js";
 
 const RES=512;
 const pixelBuf=new Uint8Array(RES*RES*4);
 const pbar=document.getElementById("pbar");
 function prog(p){pbar.style.width=p+"%";}
+const clock=new THREE.Clock();
 
-// ── SINGLE renderer for everything (textures + 3D share one WebGL context) ──
-const W=1200,H=600;
+// ══════════════════════════════════════════════════════════════════
+// SINGLE RENDERER (textures + 3D share one WebGL context)
+// ══════════════════════════════════════════════════════════════════
+const W=1400,H=700;
 const r3=new THREE.WebGLRenderer({antialias:true,powerPreference:"high-performance"});
 r3.setSize(W,H);r3.setPixelRatio(Math.min(window.devicePixelRatio,2));
-r3.toneMapping=THREE.ACESFilmicToneMapping;r3.toneMappingExposure=1.8;
+r3.toneMapping=THREE.ACESFilmicToneMapping;r3.toneMappingExposure=2.0;
 r3.shadowMap.enabled=true;r3.shadowMap.type=THREE.PCFSoftShadowMap;
 r3.autoClear=true;
 r3.domElement.style.cssText="cursor:grab;display:block;width:100%;height:auto";
 
-// Fullscreen quad scene for texture generation passes
+// Fullscreen quad for 2D texture passes
 const texScene=new THREE.Scene();const texCam=new THREE.Camera();
 texScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),new THREE.MeshBasicMaterial()));
 
 function makeRT(){
 const rt=new THREE.WebGLRenderTarget(RES,RES,{minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter});
-rt.texture.wrapS=rt.texture.wrapT=THREE.RepeatWrapping;
-return rt;
+rt.texture.wrapS=rt.texture.wrapT=THREE.RepeatWrapping;return rt;
 }
 
 const grungeTex=await new Promise(ok=>{
@@ -115,12 +126,18 @@ new THREE.TextureLoader().load("images/grunge.png",t=>{
 t.wrapS=t.wrapT=THREE.RepeatWrapping;t.minFilter=THREE.LinearFilter;t.magFilter=THREE.LinearFilter;ok(t);
 });});
 
-// ── Gradients ──
+// ══════════════════════════════════════════════════════════════════
+// GRADIENT PALETTES
+// ══════════════════════════════════════════════════════════════════
 const GRADS={
 Lava:[{p:0,c:"#110000"},{p:.1,c:"#331100"},{p:.25,c:"#772200"},{p:.4,c:"#cc3300"},{p:.55,c:"#ff5500"},{p:.7,c:"#ff9922"},{p:.85,c:"#ffdd44"},{p:1,c:"#ffffcc"}],
-Frost:[{p:0,c:"#080820"},{p:.12,c:"#112244"},{p:.28,c:"#224477"},{p:.45,c:"#4488bb"},{p:.6,c:"#77ccee"},{p:.75,c:"#aaddee"},{p:.88,c:"#cceeFF"},{p:1,c:"#f0faff"}],
+Frost:[{p:0,c:"#080820"},{p:.12,c:"#112244"},{p:.28,c:"#224477"},{p:.45,c:"#4488bb"},{p:.6,c:"#77ccee"},{p:.75,c:"#aaddee"},{p:.88,c:"#cceeff"},{p:1,c:"#f0faff"}],
 PlasmaCore:[{p:0,c:"#110022"},{p:.12,c:"#440066"},{p:.25,c:"#8800aa"},{p:.38,c:"#cc22dd"},{p:.5,c:"#ff55ff"},{p:.62,c:"#ff88ff"},{p:.72,c:"#dd88ff"},{p:.82,c:"#88ccff"},{p:.92,c:"#cceeff"},{p:1,c:"#ffffff"}],
-NeonCircuit:[{p:0,c:"#050510"},{p:.12,c:"#0a1133"},{p:.25,c:"#112255"},{p:.4,c:"#1155aa"},{p:.55,c:"#2288ee"},{p:.7,c:"#44bbff"},{p:.85,c:"#99ddff"},{p:1,c:"#ddffff"}]
+NeonCircuit:[{p:0,c:"#050510"},{p:.12,c:"#0a1133"},{p:.25,c:"#112255"},{p:.4,c:"#1155aa"},{p:.55,c:"#2288ee"},{p:.7,c:"#44bbff"},{p:.85,c:"#99ddff"},{p:1,c:"#ddffff"}],
+AlienFlesh:[{p:0,c:"#080504"},{p:.12,c:"#1a0808"},{p:.25,c:"#331510"},{p:.38,c:"#553322"},{p:.5,c:"#886644"},{p:.6,c:"#997755"},{p:.72,c:"#44cc66"},{p:.85,c:"#55ff88"},{p:1,c:"#aaffcc"}],
+RuneGlow:[{p:0,c:"#050008"},{p:.12,c:"#1a0033"},{p:.25,c:"#330066"},{p:.4,c:"#6611aa"},{p:.55,c:"#9933dd"},{p:.7,c:"#cc66ff"},{p:.85,c:"#ee99ff"},{p:1,c:"#ffeeff"}],
+Solar:[{p:0,c:"#110000"},{p:.08,c:"#330500"},{p:.2,c:"#661100"},{p:.35,c:"#cc3300"},{p:.5,c:"#ff6600"},{p:.65,c:"#ff9900"},{p:.78,c:"#ffcc33"},{p:.9,c:"#ffee88"},{p:1,c:"#ffffee"}],
+VoidEdge:[{p:0,c:"#000000"},{p:.15,c:"#050010"},{p:.3,c:"#0a0022"},{p:.45,c:"#110044"},{p:.6,c:"#220066"},{p:.75,c:"#4400aa"},{p:.88,c:"#7733ee"},{p:1,c:"#cc88ff"}]
 };
 function makeGrad(stops){
 const c=document.createElement("canvas");c.width=256;c.height=1;
@@ -133,8 +150,12 @@ tex.wrapS=tex.wrapT=THREE.ClampToEdgeWrapping;tex.needsUpdate=true;return tex;
 }
 const gTex={};for(const[k,v]of Object.entries(GRADS))gTex[k]=makeGrad(v);
 
-// ── Shared shaders ──
+// ══════════════════════════════════════════════════════════════════
+// SHARED POST-PROCESS SHADERS
+// ══════════════════════════════════════════════════════════════════
 const ppV=`varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.0,1.0);}`;
+
+// Gradient map
 const gradScene=new THREE.Scene(),gradCam=new THREE.Camera();
 const gradMat=new THREE.ShaderMaterial({
 uniforms:{tDiffuse:{value:null},tGradient:{value:null},intensity:{value:1}},vertexShader:ppV,
@@ -144,6 +165,7 @@ vec4 g=texture2D(tGradient,vec2(l,.5));gl_FragColor=vec4(mix(t.rgb,g.rgb,intensi
 depthTest:false,depthWrite:false});
 gradScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),gradMat));
 
+// Blend modes
 const blendScene=new THREE.Scene(),blendCam=new THREE.Camera();
 const blendMat=new THREE.ShaderMaterial({
 uniforms:{tBase:{value:null},tBlend:{value:null},opacity:{value:1},blendMode:{value:0}},vertexShader:ppV,
@@ -198,8 +220,10 @@ gl_FragColor=vec4(vec3(m),1.);}`,
 // ── Defaults ──
 function D(){return{animate:false,time:5,resolution:RES+"",polarConversion:false,tiling:false,normalMap:false,cHeightScale:2,cRadialMask:1,cColorBalanceShadowsR:0,cColorBalanceShadowsG:0,cColorBalanceShadowsB:0,cColorBalanceMidtonesR:0,cColorBalanceMidtonesG:0,cColorBalanceMidtonesB:0,cColorBalanceHighlightsR:0,cColorBalanceHighlightsG:0,cColorBalanceHighlightsB:0,cToonEnable:false,cToonDark:.8,cToonLight:.95,cFrequency:30,cAmplitude:.01,cIntensity:.5,cDirectionX:0,cDirectionY:1,cPowerExponent:1,cRadius:.5,cInnerRadius:1,cInnerRadius2:1,cSize:1,cWidth:1,cHeight:1,cDepth:1,cColor:1,cPetals:6,cOffset:.2,cVolume:3,cBeta:4,cDelta:.05,cScale:1,cInnerWidth:.4,cStrength:1,cPower:1,cRange:2,cEmission:1,cBloom:1,cLightX:1,cLightY:1,cLightZ:1,cAmbient:1,cSmoothness:1,cSmoothnessPower:1,cThickness:1,cThicknessPower:1,cCameraTilt:0,cCameraPan:0,cSpeed:1,cAngle:0,cDensity:1,cAlpha:1,cRepeat:1,cScaleShift:0,cBias:0,cGain:0,cInvert:0,cThreshold:0,cDiamondGearTeeth:18,cDiamondGearMid:.8,cBrushStrokeX1:-.4,cBrushStrokeY1:0,cBrushStrokeX2:1.1,cBrushStrokeY2:.8,cBubblesVariation:1,cFlameEyeInnerFade:1,cFlameEyeOuterFade:1,cFlameEyeBorder:1,cSplatLines:20,cSplatSpotStep:.04,cTrabeculumVariation:2,cLifeTime:.9,cGravity:.26,cCount:300,cExplosionRadius:1.75,cExplosionDownScale:1.25,cExplosionGrain:2,cExplosionSpeed:.3,cExplosionBallness:2,cExplosionGrowth:2.2,cExplosionFade:1.6,cExplosionDensity:1.35,cExplosionContrast:1,cExplosionRollingInitDamp:.3,cExplosionRollingSpeed:2,cExplosionDelayRange:.25,cExplosionBallSpread:1,cExplosionBloom:0,cExplosionEmission:.2,cExplosionColor:1,cNoiseOctave:8,cNoiseFrequency:1,cNoiseAmplitude:.65,cNoisePersistence:.5,cNoiseScale:1,cNoiseSphereEnable:false,cNoiseGraphEnable:false,cNoiseStrength:1,cNoiseDepth:3,cNoiseSize:8,cNoiseLacunarity:2,cTurbulence:0,cRidge:0,cRidgeOffset:.9,cGradientNoise:0,cValueNoise:0,cVoronoiNoise:0,cVoronoiCell:0,cSimplexNoise:1}}
 
-// ── Render helpers ──
-function renderFx(type,params,target){
+// ══════════════════════════════════════════════════════════════════
+// RENDER HELPERS
+// ══════════════════════════════════════════════════════════════════
+function createFxMat(type,params){
 const sh=new PIXY.FxgenShader();sh.enable(type.toUpperCase());sh.enable("TOON");sh.enable("GLSL3");
 const u=sh.generateUniforms();const mat=sh.createMaterial(u,{defines:sh.generateDefines()});
 const ec=Object.assign(D(),params);
@@ -212,8 +236,14 @@ PIXY.FxgenShaderUtils.SetShaderParameter(u,"cColorBalanceMidtones",new THREE.Vec
 PIXY.FxgenShaderUtils.SetShaderParameter(u,"cColorBalanceHighlights",new THREE.Vector3(ec.cColorBalanceHighlightsR,ec.cColorBalanceHighlightsG,ec.cColorBalanceHighlightsB));
 PIXY.FxgenShaderUtils.SetShaderParameter(u,"cDirection",new THREE.Vector2(ec.cDirectionX,ec.cDirectionY));
 PIXY.FxgenShaderUtils.SetShaderParameter(u,"tGrunge",grungeTex);
-texScene.overrideMaterial=mat;r3.setRenderTarget(target);
-r3.render(texScene,texCam);r3.setRenderTarget(null);texScene.overrideMaterial=null;mat.dispose();
+return{uniforms:u,material:mat,baseTime:ec.time};
+}
+function renderFxMat(fx,target){
+texScene.overrideMaterial=fx.material;r3.setRenderTarget(target);
+r3.render(texScene,texCam);r3.setRenderTarget(null);texScene.overrideMaterial=null;
+}
+function renderFx(type,params,target){
+const fx=createFxMat(type,params);renderFxMat(fx,target);fx.material.dispose();
 }
 function doGrad(inRT,name,outRT){
 gradMat.uniforms.tDiffuse.value=inRT.texture;gradMat.uniforms.tGradient.value=gTex[name];
@@ -239,53 +269,97 @@ ctx.putImageData(img,0,0);
 }
 
 // ══════════════════════════════════════════════════════════════════
-// MATERIAL DEFINITIONS — 4 practical game materials
+// 8 MATERIAL DEFINITIONS
 // ══════════════════════════════════════════════════════════════════
 const MATERIALS=[
 {
-name:"Lava Rock",
-use:"Volcanic terrain, fire levels, dungeon floors",
+name:"Magma Flow",
+use:"Volcanic terrain, lava rivers, fire dungeons",
 layers:[
 {type:"CoherentNoise",p:{time:8,tiling:true,cNoiseOctave:5,cNoiseFrequency:3,cNoiseAmplitude:1,cNoiseLacunarity:2,cNoisePersistence:.5,cRidge:.8,cRidgeOffset:.4,cVoronoiNoise:.3}},
 {type:"Explosion",p:{time:.6,cExplosionRadius:2.5,cExplosionBallness:5,cExplosionGrowth:3,cExplosionDensity:1.8,cExplosionContrast:1.5,cExplosionGrain:3}}
 ],
-blend:2, // Screen
-gradient:"Lava",
-mat:{roughness:.6,metalness:.1,emissive:0xff4400,emissiveIntensity:.4,normalStrength:2.5}
+blend:2,gradient:"Lava",animated:true,animSpeed:.12,
+geo:new THREE.IcosahedronGeometry(1,4),
+mat:{roughness:.55,metalness:.1,emissive:0xff4400,emissiveIntensity:.6,normalStrength:2.5}
 },
 {
 name:"Frozen Crystal",
-use:"Ice caves, frozen environments, crystal formations",
+use:"Ice caves, frozen worlds, crystal formations",
 layers:[
 {type:"CoherentNoise",p:{time:3.2,tiling:true,cNoiseOctave:3,cNoiseFrequency:16,cNoiseAmplitude:.8,cNoiseLacunarity:2,cNoisePersistence:.3,cVoronoiCell:1,cPowerExponent:3.5}}
 ],
-blend:null,
-gradient:"Frost",
-mat:{roughness:.15,metalness:.2,emissive:0x224488,emissiveIntensity:.15,normalStrength:1.5,
-clearcoat:1,clearcoatRoughness:.05,transmission:.15,thickness:.5,ior:1.5}
+blend:null,gradient:"Frost",animated:false,
+geo:new THREE.OctahedronGeometry(1,0),
+mat:{roughness:.1,metalness:.2,emissive:0x3366aa,emissiveIntensity:.25,normalStrength:1.5,
+clearcoat:1,clearcoatRoughness:.05,transmission:.2,thickness:.5,ior:1.5}
 },
 {
 name:"Plasma Core",
-use:"Energy shields, magic orbs, power sources, portals",
+use:"Energy shields, magic orbs, portals",
 layers:[
-{type:"Corona",p:{time:5,cCoronaRadius:1.5,cCoronaDensity:1.2,cCoronaIntensity:2,tiling:false}},
-{type:"Electric",p:{time:3,cElectricDensity:1.5,cElectricIntensity:2,tiling:false}}
+{type:"Corona",p:{time:5,tiling:false}},
+{type:"Electric",p:{time:3,tiling:false}}
 ],
-blend:2, // Screen
-gradient:"PlasmaCore",
-mat:{roughness:.05,metalness:.1,emissive:0xff44ff,emissiveIntensity:1.2,normalStrength:.8,
-clearcoat:1,clearcoatRoughness:0,transmission:.6,thickness:1.5,ior:2.4,opacity:.85,transparent:true}
+blend:2,gradient:"PlasmaCore",animated:true,animSpeed:.35,
+geo:new THREE.SphereGeometry(1,64,64),
+mat:{roughness:.05,metalness:.1,emissive:0xff44ff,emissiveIntensity:1.5,normalStrength:.6,
+clearcoat:1,clearcoatRoughness:0,transmission:.5,thickness:1.5,ior:2.4,opacity:.85,transparent:true}
 },
 {
 name:"Neon Circuit",
-use:"Sci-fi panels, cyberpunk environments, tech UI",
+use:"Sci-fi panels, cyberpunk, tech UI",
 layers:[
 {type:"Caustics",p:{time:3,cSpeed:.4,tiling:true}},
 {type:"BinaryMatrix",p:{time:2,tiling:true}}
 ],
-blend:4, // Add
-gradient:"NeonCircuit",
-mat:{roughness:.2,metalness:.7,emissive:0x0088ff,emissiveIntensity:.6,normalStrength:1.8}
+blend:4,gradient:"NeonCircuit",animated:false,
+geo:new THREE.BoxGeometry(1.6,1.6,.3,8,8,2),
+mat:{roughness:.15,metalness:.7,emissive:0x0088ff,emissiveIntensity:.8,normalStrength:1.8}
+},
+{
+name:"Alien Membrane",
+use:"Organic walls, creature skin, bio-horror",
+layers:[
+{type:"Trabeculum",p:{time:2,cTrabeculumVariation:4,tiling:true}},
+{type:"Caustics",p:{time:5,cSpeed:.3,tiling:true}}
+],
+blend:3,gradient:"AlienFlesh",animated:true,animSpeed:.08,
+geo:new THREE.SphereGeometry(1,32,32),
+mat:{roughness:.3,metalness:.05,emissive:0x22ff44,emissiveIntensity:.35,normalStrength:2,
+clearcoat:.5,clearcoatRoughness:.3,transmission:.25,thickness:2,ior:1.3}
+},
+{
+name:"Arcane Rune",
+use:"Magic circles, spell effects, enchanted items",
+layers:[
+{type:"MagicCircle",p:{time:1,tiling:false}}
+],
+blend:null,gradient:"RuneGlow",animated:false,
+geo:new THREE.DodecahedronGeometry(1,0),
+mat:{roughness:.1,metalness:.4,emissive:0xaa44ff,emissiveIntensity:1,normalStrength:1}
+},
+{
+name:"Solar Corona",
+use:"Sun surfaces, stellar objects, fire elementals",
+layers:[
+{type:"Corona",p:{time:3,tiling:false}},
+{type:"Explosion",p:{time:1,cExplosionRadius:3,cExplosionBallness:3,cExplosionGrowth:4,cExplosionDensity:2,cExplosionContrast:2,cExplosionGrain:2}}
+],
+blend:4,gradient:"Solar",animated:true,animSpeed:.2,
+geo:new THREE.SphereGeometry(1.2,64,64),
+mat:{roughness:.1,metalness:.05,emissive:0xff8800,emissiveIntensity:2,normalStrength:.5}
+},
+{
+name:"Void Crystal",
+use:"Dark matter, shadow artifacts, void portals",
+layers:[
+{type:"CoherentNoise",p:{time:7,tiling:true,cNoiseOctave:6,cNoiseFrequency:8,cNoiseAmplitude:1.2,cNoiseLacunarity:2.5,cNoisePersistence:.55,cRidge:1,cRidgeOffset:.8,cVoronoiNoise:.5,cVoronoiCell:.4,cTurbulence:.3}}
+],
+blend:null,gradient:"VoidEdge",animated:false,
+geo:new THREE.TorusKnotGeometry(.7,.25,128,32),
+mat:{roughness:.15,metalness:.9,emissive:0x4400aa,emissiveIntensity:.35,normalStrength:2,
+clearcoat:1,clearcoatRoughness:.05}
 }
 ];
 
@@ -293,111 +367,114 @@ mat:{roughness:.2,metalness:.7,emissive:0x0088ff,emissiveIntensity:.6,normalStre
 // GENERATE ALL MATERIALS
 // ══════════════════════════════════════════════════════════════════
 const matData=[];
-prog(5);
+const animRefs=[]; // persistent FxMaterials for animated textures
+const animTmpA=makeRT(),animTmpB=makeRT(); // shared temp RTs for animation blending
+prog(3);
 
 for(let i=0;i<MATERIALS.length;i++){
 const def=MATERIALS[i];
 const structRT=makeRT(),colorRT=makeRT(),normRT=makeRT(),roughRT=makeRT(),aoRT=makeRT(),metalRT=makeRT();
-const emissiveRT=makeRT();
 
-// Render layers
+let animInfo=null;
+
 if(def.layers.length===1){
+if(def.animated){
+const fx=createFxMat(def.layers[0].type,def.layers[0].p);
+renderFxMat(fx,structRT);
+animInfo={layerFx:[fx],blendMode:null,structRT,colorRT,gradient:def.gradient,speed:def.animSpeed};
+}else{
 renderFx(def.layers[0].type,def.layers[0].p,structRT);
+}
 }else{
 const tmpA=makeRT(),tmpB=makeRT();
+if(def.animated){
+const fxA=createFxMat(def.layers[0].type,def.layers[0].p);
+const fxB=createFxMat(def.layers[1].type,def.layers[1].p);
+renderFxMat(fxA,tmpA);renderFxMat(fxB,tmpB);
+doBlend(tmpA,tmpB,def.blend,structRT);
+animInfo={layerFx:[fxA,fxB],blendMode:def.blend,structRT,colorRT,gradient:def.gradient,speed:def.animSpeed,
+rtA:tmpA,rtB:tmpB};
+}else{
 renderFx(def.layers[0].type,def.layers[0].p,tmpA);
 renderFx(def.layers[1].type,def.layers[1].p,tmpB);
 doBlend(tmpA,tmpB,def.blend,structRT);
 tmpA.dispose();tmpB.dispose();
 }
+}
 
-// Gradient map → color
 doGrad(structRT,def.gradient,colorRT);
-
-// PBR maps from structure
 doPBR(structRT,normalMat,normRT);
 doPBR(structRT,roughMat,roughRT);
 doPBR(structRT,aoMat,aoRT);
 doPBR(structRT,metalMat,metalRT);
 
-// Emissive map = brighter parts of color map
-// (we reuse the struct luminance — bright areas glow)
-doGrad(structRT,def.gradient,emissiveRT);
-
-matData.push({def,structRT,colorRT,normRT,roughRT,aoRT,metalRT,emissiveRT});
-prog(10+i*20);
+matData.push({def,structRT,colorRT,normRT,roughRT,aoRT,metalRT});
+if(animInfo)animRefs.push(animInfo);
+prog(3+i*10);
 }
 
 // ══════════════════════════════════════════════════════════════════
-// BUILD 3D SCENE (renderer already created at top — same WebGL context)
+// 3D SCENE
 // ══════════════════════════════════════════════════════════════════
 document.getElementById("viewport").appendChild(r3.domElement);
-
 const scene=new THREE.Scene();
-scene.background=new THREE.Color(0x101018);
-scene.fog=new THREE.FogExp2(0x101018,.025);
+scene.background=new THREE.Color(0x080810);
+scene.fog=new THREE.FogExp2(0x080810,.018);
 
-const cam=new THREE.PerspectiveCamera(42,W/H,.1,100);
-cam.position.set(0,4,9);cam.lookAt(0,.5,0);
+const cam=new THREE.PerspectiveCamera(40,W/H,.1,100);
+cam.position.set(0,5,12);cam.lookAt(0,1,0);
 
 const ctrl=new OrbitControls(cam,r3.domElement);
 ctrl.enableDamping=true;ctrl.dampingFactor=.06;
-ctrl.target.set(0,.8,0);ctrl.maxDistance=20;ctrl.minDistance=3;
+ctrl.target.set(0,1,0);ctrl.maxDistance=25;ctrl.minDistance=4;
+ctrl.autoRotate=true;ctrl.autoRotateSpeed=.8;
 
-// Environment map
+// Environment
 const pmrem=new THREE.PMREMGenerator(r3);
 const envS=new THREE.Scene();
-envS.add(new THREE.HemisphereLight(0x445566,0x111122,3));
-const envD=new THREE.DirectionalLight(0xffeedd,2);envD.position.set(5,8,5);envS.add(envD);
-const envP=new THREE.PointLight(0xff6633,1);envP.position.set(-3,2,0);envS.add(envP);
+envS.add(new THREE.HemisphereLight(0x556677,0x111122,3.5));
+const envD=new THREE.DirectionalLight(0xffeedd,2.5);envD.position.set(5,8,5);envS.add(envD);
+const envP1=new THREE.PointLight(0xff6633,1.2);envP1.position.set(-3,2,0);envS.add(envP1);
+const envP2=new THREE.PointLight(0x4466ff,.8);envP2.position.set(3,2,-3);envS.add(envP2);
 const envRT=pmrem.fromScene(envS,0,.1,100);
 scene.environment=envRT.texture;
 pmrem.dispose();
 
 // Lighting
-scene.add(new THREE.HemisphereLight(0x556677,0x222233,1.2));
-const keyLight=new THREE.DirectionalLight(0xffeedd,3);keyLight.position.set(5,8,5);
+scene.add(new THREE.AmbientLight(0x222233,.4));
+scene.add(new THREE.HemisphereLight(0x556688,0x222233,1));
+
+const keyLight=new THREE.DirectionalLight(0xffeedd,3.5);keyLight.position.set(6,10,6);
 keyLight.castShadow=true;keyLight.shadow.mapSize.set(2048,2048);
-keyLight.shadow.camera.near=1;keyLight.shadow.camera.far=25;
-keyLight.shadow.camera.left=-8;keyLight.shadow.camera.right=8;
-keyLight.shadow.camera.top=8;keyLight.shadow.camera.bottom=-8;
+keyLight.shadow.camera.near=1;keyLight.shadow.camera.far=30;
+keyLight.shadow.camera.left=-12;keyLight.shadow.camera.right=12;
+keyLight.shadow.camera.top=10;keyLight.shadow.camera.bottom=-10;
 keyLight.shadow.bias=-.001;
 scene.add(keyLight);
-const fillLight=new THREE.DirectionalLight(0x6688cc,1.5);fillLight.position.set(-4,3,-3);scene.add(fillLight);
-const rimLight=new THREE.PointLight(0xff6644,1,15);rimLight.position.set(3,1,-4);scene.add(rimLight);
-const backLight=new THREE.PointLight(0x8844ff,.8,12);backLight.position.set(0,3,-5);scene.add(backLight);
 
-// Ground
-const groundMat=new THREE.MeshStandardMaterial({color:0x181820,roughness:.85,metalness:.05});
-const ground=new THREE.Mesh(new THREE.PlaneGeometry(30,30),groundMat);
+const fillLight=new THREE.DirectionalLight(0x6688cc,1.5);fillLight.position.set(-5,4,-4);scene.add(fillLight);
+const rimLight=new THREE.PointLight(0xff6644,1.2,18);rimLight.position.set(5,2,-6);scene.add(rimLight);
+const backLight=new THREE.PointLight(0x8844ff,1,15);backLight.position.set(0,4,-8);scene.add(backLight);
+
+// Ground (slightly reflective)
+const ground=new THREE.Mesh(
+new THREE.PlaneGeometry(40,40),
+new THREE.MeshStandardMaterial({color:0x0c0c14,roughness:.7,metalness:.15})
+);
 ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
 
-// ── Create 3D objects ──
+// ── Circular arrangement ──
 const objects=[];
-const spacing=3.2;
-const positions=[
-{x:-spacing*1.5,z:0},
-{x:-spacing*.5,z:0},
-{x:spacing*.5,z:0},
-{x:spacing*1.5,z:0}
-];
+const N=MATERIALS.length;
+const circleR=5.5;
 
-// Object geometries for each material
-const geometries=[
-// Lava Rock: rough displaced sphere
-new THREE.IcosahedronGeometry(1,4),
-// Ice Crystal: faceted octahedron
-new THREE.OctahedronGeometry(1,0),
-// Plasma Core: glowing sphere
-new THREE.SphereGeometry(1,64,64),
-// Sci-fi Panel: beveled box
-new THREE.BoxGeometry(1.6,1.6,.3,8,8,2)
-];
+for(let i=0;i<N;i++){
+const md=matData[i];const def=md.def;
+const angle=(i/N)*Math.PI*2-Math.PI/2;
+const px=Math.sin(angle)*circleR;
+const pz=Math.cos(angle)*circleR;
 
-for(let i=0;i<4;i++){
-const md=matData[i];const def=md.def;const pos=positions[i];
-
-// Create material
+// Material
 const usePhysical=def.mat.clearcoat||def.mat.transmission;
 const MatClass=usePhysical?THREE.MeshPhysicalMaterial:THREE.MeshStandardMaterial;
 const m=new MatClass({
@@ -412,13 +489,12 @@ metalnessMap:md.metalRT.texture,
 emissive:new THREE.Color(def.mat.emissive),
 emissiveIntensity:def.mat.emissiveIntensity,
 emissiveMap:md.colorRT.texture,
-envMapIntensity:1.2,
+envMapIntensity:1.5,
 side:THREE.DoubleSide,
 transparent:!!def.mat.transparent,
 opacity:def.mat.opacity||1
 });
 m.normalScale.set(def.mat.normalStrength,def.mat.normalStrength);
-
 if(usePhysical){
 if(def.mat.clearcoat)m.clearcoat=def.mat.clearcoat;
 if(def.mat.clearcoatRoughness!==undefined)m.clearcoatRoughness=def.mat.clearcoatRoughness;
@@ -427,43 +503,80 @@ if(def.mat.thickness)m.thickness=def.mat.thickness;
 if(def.mat.ior)m.ior=def.mat.ior;
 }
 
-const mesh=new THREE.Mesh(geometries[i],m);
-mesh.position.set(pos.x,1.2,pos.z);
+const mesh=new THREE.Mesh(def.geo,m);
+mesh.position.set(px,1.4,pz);
 mesh.castShadow=true;mesh.receiveShadow=true;
-
-// Scale adjustments
-if(i===0)mesh.scale.setScalar(1.1); // lava rock bigger
-if(i===1){mesh.scale.setScalar(1.3);mesh.rotation.y=Math.PI/6;} // ice crystal tilted
-if(i===2)mesh.scale.setScalar(1.15); // plasma core sphere
-if(i===3){mesh.position.y=1;mesh.rotation.x=-.2;} // panel tilted
-
 scene.add(mesh);objects.push(mesh);
 
 // Pedestal
-const pedestal=new THREE.Mesh(
-new THREE.CylinderGeometry(.5,.6,.15,32),
-new THREE.MeshStandardMaterial({color:0x111118,roughness:.8,metalness:.3})
+const ped=new THREE.Mesh(
+new THREE.CylinderGeometry(.55,.7,.2,32),
+new THREE.MeshStandardMaterial({color:0x111118,roughness:.6,metalness:.4})
 );
-pedestal.position.set(pos.x,.075,pos.z);pedestal.receiveShadow=true;pedestal.castShadow=true;
-scene.add(pedestal);
+ped.position.set(px,.1,pz);ped.receiveShadow=true;ped.castShadow=true;
+scene.add(ped);
 
-// Point light per object for dramatic local lighting
+// Per-object glow light
 if(def.mat.emissiveIntensity>.2){
-const glowStr=def.mat.emissiveIntensity>1?1.5:.6;
-const pLight=new THREE.PointLight(def.mat.emissive,glowStr,6);
-pLight.position.set(pos.x,1.5,pos.z+1);scene.add(pLight);
+const glow=def.mat.emissiveIntensity>1?2:.8;
+const pL=new THREE.PointLight(def.mat.emissive,glow,5);
+pL.position.set(px,2.5,pz);scene.add(pL);
 }
 }
+
+// ══════════════════════════════════════════════════════════════════
+// FLOATING PARTICLES
+// ══════════════════════════════════════════════════════════════════
+const PC=600;
+const pPos=new Float32Array(PC*3);
+const pCol=new Float32Array(PC*3);
+const pVel=new Float32Array(PC*3);
+const pColors=[
+new THREE.Color(0xff4400),new THREE.Color(0x4488ff),
+new THREE.Color(0xff44ff),new THREE.Color(0x22aaff),
+new THREE.Color(0x22ff44),new THREE.Color(0xaa44ff),
+new THREE.Color(0xff8800),new THREE.Color(0x7733ee)
+];
+for(let i=0;i<PC;i++){
+pPos[i*3]=(Math.random()-.5)*22;
+pPos[i*3+1]=Math.random()*10;
+pPos[i*3+2]=(Math.random()-.5)*22;
+const c=pColors[i%8];
+pCol[i*3]=c.r;pCol[i*3+1]=c.g;pCol[i*3+2]=c.b;
+pVel[i*3]=(Math.random()-.5)*.008;
+pVel[i*3+1]=Math.random()*.006+.003;
+pVel[i*3+2]=(Math.random()-.5)*.008;
+}
+const pGeo=new THREE.BufferGeometry();
+pGeo.setAttribute("position",new THREE.BufferAttribute(pPos,3));
+pGeo.setAttribute("color",new THREE.BufferAttribute(pCol,3));
+const pMat=new THREE.PointsMaterial({
+size:.06,vertexColors:true,transparent:true,opacity:.7,
+blending:THREE.AdditiveBlending,depthWrite:false,sizeAttenuation:true
+});
+const particles=new THREE.Points(pGeo,pMat);
+scene.add(particles);
+
+// ══════════════════════════════════════════════════════════════════
+// BLOOM POST-PROCESSING
+// ══════════════════════════════════════════════════════════════════
+const composer=new EffectComposer(r3);
+composer.addPass(new RenderPass(scene,cam));
+const bloomPass=new UnrealBloomPass(new THREE.Vector2(W,H),1.0,.4,.65);
+composer.addPass(bloomPass);
+composer.addPass(new OutputPass());
 
 prog(90);
 
-// ── HUD Labels ──
+// ══════════════════════════════════════════════════════════════════
+// HUD LABELS
+// ══════════════════════════════════════════════════════════════════
 const hud=document.getElementById("hud");
 function updateLabels(){
 const rect=r3.domElement.getBoundingClientRect();
-for(let i=0;i<4;i++){
+for(let i=0;i<N;i++){
 const obj=objects[i];const def=MATERIALS[i];
-const pos3=obj.position.clone();pos3.y+=1.8;
+const pos3=obj.position.clone();pos3.y+=2;
 const projected=pos3.project(cam);
 const x=(projected.x*.5+.5)*rect.width;
 const y=(1-(projected.y*.5+.5))*rect.height;
@@ -475,13 +588,17 @@ hud.appendChild(label);
 }
 label.style.left=(x-label.offsetWidth/2)+"px";
 label.style.top=y+"px";
-label.style.opacity=projected.z<1?"1":"0";
+// Hide if behind camera or too far to side
+const vis=projected.z<1&&x>-50&&x<rect.width+50;
+label.style.opacity=vis?"1":"0";
 }
 }
 
-// ── Material map thumbnails ──
+// ══════════════════════════════════════════════════════════════════
+// MATERIAL MAP THUMBNAILS
+// ══════════════════════════════════════════════════════════════════
 const strips=document.getElementById("mat-strips");
-for(let i=0;i<4;i++){
+for(let i=0;i<N;i++){
 const md=matData[i];const def=MATERIALS[i];
 const row=document.createElement("div");row.className="mat-row";
 const title=document.createElement("div");title.className="mat-title";
@@ -512,15 +629,60 @@ await new Promise(r=>setTimeout(r,200));
 document.getElementById("loading").style.display="none";
 document.getElementById("content").style.display="block";
 
-// ── Animate ──
+// ══════════════════════════════════════════════════════════════════
+// ANIMATION LOOP
+// ══════════════════════════════════════════════════════════════════
 function animate(){
 requestAnimationFrame(animate);
-objects[0].rotation.y+=.003; // lava rock
-objects[1].rotation.y+=.004; // crystal
-objects[2].rotation.y+=.005;objects[2].rotation.x+=.002; // torus knot
-objects[3].rotation.y+=.002; // panel
+const t=clock.getElapsedTime();
+
+// ── Update animated textures ──
+for(const anim of animRefs){
+const newTime=t*anim.speed;
+if(anim.layerFx.length===1){
+anim.layerFx[0].uniforms.time.value=anim.layerFx[0].baseTime+newTime;
+renderFxMat(anim.layerFx[0],anim.structRT);
+}else{
+anim.layerFx[0].uniforms.time.value=anim.layerFx[0].baseTime+newTime;
+anim.layerFx[1].uniforms.time.value=anim.layerFx[1].baseTime+newTime*.7;
+renderFxMat(anim.layerFx[0],anim.rtA);
+renderFxMat(anim.layerFx[1],anim.rtB);
+doBlend(anim.rtA,anim.rtB,anim.blendMode,anim.structRT);
+}
+doGrad(anim.structRT,anim.gradient,anim.colorRT);
+}
+
+// ── Object rotations ──
+for(let i=0;i<N;i++){
+const spd=[.005,.006,.008,.003,.004,.007,.003,.005];
+objects[i].rotation.y+=spd[i];
+if(i===2)objects[i].rotation.x+=.002; // plasma wobble
+if(i===4){objects[i].rotation.x=Math.sin(t*.5)*.15;} // alien pulse
+if(i===6)objects[i].rotation.z+=.001; // solar tilt
+}
+
+// ── Particles ──
+const pa=particles.geometry.attributes.position.array;
+for(let i=0;i<PC;i++){
+pa[i*3]+=pVel[i*3];
+pa[i*3+1]+=pVel[i*3+1];
+pa[i*3+2]+=pVel[i*3+2];
+if(pa[i*3+1]>10){
+pa[i*3+1]=0;
+pa[i*3]=(Math.random()-.5)*22;
+pa[i*3+2]=(Math.random()-.5)*22;
+}
+}
+particles.geometry.attributes.position.needsUpdate=true;
+particles.rotation.y=t*.02;
+
+// ── Pulsing lights ──
+const pulse=Math.sin(t*2)*.3+.7;
+backLight.intensity=pulse*1.2;
+
+// ── Render with bloom ──
 ctrl.update();
-r3.render(scene,cam);
+composer.render();
 updateLabels();
 }
 animate();
