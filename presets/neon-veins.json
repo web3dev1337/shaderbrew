@@ -1,0 +1,23 @@
+{
+	"type": "Trabeculum",
+	"animate": true,
+	"time": 4.0,
+	"resolution": "512",
+	"polarConversion": false,
+	"tiling": true,
+	"normalMap": false,
+	"cTrabeculumVariation": 3,
+	"cIntensity": 0.9,
+	"cToonEnable": true,
+	"cToonDark": 0.25,
+	"cToonLight": 0.7,
+	"cColorBalanceShadowsR": -1.0,
+	"cColorBalanceShadowsG": 1.0,
+	"cColorBalanceShadowsB": -0.5,
+	"cColorBalanceMidtonesR": -0.4,
+	"cColorBalanceMidtonesG": 1.0,
+	"cColorBalanceMidtonesB": 0.2,
+	"cColorBalanceHighlightsR": 0.3,
+	"cColorBalanceHighlightsG": 1.0,
+	"cColorBalanceHighlightsB": 0.5
+}

@@ -1,0 +1,22 @@
+{
+	"type": "WaterTurbulence",
+	"animate": true,
+	"time": 3.0,
+	"resolution": "512",
+	"polarConversion": false,
+	"tiling": true,
+	"normalMap": false,
+	"cFrequency": 8,
+	"cAmplitude": 0.04,
+	"cIntensity": 0.7,
+	"cSpeed": 0.4,
+	"cColorBalanceShadowsR": -1.0,
+	"cColorBalanceShadowsG": -0.4,
+	"cColorBalanceShadowsB": 0.9,
+	"cColorBalanceMidtonesR": -0.8,
+	"cColorBalanceMidtonesG": 0.3,
+	"cColorBalanceMidtonesB": 0.95,
+	"cColorBalanceHighlightsR": -0.1,
+	"cColorBalanceHighlightsG": 0.85,
+	"cColorBalanceHighlightsB": 1.0
+}

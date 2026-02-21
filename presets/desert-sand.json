@@ -1,0 +1,23 @@
+{
+	"type": "FbmNoise2",
+	"animate": false,
+	"time": 20.0,
+	"resolution": "512",
+	"polarConversion": false,
+	"tiling": true,
+	"normalMap": false,
+	"cNoiseOctave": 6,
+	"cNoiseFrequency": 3,
+	"cNoiseAmplitude": 0.8,
+	"cNoiseLacunarity": 2.5,
+	"cNoisePersistence": 0.45,
+	"cColorBalanceShadowsR": 0.6,
+	"cColorBalanceShadowsG": 0.2,
+	"cColorBalanceShadowsB": -0.7,
+	"cColorBalanceMidtonesR": 0.85,
+	"cColorBalanceMidtonesG": 0.65,
+	"cColorBalanceMidtonesB": -0.1,
+	"cColorBalanceHighlightsR": 1.0,
+	"cColorBalanceHighlightsG": 0.9,
+	"cColorBalanceHighlightsB": 0.5
+}

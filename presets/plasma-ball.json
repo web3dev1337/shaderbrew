@@ -1,0 +1,22 @@
+{
+	"type": "Energy",
+	"animate": true,
+	"time": 0.0,
+	"resolution": "512",
+	"polarConversion": true,
+	"tiling": false,
+	"normalMap": false,
+	"cRadialMask": 0.5,
+	"cIntensity": 0.85,
+	"cFrequency": 12,
+	"cSpeed": 0.8,
+	"cColorBalanceShadowsR": -0.4,
+	"cColorBalanceShadowsG": -0.9,
+	"cColorBalanceShadowsB": 1.0,
+	"cColorBalanceMidtonesR": 0.6,
+	"cColorBalanceMidtonesG": -0.2,
+	"cColorBalanceMidtonesB": 1.0,
+	"cColorBalanceHighlightsR": 1.0,
+	"cColorBalanceHighlightsG": 0.5,
+	"cColorBalanceHighlightsB": 1.0
+}

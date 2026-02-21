@@ -1,0 +1,20 @@
+{
+	"type": "Grunge",
+	"animate": false,
+	"time": 5.0,
+	"resolution": "512",
+	"polarConversion": false,
+	"tiling": true,
+	"normalMap": false,
+	"cIntensity": 0.6,
+	"cScale": 1.5,
+	"cColorBalanceShadowsR": 0.6,
+	"cColorBalanceShadowsG": -0.4,
+	"cColorBalanceShadowsB": -0.9,
+	"cColorBalanceMidtonesR": 0.85,
+	"cColorBalanceMidtonesG": 0.3,
+	"cColorBalanceMidtonesB": -0.6,
+	"cColorBalanceHighlightsR": 1.0,
+	"cColorBalanceHighlightsG": 0.7,
+	"cColorBalanceHighlightsB": 0.2
+}

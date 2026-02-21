@@ -5,37 +5,48 @@
 <meta charset="utf-8"/>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#0a0a0f;color:#fff;font-family:monospace;padding:20px}
-h1{text-align:center;margin-bottom:6px;font-size:24px;color:#e0e0ff}
-.subtitle{text-align:center;color:#666;margin-bottom:16px;font-size:13px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:16px;max-width:1900px;margin:0 auto}
-.card{background:#111;border:2px solid #222;border-radius:8px;overflow:hidden;cursor:pointer;transition:border-color 0.2s,box-shadow 0.2s}
-.card:hover{border-color:#e94560;box-shadow:0 0 20px rgba(233,69,96,0.25)}
+body{background:#050508;color:#fff;font-family:'Segoe UI',system-ui,monospace;padding:20px}
+h1{text-align:center;margin-bottom:4px;font-size:28px;color:#e0e0ff;letter-spacing:2px}
+.subtitle{text-align:center;color:#555;margin-bottom:20px;font-size:13px}
+.subtitle a{color:#e94560;text-decoration:none}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:14px;max-width:1900px;margin:0 auto 30px}
+.card{background:#0a0a12;border:2px solid #1a1a2e;border-radius:10px;overflow:hidden;cursor:pointer;transition:all 0.3s;position:relative}
+.card:hover{border-color:#e94560;box-shadow:0 0 30px rgba(233,69,96,0.3);transform:translateY(-2px)}
 .card canvas{width:100%;aspect-ratio:1;display:block;background:#000}
-.card .label{padding:8px 12px;font-size:14px;color:#ccc;text-align:center;border-top:1px solid #222;letter-spacing:1px}
-.card .label span{color:#555;font-size:11px;margin-left:8px}
-#status{text-align:center;color:#888;margin:16px 0;font-size:14px}
-.controls{text-align:center;margin-bottom:16px;display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
-.controls button{padding:8px 16px;border:1px solid #333;border-radius:4px;background:#1a1a2e;color:#ccc;font-family:monospace;font-size:13px;cursor:pointer;transition:all 0.15s}
-.controls button:hover{background:#0f3460;border-color:#e94560;color:#fff}
-.controls button.on{background:#0f3460;border-color:#e94560;color:#fff}
+.card .label{padding:10px 14px;font-size:13px;color:#ccc;text-align:center;border-top:1px solid #1a1a2e;letter-spacing:1px;display:flex;justify-content:space-between;align-items:center}
+.card .label .name{font-weight:bold;color:#e0e0ff}
+.card .label .tag{font-size:10px;padding:2px 8px;border-radius:10px;background:#1a1a2e;color:#888}
+.card .label .tag.custom{background:#2a1030;color:#e94560}
+.card .badges{position:absolute;top:8px;right:8px;display:flex;gap:4px}
+.card .badge{font-size:9px;padding:2px 6px;border-radius:8px;background:rgba(10,10,20,0.85);border:1px solid #333}
+.card .badge.polar{color:#ff6b8a;border-color:#e94560}
+.card .badge.tiling{color:#6bffb8;border-color:#4ae94a}
+.card .badge.toon{color:#6bb8ff;border-color:#4a94e9}
+.card .badge.gradient{color:#ffb86b;border-color:#ff8c00}
+#status{text-align:center;color:#666;margin:16px 0;font-size:14px;font-family:monospace}
+.controls{text-align:center;margin-bottom:20px;display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.controls button{padding:8px 18px;border:1px solid #222;border-radius:20px;background:#0a0a12;color:#888;font-family:monospace;font-size:12px;cursor:pointer;transition:all 0.2s;letter-spacing:0.5px}
+.controls button:hover{background:#1a1a2e;border-color:#555;color:#ccc}
+.controls button.on{background:#1a1030;border-color:#e94560;color:#e94560}
+.stats{text-align:center;padding:10px;font-family:monospace;font-size:11px;color:#333;margin-top:20px;border-top:1px solid #111}
 </style>
 </head>
 <body>
-<h1>Effect Texture Maker - Live Gallery</h1>
-<p class="subtitle">Every effect is rendering live. Click any to open full editor.</p>
+<h1>Effect Texture Maker</h1>
+<p class="subtitle">Live GPU-rendered procedural textures with gradient color mapping | <a href="editor.html">Open Editor</a></p>
 <div class="controls">
-<button onclick="filterCat('all')" class="on" id="btn-all">All</button>
+<button onclick="filterCat('custom')" class="on" id="btn-custom">Showcase Presets</button>
+<button onclick="filterCat('all')" id="btn-all">All Effects</button>
 <button onclick="filterCat('fire')" id="btn-fire">Fire / Energy</button>
 <button onclick="filterCat('light')" id="btn-light">Light / Glow</button>
 <button onclick="filterCat('shape')" id="btn-shape">Shapes</button>
 <button onclick="filterCat('atmo')" id="btn-atmo">Atmospheric</button>
 <button onclick="filterCat('noise')" id="btn-noise">Noise</button>
 <button onclick="filterCat('art')" id="btn-art">Artistic</button>
-<button onclick="filterCat('custom')" id="btn-custom">Custom Presets</button>
 </div>
 <div id="status">Loading Three.js + shaders...</div>
 <div class="grid" id="grid"></div>
+<div class="stats" id="stats"></div>
 
 <script type="importmap">
 {"imports":{"three":"https://unpkg.com/three@0.174.0/build/three.module.min.js","three/addons/":"https://unpkg.com/three@0.174.0/examples/jsm/","pixy":"./pixy.module.min.js"}}
@@ -44,6 +55,62 @@ h1{text-align:center;margin-bottom:6px;font-size:24px;color:#e0e0ff}
 import*as THREE from"three";
 import*as PIXY from"pixy";
 
+// --- Gradient Map System (Phase 2 feature, embedded for gallery) ---
+const GRADIENTS={
+Fire:[{p:0,c:"#000000"},{p:.25,c:"#8b0000"},{p:.5,c:"#ff4500"},{p:.75,c:"#ffa500"},{p:1,c:"#ffff00"}],
+Ice:[{p:0,c:"#000022"},{p:.3,c:"#003366"},{p:.6,c:"#4488cc"},{p:.85,c:"#aaddff"},{p:1,c:"#ffffff"}],
+Neon:[{p:0,c:"#0a0020"},{p:.2,c:"#6600cc"},{p:.5,c:"#ff00ff"},{p:.7,c:"#00ffff"},{p:1,c:"#ffffff"}],
+Earth:[{p:0,c:"#1a0f00"},{p:.3,c:"#4a3000"},{p:.5,c:"#8b6914"},{p:.75,c:"#c4a35a"},{p:1,c:"#f5e6c8"}],
+Toxic:[{p:0,c:"#000000"},{p:.3,c:"#003300"},{p:.5,c:"#00cc00"},{p:.75,c:"#66ff00"},{p:1,c:"#ccff66"}],
+Plasma:[{p:0,c:"#0a0015"},{p:.2,c:"#4400aa"},{p:.4,c:"#cc00ff"},{p:.6,c:"#ff0066"},{p:.8,c:"#ff6600"},{p:1,c:"#ffff00"}],
+Ocean:[{p:0,c:"#000510"},{p:.25,c:"#002244"},{p:.5,c:"#006688"},{p:.75,c:"#00aacc"},{p:1,c:"#88ffee"}],
+Ember:[{p:0,c:"#000000"},{p:.3,c:"#330000"},{p:.5,c:"#991100"},{p:.7,c:"#ff4400"},{p:.9,c:"#ffaa00"},{p:1,c:"#ffeecc"}],
+Frost:[{p:0,c:"#050520"},{p:.3,c:"#1a3355"},{p:.5,c:"#5588bb"},{p:.8,c:"#bbddff"},{p:1,c:"#ffffff"}],
+Void:[{p:0,c:"#000000"},{p:.3,c:"#1a0033"},{p:.5,c:"#440066"},{p:.75,c:"#8800aa"},{p:1,c:"#cc44ff"}]
+};
+
+function makeGradientTexture(stops){
+const c=document.createElement("canvas");c.width=256;c.height=1;
+const ctx=c.getContext("2d");
+const g=ctx.createLinearGradient(0,0,256,0);
+for(const s of stops)g.addColorStop(s.p,s.c);
+ctx.fillStyle=g;ctx.fillRect(0,0,256,1);
+const tex=new THREE.CanvasTexture(c);
+tex.minFilter=THREE.LinearFilter;tex.magFilter=THREE.LinearFilter;
+tex.wrapS=THREE.ClampToEdgeWrapping;
+return tex;
+}
+
+// Gradient map shader (post-process)
+const gradMapVert=`varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position,1.0);}`;
+const gradMapFrag=`uniform sampler2D tDiffuse;uniform sampler2D tGradient;uniform float intensity;varying vec2 vUv;void main(){vec4 t=texture2D(tDiffuse,vUv);float l=dot(t.rgb,vec3(0.299,0.587,0.114));vec4 g=texture2D(tGradient,vec2(l,0.5));gl_FragColor=vec4(mix(t.rgb,g.rgb,intensity),1.0);}`;
+const gradScene=new THREE.Scene();
+const gradCam=new THREE.Camera();
+const gradQuad=new THREE.Mesh(new THREE.PlaneGeometry(2,2),null);
+gradScene.add(gradQuad);
+
+// Which presets get which gradient maps
+const PRESET_GRADIENTS={
+"helix-nebula":"Neon","magma-channels":"Fire","storm-eye":"Plasma",
+"bioluminescent-deep":"Ocean","solar-chromosphere":"Ember","neural-tissue":"Neon",
+"crystal-voronoi":"Frost","frozen-lightning":"Ice","inferno-vortex":"Fire",
+"alien-nebula":"Void","plasma-storm":"Plasma","ocean-caustics":"Ocean",
+"dark-matter":"Void","cyberpunk-circuit":"Neon","lava-planet":"Fire",
+"ice-crystal":"Ice","aurora-borealis":"Ocean","toxic-waste":"Toxic",
+"dragon-scales":"Ember","ocean-abyss":"Ocean","blood-moon":"Fire",
+"electric-storm":"Plasma","copper-patina":"Earth","starfield":"Frost",
+"sacred-geometry":"Ember","supernova":"Plasma","rust-metal":"Earth",
+"neon-veins":"Toxic","black-hole":"Void","digital-rain":"Toxic",
+"plasma-ball":"Plasma","desert-sand":"Earth","mercury-pool":"Frost",
+"alien-flesh":"Neon","fire-mandala":"Fire","smoke-vortex":"Ocean",
+"quantum-foam":"Void","emerald-marble":"Toxic"
+};
+
+// Pre-build gradient textures
+const gradTextures={};
+for(const[name,stops]of Object.entries(GRADIENTS)){gradTextures[name]=makeGradientTexture(stops)}
+
+// --- Effect Types ---
 const TYPES=[
 "Wood","Circle","Solar","Corona","Spark","Ring","Gradation","GradationLine",
 "Flash","Cone","Flower","FlowerFun","WaveRing","Smoke","Flame","FlameEye",
@@ -65,13 +132,22 @@ atmo:["Smoke","Cloud","Cloud2","Snow","Bubbles","WaterTurbulence","Caustics"],
 noise:["CoherentNoise","PerlinNoise","SeamlessNoise","BooleanNoise","CellNoise","TurbulentNoise","FbmNoise","FbmNoise2","FbmNoise3","RandomNoise","VoronoiNoise","SparkNoise","MarbleNoise","TessNoise","GradientNoise"],
 art:["Wood","BrushStroke","InkSplat","Grunge","Speckle","Squiggles","Trabeculum","BinaryMatrix","Checker","Gradation","GradationLine","Cell","Lightning","Particle"]
 };
-const CUSTOM_PRESETS=["helix-nebula","magma-channels","storm-eye","bioluminescent-deep","solar-chromosphere","neural-tissue","crystal-voronoi","frozen-lightning","inferno-vortex","alien-nebula","plasma-storm","ocean-caustics","dark-matter"];
+
+const CUSTOM_PRESETS=[
+"helix-nebula","magma-channels","storm-eye","bioluminescent-deep",
+"solar-chromosphere","neural-tissue","crystal-voronoi","frozen-lightning",
+"inferno-vortex","alien-nebula","plasma-storm","ocean-caustics","dark-matter",
+"cyberpunk-circuit","lava-planet","ice-crystal","aurora-borealis","toxic-waste",
+"dragon-scales","ocean-abyss","blood-moon","electric-storm","copper-patina",
+"starfield","sacred-geometry","supernova","rust-metal","neon-veins",
+"black-hole","digital-rain","plasma-ball","desert-sand","mercury-pool",
+"alien-flesh","fire-mandala","smoke-vortex","quantum-foam","emerald-marble"
+];
 
 const RES=512;
 const grid=document.getElementById("grid");
 const statusEl=document.getElementById("status");
 
-// Single renderer shared by all
 const renderer=new THREE.WebGLRenderer({alpha:true,antialias:false});
 renderer.setSize(RES,RES);
 renderer.autoClear=true;
@@ -87,12 +163,17 @@ grungeTex.magFilter=THREE.LinearFilter;
 
 function getDefaults(){return{animate:true,time:0,resolution:RES+"",polarConversion:false,tiling:false,normalMap:false,cHeightScale:2,cRadialMask:1,cColorBalanceShadowsR:0,cColorBalanceShadowsG:0,cColorBalanceShadowsB:0,cColorBalanceMidtonesR:0,cColorBalanceMidtonesG:0,cColorBalanceMidtonesB:0,cColorBalanceHighlightsR:0,cColorBalanceHighlightsG:0,cColorBalanceHighlightsB:0,cToonEnable:false,cToonDark:.8,cToonLight:.95,cFrequency:30,cAmplitude:.01,cIntensity:.5,cDirectionX:0,cDirectionY:1,cPowerExponent:1,cRadius:.5,cInnerRadius:1,cInnerRadius2:1,cSize:1,cWidth:1,cHeight:1,cDepth:1,cColor:1,cPetals:6,cOffset:.2,cVolume:3,cBeta:4,cDelta:.05,cScale:1,cInnerWidth:.4,cStrength:1,cPower:1,cRange:2,cEmission:1,cBloom:1,cLightX:1,cLightY:1,cLightZ:1,cAmbient:1,cSmoothness:1,cSmoothnessPower:1,cThickness:1,cThicknessPower:1,cCameraTilt:0,cCameraPan:0,cSpeed:1,cAngle:0,cDensity:1,cAlpha:1,cRepeat:1,cScaleShift:0,cBias:0,cGain:0,cInvert:0,cThreshold:0,cDiamondGearTeeth:18,cDiamondGearMid:.8,cBrushStrokeX1:-.4,cBrushStrokeY1:0,cBrushStrokeX2:1.1,cBrushStrokeY2:.8,cBubblesVariation:1,cFlameEyeInnerFade:1,cFlameEyeOuterFade:1,cFlameEyeBorder:1,cSplatLines:20,cSplatSpotStep:.04,cTrabeculumVariation:2,cLifeTime:.9,cGravity:.26,cCount:300,cExplosionRadius:1.75,cExplosionDownScale:1.25,cExplosionGrain:2,cExplosionSpeed:.3,cExplosionBallness:2,cExplosionGrowth:2.2,cExplosionFade:1.6,cExplosionDensity:1.35,cExplosionContrast:1,cExplosionRollingInitDamp:.3,cExplosionRollingSpeed:2,cExplosionDelayRange:.25,cExplosionBallSpread:1,cExplosionBloom:0,cExplosionEmission:.2,cExplosionColor:1,cNoiseOctave:8,cNoiseFrequency:1,cNoiseAmplitude:.65,cNoisePersistence:.5,cNoiseScale:1,cNoiseSphereEnable:false,cNoiseGraphEnable:false,cNoiseStrength:1,cNoiseDepth:3,cNoiseSize:8,cNoiseLacunarity:2,cTurbulence:0,cRidge:0,cRidgeOffset:.9,cGradientNoise:0,cValueNoise:0,cVoronoiNoise:0,cVoronoiCell:0,cSimplexNoise:1}}
 
-// Each effect keeps its own state
 const effects=[];
-const visibleSet=new Set();
 const pixelBuf=new Uint8Array(RES*RES*4);
 
-function buildEffect(type,ec,label,clickUrl){
+// Gradient map render target for post-processing
+const gradRT=new THREE.WebGLRenderTarget(RES,RES,{minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter});
+const gradMat=new THREE.ShaderMaterial({
+uniforms:{tDiffuse:{value:null},tGradient:{value:null},intensity:{value:0.85}},
+vertexShader:gradMapVert,fragmentShader:gradMapFrag,depthTest:false,depthWrite:false
+});
+
+function buildEffect(type,ec,label,tags,gradientName,clickUrl){
 const sh=new PIXY.FxgenShader();
 sh.enable(type.toUpperCase());
 sh.enable("TOON");
@@ -109,17 +190,31 @@ const card=document.createElement("div");
 card.className="card";
 card.dataset.type=type;
 card.appendChild(canvas);
+
+const badges=document.createElement("div");
+badges.className="badges";
+if(ec.polarConversion){const b=document.createElement("span");b.className="badge polar";b.textContent="POLAR";badges.appendChild(b)}
+if(ec.tiling){const b=document.createElement("span");b.className="badge tiling";b.textContent="TILE";badges.appendChild(b)}
+if(ec.cToonEnable){const b=document.createElement("span");b.className="badge toon";b.textContent="TOON";badges.appendChild(b)}
+if(gradientName){const b=document.createElement("span");b.className="badge gradient";b.textContent="GRAD:"+gradientName;badges.appendChild(b)}
+card.appendChild(badges);
+
 const lbl=document.createElement("div");
 lbl.className="label";
-lbl.innerHTML=label;
+const nameSpan=document.createElement("span");
+nameSpan.className="name";
+nameSpan.textContent=label;
+lbl.appendChild(nameSpan);
+const tagSpan=document.createElement("span");
+tagSpan.className="tag"+(tags.includes("custom")?" custom":"");
+tagSpan.textContent=tags.filter(t=>t!=="custom"&&t!=="animated").join(" | ")||type;
+lbl.appendChild(tagSpan);
 card.appendChild(lbl);
 card.addEventListener("click",()=>window.open(clickUrl,"_blank"));
 
-const eff={type,ec,uniforms,mat,rt,canvas,ctx,card,visible:false};
+const eff={type,ec,uniforms,mat,rt,canvas,ctx,card,visible:false,gradientName};
 effects.push(eff);
 grid.appendChild(card);
-
-// Observe visibility
 observer.observe(card);
 return eff;
 }
@@ -142,13 +237,26 @@ PIXY.FxgenShaderUtils.SetShaderParameter(u,"cColorBalanceHighlights",new THREE.V
 PIXY.FxgenShaderUtils.SetShaderParameter(u,"cDirection",new THREE.Vector2(ec.cDirectionX,ec.cDirectionY));
 PIXY.FxgenShaderUtils.SetShaderParameter(u,"tGrunge",grungeTex);
 
+// Render base effect
 scene.overrideMaterial=eff.mat;
 renderer.setRenderTarget(eff.rt);
 renderer.render(scene,cam);
 renderer.setRenderTarget(null);
 scene.overrideMaterial=null;
 
-renderer.readRenderTargetPixels(eff.rt,0,0,RES,RES,pixelBuf);
+// Apply gradient map if assigned (Phase 2 feature!)
+let readRT=eff.rt;
+if(eff.gradientName&&gradTextures[eff.gradientName]){
+gradMat.uniforms.tDiffuse.value=eff.rt.texture;
+gradMat.uniforms.tGradient.value=gradTextures[eff.gradientName];
+gradQuad.material=gradMat;
+renderer.setRenderTarget(gradRT);
+renderer.render(gradScene,gradCam);
+renderer.setRenderTarget(null);
+readRT=gradRT;
+}
+
+renderer.readRenderTargetPixels(readRT,0,0,RES,RES,pixelBuf);
 const img=eff.ctx.createImageData(RES,RES);
 for(let y=0;y<RES;y++){
 const src=(RES-1-y)*RES*4,dst=y*RES*4;
@@ -157,7 +265,6 @@ for(let x=0;x<RES*4;x++)img.data[dst+x]=pixelBuf[src+x];
 eff.ctx.putImageData(img,0,0);
 }
 
-// IntersectionObserver: only animate visible cards
 const observer=new IntersectionObserver((entries)=>{
 for(const e of entries){
 const card=e.target;
@@ -166,9 +273,8 @@ if(eff){eff.visible=e.isIntersecting}
 }
 },{threshold:0.05});
 
-// Animation loop: render only visible effects, staggered
 let lastTime=0;
-const MAX_PER_FRAME=6;
+const MAX_PER_FRAME=8;
 let roundRobin=0;
 
 function animate(now){
@@ -176,11 +282,8 @@ requestAnimationFrame(animate);
 const dt=(now-lastTime)/1000;
 lastTime=now;
 if(dt>1||dt<=0)return;
-
 const visible=effects.filter(e=>e.visible&&e.card.style.display!=="none");
 if(!visible.length)return;
-
-// Render up to MAX_PER_FRAME visible effects per frame, cycling through
 let rendered=0;
 for(let i=0;i<visible.length&&rendered<MAX_PER_FRAME;i++){
 const idx=(roundRobin+i)%visible.length;
@@ -190,7 +293,6 @@ rendered++;
 roundRobin=(roundRobin+MAX_PER_FRAME)%Math.max(visible.length,1);
 }
 
-// Filter
 window.filterCat=function(cat){
 document.querySelectorAll(".controls button").forEach(b=>b.classList.remove("on"));
 const btn=document.getElementById("btn-"+cat);
@@ -203,34 +305,42 @@ else eff.card.style.display=(CATS[cat]||[]).includes(t)?"":"none";
 });
 };
 
-// Build everything
 async function init(){
-statusEl.textContent="Building effects...";
+statusEl.textContent="Building showcase presets with gradient maps...";
 let count=0;
-for(const type of TYPES){
-const ec=getDefaults();
-ec.type=type;
-ec.time=Math.random()*5;
-buildEffect(type,ec,type,`index.html`);
-count++;
-statusEl.textContent=`Building ${count}/${TYPES.length+CUSTOM_PRESETS.length}...`;
-await new Promise(r=>setTimeout(r,2));
-}
 
+// Load custom presets FIRST with gradient maps applied
 for(const name of CUSTOM_PRESETS){
 try{
 const resp=await fetch("presets/"+name+".json");
 const preset=await resp.json();
 const ec=Object.assign(getDefaults(),preset);
 const label=name.replace(/-/g," ").replace(/\b\w/g,c=>c.toUpperCase());
-const eff=buildEffect(ec.type,ec,label+' <span>custom preset</span>',"index.html?preset="+name);
+const tags=["custom"];
+const gradName=PRESET_GRADIENTS[name]||null;
+const eff=buildEffect(ec.type,ec,label,tags,gradName,"editor.html");
 eff.card.dataset.custom="1";
 count++;
-statusEl.textContent=`Building ${count}/${TYPES.length+CUSTOM_PRESETS.length}...`;
+statusEl.textContent=`Building ${count}/${CUSTOM_PRESETS.length+TYPES.length}...`;
 }catch(e){console.warn("preset fail:",name,e)}
+await new Promise(r=>setTimeout(r,2));
 }
 
-statusEl.textContent=`${count} live effects. Scroll to explore. Only visible ones animate.`;
+// Then all base effects (no gradient)
+for(const type of TYPES){
+const ec=getDefaults();
+ec.type=type;
+ec.time=Math.random()*5;
+buildEffect(type,ec,type,[type],null,"editor.html");
+count++;
+statusEl.textContent=`Building ${count}/${CUSTOM_PRESETS.length+TYPES.length}...`;
+await new Promise(r=>setTimeout(r,2));
+}
+
+const gradCount=Object.keys(PRESET_GRADIENTS).length;
+statusEl.textContent=`${count} live textures | ${CUSTOM_PRESETS.length} curated presets | ${gradCount} with gradient color maps | GPU-rendered in real-time`;
+document.getElementById("stats").textContent=`Features: Color Balance + Gradient Maps (10 palettes) + Polar Warping + Toon Shading + Seamless Tiling | Click any to edit`;
+filterCat("custom");
 requestAnimationFrame(animate);
 }
 

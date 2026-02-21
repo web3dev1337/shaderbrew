@@ -1,0 +1,23 @@
+{
+	"type": "SparkNoise",
+	"animate": true,
+	"time": 8.0,
+	"resolution": "512",
+	"polarConversion": false,
+	"tiling": false,
+	"normalMap": false,
+	"cNoiseOctave": 3,
+	"cNoiseFrequency": 20,
+	"cNoiseAmplitude": 1.5,
+	"cNoiseLacunarity": 3,
+	"cNoisePersistence": 0.3,
+	"cColorBalanceShadowsR": -0.4,
+	"cColorBalanceShadowsG": -0.3,
+	"cColorBalanceShadowsB": 0.6,
+	"cColorBalanceMidtonesR": 0.2,
+	"cColorBalanceMidtonesG": 0.4,
+	"cColorBalanceMidtonesB": 0.9,
+	"cColorBalanceHighlightsR": 1.0,
+	"cColorBalanceHighlightsG": 0.95,
+	"cColorBalanceHighlightsB": 0.8
+}

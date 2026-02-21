@@ -1,0 +1,20 @@
+{
+	"type": "Corona",
+	"animate": true,
+	"time": 1.0,
+	"resolution": "512",
+	"polarConversion": false,
+	"tiling": false,
+	"normalMap": false,
+	"cIntensity": 0.7,
+	"cPowerExponent": 1.8,
+	"cColorBalanceShadowsR": 0.85,
+	"cColorBalanceShadowsG": -1.0,
+	"cColorBalanceShadowsB": -1.0,
+	"cColorBalanceMidtonesR": 1.0,
+	"cColorBalanceMidtonesG": -0.5,
+	"cColorBalanceMidtonesB": -0.9,
+	"cColorBalanceHighlightsR": 1.0,
+	"cColorBalanceHighlightsG": 0.4,
+	"cColorBalanceHighlightsB": 0.15
+}

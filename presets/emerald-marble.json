@@ -1,0 +1,23 @@
+{
+	"type": "MarbleNoise",
+	"animate": false,
+	"time": 10.0,
+	"resolution": "512",
+	"polarConversion": false,
+	"tiling": true,
+	"normalMap": false,
+	"cNoiseOctave": 6,
+	"cNoiseFrequency": 4,
+	"cNoiseAmplitude": 1.0,
+	"cNoiseLacunarity": 2,
+	"cNoisePersistence": 0.5,
+	"cColorBalanceShadowsR": -0.95,
+	"cColorBalanceShadowsG": 0.6,
+	"cColorBalanceShadowsB": -0.3,
+	"cColorBalanceMidtonesR": -0.5,
+	"cColorBalanceMidtonesG": 0.85,
+	"cColorBalanceMidtonesB": 0.2,
+	"cColorBalanceHighlightsR": 0.7,
+	"cColorBalanceHighlightsG": 1.0,
+	"cColorBalanceHighlightsB": 0.75
+}
