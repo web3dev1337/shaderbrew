@@ -72,7 +72,7 @@ Forging materials...
 <div class="hud" id="hud"></div>
 <div class="info-bar">
 <kbd>Drag</kbd> orbit &nbsp; <kbd>Scroll</kbd> zoom &nbsp; <kbd>Right-drag</kbd> pan &nbsp; | &nbsp;
-8 procedural materials &middot; 4 animated in real-time &middot; bloom post-processing &middot; floating particles
+8 procedural materials &middot; 4 animated in real-time &middot; bloom post-processing
 </div>
 <div class="mat-strips" id="mat-strips"></div>
 </div>
@@ -525,39 +525,6 @@ pL.position.set(px,2.5,pz);scene.add(pL);
 }
 
 // ══════════════════════════════════════════════════════════════════
-// FLOATING PARTICLES
-// ══════════════════════════════════════════════════════════════════
-const PC=600;
-const pPos=new Float32Array(PC*3);
-const pCol=new Float32Array(PC*3);
-const pVel=new Float32Array(PC*3);
-const pColors=[
-new THREE.Color(0xff4400),new THREE.Color(0x4488ff),
-new THREE.Color(0xff44ff),new THREE.Color(0x22aaff),
-new THREE.Color(0x22ff44),new THREE.Color(0xaa44ff),
-new THREE.Color(0xff8800),new THREE.Color(0x7733ee)
-];
-for(let i=0;i<PC;i++){
-pPos[i*3]=(Math.random()-.5)*22;
-pPos[i*3+1]=Math.random()*10;
-pPos[i*3+2]=(Math.random()-.5)*22;
-const c=pColors[i%8];
-pCol[i*3]=c.r;pCol[i*3+1]=c.g;pCol[i*3+2]=c.b;
-pVel[i*3]=(Math.random()-.5)*.008;
-pVel[i*3+1]=Math.random()*.006+.003;
-pVel[i*3+2]=(Math.random()-.5)*.008;
-}
-const pGeo=new THREE.BufferGeometry();
-pGeo.setAttribute("position",new THREE.BufferAttribute(pPos,3));
-pGeo.setAttribute("color",new THREE.BufferAttribute(pCol,3));
-const pMat=new THREE.PointsMaterial({
-size:.06,vertexColors:true,transparent:true,opacity:.7,
-blending:THREE.AdditiveBlending,depthWrite:false,sizeAttenuation:true
-});
-const particles=new THREE.Points(pGeo,pMat);
-scene.add(particles);
-
-// ══════════════════════════════════════════════════════════════════
 // BLOOM POST-PROCESSING
 // ══════════════════════════════════════════════════════════════════
 const composer=new EffectComposer(r3);
@@ -660,21 +627,6 @@ if(i===2)objects[i].rotation.x+=.002; // plasma wobble
 if(i===4){objects[i].rotation.x=Math.sin(t*.5)*.15;} // alien pulse
 if(i===6)objects[i].rotation.z+=.001; // solar tilt
 }
-
-// ── Particles ──
-const pa=particles.geometry.attributes.position.array;
-for(let i=0;i<PC;i++){
-pa[i*3]+=pVel[i*3];
-pa[i*3+1]+=pVel[i*3+1];
-pa[i*3+2]+=pVel[i*3+2];
-if(pa[i*3+1]>10){
-pa[i*3+1]=0;
-pa[i*3]=(Math.random()-.5)*22;
-pa[i*3+2]=(Math.random()-.5)*22;
-}
-}
-particles.geometry.attributes.position.needsUpdate=true;
-particles.rotation.y=t*.02;
 
 // ── Pulsing lights ──
 const pulse=Math.sin(t*2)*.3+.7;
