@@ -138,45 +138,48 @@ Created 5 basic V1 presets + 8 advanced V2 presets with intentional parameter in
 - [x] 5 built-in gradient presets (Fire, Ice, Neon, Earth, Toxic)
 - [x] Integrated into app.js render loop (commit de60a9e)
 
-### Phase 3: Enhanced UI Layout
-**Files:** `src/ui/layout.js`, `src/ui/layer-panel.js`, new `index.html`
+### Phase 3: Enhanced UI Layout -- DONE (commit 594db2c)
+**Files created:** `src/shaders/tile-preview.js`, `src/tile-preview-pass.js`, `src/ui/toolbar.js`
 
-1. **Split-pane layout**: Layer panel (left) | Viewport (center) | Parameters (right)
-2. Layer panel with drag-to-reorder, per-layer visibility/opacity/blend controls
-3. Move from lil-gui to custom parameter panel for better control
-4. 2x2 tiling preview toggle
+- [x] Toolbar with quick toggles (2x2 tile, animate, 3D sphere, reset)
+- [x] TilePreviewPass shader for seamless tiling visualization
+- [x] Enhanced editor.html CSS with fixed lil-gui, proper viewport area
+- [x] Resolution indicator in toolbar
 
-### Phase 4: PBR Map Generation
-**Files:** `src/pbr-generator.js`, `src/shaders/pbr/`
+### Phase 4: PBR Map Generation -- DONE (commit 6c47cb6)
+**Files created:** `src/pbr-generator.js`, `src/shaders/pbr/height-normal.js`, `src/shaders/pbr/roughness.js`, `src/shaders/pbr/ao.js`, `src/shaders/pbr/metallic.js`, `src/ui/pbr-panel.js`
 
-1. **Height-to-Normal** (Sobel filter) - already partially exists in pixy's NormalMap pass
-2. **Roughness** from grayscale with controls
-3. **AO** from height via blur difference
-4. **Metallic** from parameters
-5. **ORM** packed texture (Occlusion-Roughness-Metallic in RGB)
-6. Split viewport showing all maps simultaneously
+- [x] Height-to-Normal Sobel filter shader
+- [x] Roughness shader with invert/contrast/bias
+- [x] AO shader with multi-directional occlusion sampling
+- [x] Metallic shader with threshold/smoothing
+- [x] PBRGenerator class coordinating all map passes
+- [x] PBR panel UI with preview thumbnails + parameter sliders
 
-### Phase 5: 3D Preview
-**Files:** `src/preview-3d.js`
+### Phase 5: 3D Preview -- DONE (commit 517a68b)
+**Files created:** `src/preview-3d.js`
 
-1. Split viewport with `MeshStandardMaterial` on sphere/cube/custom mesh
-2. Apply generated PBR maps in real-time
-3. Environment lighting with IBL
+- [x] MeshStandardMaterial on sphere/cube/cylinder/plane
+- [x] Auto-applies color + all PBR maps in real-time
+- [x] ACES filmic tone mapping, 3-point lighting
+- [x] Auto-rotate toggle, mesh type selector, orbit controls
 
-### Phase 6: Undo/Redo
-**Files:** `src/history.js`
+### Phase 6: Undo/Redo -- DONE (commit a1167d1)
+**Files created:** `src/history.js`
 
-1. JSON state snapshots
-2. Debounced recording for slider drags
-3. Ctrl+Z / Ctrl+Shift+Z
+- [x] JSON state snapshots (max 50)
+- [x] Debounced recording (300ms) for slider drags
+- [x] Ctrl+Z undo, Ctrl+Shift+Z / Ctrl+Y redo
+- [x] Records on type change, reset, preset load
 
-### Phase 7: Enhanced Export
-**Files:** `src/export.js`
+### Phase 7: Enhanced Export -- DONE (commit 5075765)
+**Files created:** `src/export.js`, `src/ui/export-panel.js`
 
-1. PNG/JPEG formats with quality control
-2. Resolution selector (up to 4096)
-3. ZIP bundle via JSZip (all PBR maps + preset JSON)
-4. Animation frame export improvements
+- [x] PNG/JPEG export with quality control
+- [x] Resolution selector (256, 512, 1024, 2048, 4096)
+- [x] ZIP bundle via JSZip CDN (all PBR maps + color + preset JSON)
+- [x] Individual PBR map export buttons
+- [x] Export panel UI with accent-colored highlight
 
 ### Phase 8 (Future): Node Graph Editor
 - LiteGraph.js or Rete.js based
