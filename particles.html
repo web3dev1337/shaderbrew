@@ -28,6 +28,11 @@ background:radial-gradient(ellipse at center,transparent 60%,rgba(0,0,0,.4));poi
 .sprite-card{text-align:center;font-family:monospace}
 .sprite-card canvas{width:100px;height:100px;border-radius:8px;border:1px solid #1a1a2e;background:#000;display:block;margin-bottom:4px}
 .sprite-card .label{font-size:10px;color:#888}.sprite-card .sub{font-size:8px;color:#444}
+.toggle-bar{max-width:1400px;margin:10px auto;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:0 20px}
+.toggle-btn{font-family:monospace;font-size:12px;padding:8px 16px;border:1px solid #333;border-radius:6px;
+background:#111;color:#aaa;cursor:pointer;transition:all .2s}
+.toggle-btn.active{background:#1a1a2e;color:#fff;border-color:#e94560}
+.toggle-btn:hover{border-color:#666}
 .links{text-align:center;padding:20px;font-family:monospace;font-size:12px}
 .links a{color:#e94560;text-decoration:none;margin:0 10px}
 </style>
@@ -41,6 +46,7 @@ background:radial-gradient(ellipse at center,transparent 60%,rgba(0,0,0,.4));poi
 <div id="loading">Forging particle sprites...<div class="bar"><div class="bar-fill" id="pbar"></div></div></div>
 <div id="content" style="display:none">
 <div id="viewport"></div>
+<div class="toggle-bar" id="toggles"></div>
 <div class="info-bar">
 <kbd>Drag</kbd> orbit &nbsp; <kbd>Scroll</kbd> zoom &nbsp; | &nbsp;
 4 particle systems &middot; procedural sprite textures &middot; bloom post-processing &middot; ~1000 live particles
@@ -437,6 +443,41 @@ prog(100);
 await new Promise(r=>setTimeout(r,200));
 document.getElementById("loading").style.display="none";
 document.getElementById("content").style.display="block";
+
+// ── Toggle buttons ──
+const systems=[
+{name:"Fire Fountain",obj:fire,color:"#ff5500"},
+{name:"Magic Vortex",obj:magic,color:"#aa44ff"},
+{name:"Lightning Sparks",obj:sparks,color:"#4488ff"},
+{name:"Ember Rain",obj:embers,color:"#ff8800"}
+];
+const togBar=document.getElementById("toggles");
+const allBtn=document.createElement("button");
+allBtn.className="toggle-btn active";allBtn.textContent="All";
+allBtn.onclick=()=>{systems.forEach(s=>{s.obj.points.visible=true;});
+document.querySelectorAll(".toggle-btn").forEach(b=>b.classList.add("active"));};
+togBar.appendChild(allBtn);
+const soloBtn=document.createElement("button");
+soloBtn.className="toggle-btn";soloBtn.textContent="Solo Mode";soloBtn.dataset.solo="0";
+soloBtn.onclick=()=>{const on=soloBtn.dataset.solo==="1";soloBtn.dataset.solo=on?"0":"1";
+soloBtn.classList.toggle("active",!on);};
+togBar.appendChild(soloBtn);
+for(const s of systems){
+const btn=document.createElement("button");
+btn.className="toggle-btn active";btn.textContent=s.name;
+btn.style.borderColor=s.color;
+btn.onclick=()=>{
+const solo=soloBtn.dataset.solo==="1";
+if(solo){
+systems.forEach(x=>{x.obj.points.visible=false;
+document.querySelectorAll(".toggle-btn").forEach(b=>{if(b!==allBtn&&b!==soloBtn)b.classList.remove("active");});});
+s.obj.points.visible=true;btn.classList.add("active");
+}else{
+s.obj.points.visible=!s.obj.points.visible;
+btn.classList.toggle("active",s.obj.points.visible);
+}};
+togBar.appendChild(btn);
+}
 
 // ══════════════════════════════════════════════════════════════════
 // ANIMATION LOOP
