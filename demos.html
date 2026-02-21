@@ -95,7 +95,7 @@ function prog(p){pbar.style.width=p+"%";}
 const W=1200,H=600;
 const r3=new THREE.WebGLRenderer({antialias:true,powerPreference:"high-performance"});
 r3.setSize(W,H);r3.setPixelRatio(Math.min(window.devicePixelRatio,2));
-r3.toneMapping=THREE.ACESFilmicToneMapping;r3.toneMappingExposure=1.4;
+r3.toneMapping=THREE.ACESFilmicToneMapping;r3.toneMappingExposure=1.8;
 r3.shadowMap.enabled=true;r3.shadowMap.type=THREE.PCFSoftShadowMap;
 r3.autoClear=true;
 r3.domElement.style.cssText="cursor:grab;display:block;width:100%;height:auto";
@@ -117,10 +117,10 @@ t.wrapS=t.wrapT=THREE.RepeatWrapping;t.minFilter=THREE.LinearFilter;t.magFilter=
 
 // ── Gradients ──
 const GRADS={
-Lava:[{p:0,c:"#000000"},{p:.1,c:"#1a0000"},{p:.25,c:"#551100"},{p:.4,c:"#aa2200"},{p:.55,c:"#ee4400"},{p:.7,c:"#ff8800"},{p:.85,c:"#ffcc22"},{p:1,c:"#ffffaa"}],
-Frost:[{p:0,c:"#020210"},{p:.15,c:"#061133"},{p:.3,c:"#103366"},{p:.5,c:"#3377aa"},{p:.7,c:"#77bbdd"},{p:.85,c:"#bbddee"},{p:1,c:"#eef8ff"}],
-BronzeMetal:[{p:0,c:"#0a0500"},{p:.15,c:"#1a1008"},{p:.3,c:"#3a2810"},{p:.5,c:"#7a5520"},{p:.65,c:"#aa7733"},{p:.8,c:"#ccaa55"},{p:.9,c:"#eedd88"},{p:1,c:"#fff8e0"}],
-NeonCircuit:[{p:0,c:"#000005"},{p:.15,c:"#000515"},{p:.3,c:"#001133"},{p:.5,c:"#003388"},{p:.65,c:"#0066dd"},{p:.8,c:"#22aaff"},{p:.9,c:"#88ddff"},{p:1,c:"#ccffff"}]
+Lava:[{p:0,c:"#110000"},{p:.1,c:"#331100"},{p:.25,c:"#772200"},{p:.4,c:"#cc3300"},{p:.55,c:"#ff5500"},{p:.7,c:"#ff9922"},{p:.85,c:"#ffdd44"},{p:1,c:"#ffffcc"}],
+Frost:[{p:0,c:"#080820"},{p:.12,c:"#112244"},{p:.28,c:"#224477"},{p:.45,c:"#4488bb"},{p:.6,c:"#77ccee"},{p:.75,c:"#aaddee"},{p:.88,c:"#cceeFF"},{p:1,c:"#f0faff"}],
+PlasmaCore:[{p:0,c:"#110022"},{p:.12,c:"#440066"},{p:.25,c:"#8800aa"},{p:.38,c:"#cc22dd"},{p:.5,c:"#ff55ff"},{p:.62,c:"#ff88ff"},{p:.72,c:"#dd88ff"},{p:.82,c:"#88ccff"},{p:.92,c:"#cceeff"},{p:1,c:"#ffffff"}],
+NeonCircuit:[{p:0,c:"#050510"},{p:.12,c:"#0a1133"},{p:.25,c:"#112255"},{p:.4,c:"#1155aa"},{p:.55,c:"#2288ee"},{p:.7,c:"#44bbff"},{p:.85,c:"#99ddff"},{p:1,c:"#ddffff"}]
 };
 function makeGrad(stops){
 const c=document.createElement("canvas");c.width=256;c.height=1;
@@ -265,15 +265,16 @@ mat:{roughness:.15,metalness:.2,emissive:0x224488,emissiveIntensity:.15,normalSt
 clearcoat:1,clearcoatRoughness:.05,transmission:.15,thickness:.5,ior:1.5}
 },
 {
-name:"Ornate Bronze",
-use:"Shields, armor, ancient artifacts, treasure",
+name:"Plasma Core",
+use:"Energy shields, magic orbs, power sources, portals",
 layers:[
-{type:"CoherentNoise",p:{time:8,tiling:true,cNoiseOctave:5,cNoiseFrequency:4,cNoiseAmplitude:1,cNoiseLacunarity:2,cNoisePersistence:.5,cRidge:.6,cRidgeOffset:.5,cVoronoiNoise:.2,cVoronoiCell:.3}},
-{type:"Trabeculum",p:{time:1,cTrabeculumVariation:3,tiling:true}}
+{type:"Corona",p:{time:5,cCoronaRadius:1.5,cCoronaDensity:1.2,cCoronaIntensity:2,tiling:false}},
+{type:"Electric",p:{time:3,cElectricDensity:1.5,cElectricIntensity:2,tiling:false}}
 ],
-blend:3, // Overlay
-gradient:"BronzeMetal",
-mat:{roughness:.3,metalness:.85,emissive:0x331100,emissiveIntensity:.05,normalStrength:2}
+blend:2, // Screen
+gradient:"PlasmaCore",
+mat:{roughness:.05,metalness:.1,emissive:0xff44ff,emissiveIntensity:1.2,normalStrength:.8,
+clearcoat:1,clearcoatRoughness:0,transmission:.6,thickness:1.5,ior:2.4,opacity:.85,transparent:true}
 },
 {
 name:"Neon Circuit",
@@ -333,8 +334,8 @@ prog(10+i*20);
 document.getElementById("viewport").appendChild(r3.domElement);
 
 const scene=new THREE.Scene();
-scene.background=new THREE.Color(0x06060a);
-scene.fog=new THREE.FogExp2(0x06060a,.04);
+scene.background=new THREE.Color(0x101018);
+scene.fog=new THREE.FogExp2(0x101018,.025);
 
 const cam=new THREE.PerspectiveCamera(42,W/H,.1,100);
 cam.position.set(0,4,9);cam.lookAt(0,.5,0);
@@ -346,27 +347,28 @@ ctrl.target.set(0,.8,0);ctrl.maxDistance=20;ctrl.minDistance=3;
 // Environment map
 const pmrem=new THREE.PMREMGenerator(r3);
 const envS=new THREE.Scene();
-envS.add(new THREE.HemisphereLight(0x223344,0x080808,2.5));
-const envD=new THREE.DirectionalLight(0xffeedd,1.2);envD.position.set(5,8,5);envS.add(envD);
-const envP=new THREE.PointLight(0xff6633,.6);envP.position.set(-3,2,0);envS.add(envP);
+envS.add(new THREE.HemisphereLight(0x445566,0x111122,3));
+const envD=new THREE.DirectionalLight(0xffeedd,2);envD.position.set(5,8,5);envS.add(envD);
+const envP=new THREE.PointLight(0xff6633,1);envP.position.set(-3,2,0);envS.add(envP);
 const envRT=pmrem.fromScene(envS,0,.1,100);
 scene.environment=envRT.texture;
 pmrem.dispose();
 
 // Lighting
-scene.add(new THREE.HemisphereLight(0x334455,0x111111,.5));
-const keyLight=new THREE.DirectionalLight(0xffeedd,2);keyLight.position.set(5,8,5);
+scene.add(new THREE.HemisphereLight(0x556677,0x222233,1.2));
+const keyLight=new THREE.DirectionalLight(0xffeedd,3);keyLight.position.set(5,8,5);
 keyLight.castShadow=true;keyLight.shadow.mapSize.set(2048,2048);
 keyLight.shadow.camera.near=1;keyLight.shadow.camera.far=25;
 keyLight.shadow.camera.left=-8;keyLight.shadow.camera.right=8;
 keyLight.shadow.camera.top=8;keyLight.shadow.camera.bottom=-8;
 keyLight.shadow.bias=-.001;
 scene.add(keyLight);
-const fillLight=new THREE.DirectionalLight(0x4466aa,.8);fillLight.position.set(-4,3,-3);scene.add(fillLight);
-const rimLight=new THREE.PointLight(0xff4422,.5,12);rimLight.position.set(3,1,-4);scene.add(rimLight);
+const fillLight=new THREE.DirectionalLight(0x6688cc,1.5);fillLight.position.set(-4,3,-3);scene.add(fillLight);
+const rimLight=new THREE.PointLight(0xff6644,1,15);rimLight.position.set(3,1,-4);scene.add(rimLight);
+const backLight=new THREE.PointLight(0x8844ff,.8,12);backLight.position.set(0,3,-5);scene.add(backLight);
 
 // Ground
-const groundMat=new THREE.MeshStandardMaterial({color:0x0a0a10,roughness:.95,metalness:0});
+const groundMat=new THREE.MeshStandardMaterial({color:0x181820,roughness:.85,metalness:.05});
 const ground=new THREE.Mesh(new THREE.PlaneGeometry(30,30),groundMat);
 ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
 
@@ -386,8 +388,8 @@ const geometries=[
 new THREE.IcosahedronGeometry(1,4),
 // Ice Crystal: faceted octahedron
 new THREE.OctahedronGeometry(1,0),
-// Bronze Ornament: torus knot
-new THREE.TorusKnotGeometry(.6,.25,128,32),
+// Plasma Core: glowing sphere
+new THREE.SphereGeometry(1,64,64),
 // Sci-fi Panel: beveled box
 new THREE.BoxGeometry(1.6,1.6,.3,8,8,2)
 ];
@@ -410,8 +412,10 @@ metalnessMap:md.metalRT.texture,
 emissive:new THREE.Color(def.mat.emissive),
 emissiveIntensity:def.mat.emissiveIntensity,
 emissiveMap:md.colorRT.texture,
-envMapIntensity:1,
-side:THREE.DoubleSide
+envMapIntensity:1.2,
+side:THREE.DoubleSide,
+transparent:!!def.mat.transparent,
+opacity:def.mat.opacity||1
 });
 m.normalScale.set(def.mat.normalStrength,def.mat.normalStrength);
 
@@ -430,7 +434,7 @@ mesh.castShadow=true;mesh.receiveShadow=true;
 // Scale adjustments
 if(i===0)mesh.scale.setScalar(1.1); // lava rock bigger
 if(i===1){mesh.scale.setScalar(1.3);mesh.rotation.y=Math.PI/6;} // ice crystal tilted
-if(i===2)mesh.position.y=1.4; // torus knot higher
+if(i===2)mesh.scale.setScalar(1.15); // plasma core sphere
 if(i===3){mesh.position.y=1;mesh.rotation.x=-.2;} // panel tilted
 
 scene.add(mesh);objects.push(mesh);
@@ -445,8 +449,9 @@ scene.add(pedestal);
 
 // Point light per object for dramatic local lighting
 if(def.mat.emissiveIntensity>.2){
-const pLight=new THREE.PointLight(def.mat.emissive,.4,4);
-pLight.position.set(pos.x,2.5,pos.z+1);scene.add(pLight);
+const glowStr=def.mat.emissiveIntensity>1?1.5:.6;
+const pLight=new THREE.PointLight(def.mat.emissive,glowStr,6);
+pLight.position.set(pos.x,1.5,pos.z+1);scene.add(pLight);
 }
 }
 
