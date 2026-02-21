@@ -322,26 +322,28 @@ async function makeCompositeSpriteSheet(recipe){
 // ==================== COMPOSITE CATALOG ====================
 
 const COMPOSITE_CATALOG=[
-  // 201. Dark Ritual Portal — ACTUAL Dark Ritual (#029) ring + warp tunnel center
+  // 201. Dark Ritual Portal — Dark Ritual (#029) ring + warp tunnel center
+  // Dark Ritual is naturally a ring (transparent center) — no mask needed on it
+  // Warp tunnel fills the hole; overlap into ring ensures no gap
   {name:"Dark Ritual Portal",cat:"magic",fps:5,layers:[
     {shader:"warp_tunnel",tStart:0,tEnd:15,blend:"normal",opacity:1.0,
-     mask:{type:"circle",radius:0.3,feather:0.04}},
+     mask:{type:"circle",radius:0.45,feather:0.1}},
     {atlas:"029-dark-ritual",blend:"normal",opacity:1.0,
-     mask:{type:"ring",inner:0.2,outer:1.0,feather:0.06}}
+     mask:{type:"none"}}
   ]},
   // 202. Dark Ritual Inferno — Dark Ritual ring + warp inferno center
   {name:"Dark Ritual Inferno",cat:"fire",fps:5,layers:[
     {shader:"warp_inferno",tStart:0,tEnd:12,blend:"normal",opacity:1.0,
-     mask:{type:"circle",radius:0.3,feather:0.04}},
+     mask:{type:"circle",radius:0.45,feather:0.1}},
     {atlas:"029-dark-ritual",blend:"normal",opacity:1.0,
-     mask:{type:"ring",inner:0.2,outer:1.0,feather:0.06}}
+     mask:{type:"none"}}
   ]},
   // 203. Dark Ritual Void — Dark Ritual ring + void warp center
   {name:"Dark Ritual Void",cat:"dark",fps:5,layers:[
     {shader:"warp_void",tStart:0,tEnd:30,blend:"normal",opacity:1.0,
-     mask:{type:"circle",radius:0.35,feather:0.05}},
+     mask:{type:"circle",radius:0.45,feather:0.1}},
     {atlas:"029-dark-ritual",blend:"normal",opacity:1.0,
-     mask:{type:"ring",inner:0.25,outer:1.0,feather:0.06}}
+     mask:{type:"none"}}
   ]},
   // 204. Shield Break — energy shield + reality shatter cracking through
   {name:"Shield Break",cat:"energy",fps:9,layers:[
