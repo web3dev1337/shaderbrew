@@ -14,6 +14,11 @@ import { AlphaExport } from "./alpha-export.js";
 import { NoiseSphere } from "./noise-sphere.js";
 import { GuiSetup } from "./ui/gui-setup.js";
 import { PresetLoader } from "./preset-loader.js";
+import { LayerManager } from "./layer-manager.js";
+import { Compositor } from "./compositor.js";
+import { LayerPanel } from "./ui/layer-panel.js";
+import { GradientEditor } from "./gradient-editor.js";
+import { GradientPass } from "./gradient-pass.js";
 
 if (!WebGL.isWebGL2Available()) {
 	document.body.appendChild(WebGL.getWebGLErrorMessage());
@@ -30,10 +35,13 @@ class App {
 		this._initGraphics();
 		this._initEffectController();
 		this._initPipeline();
+		this._initLayers();
+		this._initGradient();
 		this._initNoiseSphere();
 		this._initSpriteSheet();
 		this._initAlphaExport();
 		this._initGui();
+		this._initLayerPanel();
 		this._initPresets();
 		console.log("[fxgen] initialized");
 	}
@@ -80,6 +88,47 @@ class App {
 		this.baseDefaultUniforms = basePass.defaultUniforms;
 	}
 
+	_initLayers() {
+		this.layerManager = new LayerManager(this.renderer);
+		const firstLayer = this.layerManager.addLayer(this.canvas.width, this.canvas.height, this.effectController.type);
+		firstLayer.effectController = this.effectController;
+		firstLayer.pipeline = this.pipeline;
+		this.compositor = new Compositor(this.renderer, this.canvas.width, this.canvas.height);
+	}
+
+	_initGradient() {
+		this.gradientEditor = new GradientEditor();
+		this.gradientEditor.buildUI();
+		this.gradientEditor.onChange = () => this.render();
+		this.gradientPass = new GradientPass(this.renderer, this.canvas.width, this.canvas.height);
+	}
+
+	_initLayerPanel() {
+		this.layerPanel = new LayerPanel(this.layerManager, () => this._onLayerChange());
+		this.layerPanel.build();
+
+		// Add gradient toggle button to preset bar area
+		const gradBtn = document.createElement("button");
+		gradBtn.textContent = "Gradient";
+		gradBtn.style.cssText = "padding:8px 16px;border:1px solid #555;border-radius:4px;background:#1a1a2e;color:#e0e0ff;font-family:monospace;font-size:13px;cursor:pointer;transition:all 0.2s;position:fixed;bottom:55px;right:10px;z-index:9999";
+		gradBtn.addEventListener("click", () => this.gradientEditor.toggle());
+		gradBtn.addEventListener("mouseenter", () => { gradBtn.style.background = "#0f3460"; gradBtn.style.borderColor = "#e94560"; });
+		gradBtn.addEventListener("mouseleave", () => { gradBtn.style.background = "#1a1a2e"; gradBtn.style.borderColor = "#555"; });
+		document.body.appendChild(gradBtn);
+	}
+
+	_onLayerChange() {
+		const active = this.layerManager.getActiveLayer();
+		if (active) {
+			this.effectController = active.effectController;
+			this.pipeline = active.pipeline;
+			this.baseDefaultUniforms = active.pipeline.layers[0]?.defaultUniforms || {};
+			this.gui.rebuildParameters(this.effectController.type, this.effectController, this.baseDefaultUniforms);
+			this.gui.refreshAllDisplays();
+		}
+		this.render();
+	}
+
 	_initNoiseSphere() {
 		this.noiseSphere = new NoiseSphere();
 	}
@@ -116,6 +165,13 @@ class App {
 		const basePass = this.pipeline.buildPasses(type);
 		this.baseDefaultUniforms = basePass.defaultUniforms;
 		this.gui.rebuildParameters(type, this.effectController, this.baseDefaultUniforms);
+
+		// Update active layer's name
+		const active = this.layerManager.getActiveLayer();
+		if (active) {
+			active.name = type + " " + active.id;
+			if (this.layerPanel) this.layerPanel.refresh();
+		}
 	}
 
 	onResetEffectParameters() {
@@ -249,22 +305,49 @@ class App {
 
 	render() {
 		this.stats.update();
-		this.pipeline.render(
-			this.effectController,
-			this.mouse,
-			this.camera,
-			this.grungeTexture
-		);
 
-		if (this.effectController.cNoiseSphereEnable) {
-			const secondToLastRT = this.pipeline.layers[this.pipeline.layers.length - 2].renderTarget;
-			this.noiseSphere.render(this.renderer, this.camera, secondToLastRT.texture);
+		if (this.layerManager.layers.length > 1) {
+			// Multi-layer: render all layers, composite them
+			const results = this.layerManager.renderAll(this.mouse, this.camera, this.grungeTexture);
+			const composited = this.compositor.composite(results);
+
+			// Apply gradient map if enabled
+			if (this.gradientEditor.enabled && composited) {
+				this.gradientPass.apply(composited, this.gradientEditor.getTexture(), this.gradientEditor.intensity);
+			} else if (composited) {
+				// Blit composited result to screen
+				this.compositor._blit(composited, null);
+			}
+		} else {
+			// Single layer: use direct pipeline (original behavior)
+			this.pipeline.render(
+				this.effectController,
+				this.mouse,
+				this.camera,
+				this.grungeTexture
+			);
+
+			// Apply gradient map if enabled
+			if (this.gradientEditor.enabled) {
+				const lastRT = this.pipeline.layers[this.pipeline.layers.length - 2]?.renderTarget;
+				if (lastRT) {
+					this.gradientPass.apply(lastRT.texture, this.gradientEditor.getTexture(), this.gradientEditor.intensity);
+				}
+			}
+
+			if (this.effectController.cNoiseSphereEnable) {
+				const secondToLastRT = this.pipeline.layers[this.pipeline.layers.length - 2].renderTarget;
+				this.noiseSphere.render(this.renderer, this.camera, secondToLastRT.texture);
+			}
 		}
 	}
 
 	_onResize() {
 		this.renderer.setSize(this.canvas.width, this.canvas.height);
 		this.pipeline.resize(this.canvas.width, this.canvas.height);
+		this.layerManager.resize(this.canvas.width, this.canvas.height);
+		this.compositor.resize(this.canvas.width, this.canvas.height);
+		this.gradientPass.resize(this.canvas.width, this.canvas.height);
 		this.spriteSheet.resize(this.canvas.width, this.canvas.height);
 		this.render();
 	}
