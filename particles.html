@@ -204,15 +204,15 @@ tex.wrapS=tex.wrapT=THREE.ClampToEdgeWrapping;tex.needsUpdate=true;
 return{tex,canvas};
 }
 
-const gradFire=makeGrad([{p:0,c:"#080000"},{p:.2,c:"#551000"},{p:.4,c:"#aa2800"},{p:.6,c:"#dd5500"},{p:.8,c:"#ee9922"},{p:1,c:"#ffcc66"}]);
+const gradFire=makeGrad([{p:0,c:"#0a0000"},{p:.2,c:"#661100"},{p:.4,c:"#cc3300"},{p:.6,c:"#ff7700"},{p:.8,c:"#ffcc33"},{p:1,c:"#ffffdd"}]);
 const gradMagic=makeGrad([{p:0,c:"#0a0018"},{p:.2,c:"#4400aa"},{p:.4,c:"#9933ff"},{p:.6,c:"#dd66ff"},{p:.8,c:"#ffaaff"},{p:1,c:"#ffffff"}]);
 const gradSpark=makeGrad([{p:0,c:"#000818"},{p:.2,c:"#0044aa"},{p:.4,c:"#2288ff"},{p:.65,c:"#66ccff"},{p:.85,c:"#ccf0ff"},{p:1,c:"#ffffff"}]);
 const gradEmber=makeGrad([{p:0,c:"#0a0400"},{p:.25,c:"#663300"},{p:.5,c:"#cc6600"},{p:.75,c:"#ffaa22"},{p:1,c:"#ffeeaa"}]);
 
 const sheets=[
 {name:"Fire Burst",effect:"Explosion",
-params:{cExplosionRadius:2.5,cExplosionBallness:3,cExplosionGrowth:5,cExplosionDensity:1.2,cExplosionContrast:1.0,cExplosionGrain:1.8},
-grad:gradFire,tStart:.1,tEnd:4.5},
+params:{cExplosionRadius:2,cExplosionBallness:4,cExplosionGrowth:3,cExplosionDensity:1.5,cExplosionContrast:1.2,cExplosionGrain:1.5},
+grad:gradFire,tStart:.3,tEnd:1.8},
 {name:"Magic Aura",effect:"Corona",
 params:{},
 grad:gradMagic,tStart:2,tEnd:9},
