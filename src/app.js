@@ -24,6 +24,7 @@ import { Toolbar } from "./ui/toolbar.js";
 import { PBRGenerator } from "./pbr-generator.js";
 import { PBRPanel } from "./ui/pbr-panel.js";
 import { Preview3D } from "./preview-3d.js";
+import { History } from "./history.js";
 
 if (!WebGL.isWebGL2Available()) {
 	document.body.appendChild(WebGL.getWebGLErrorMessage());
@@ -51,6 +52,7 @@ class App {
 		this._initGui();
 		this._initLayerPanel();
 		this._initToolbar();
+		this._initHistory();
 		this._initPresets();
 		console.log("[fxgen] initialized");
 	}
@@ -130,6 +132,22 @@ class App {
 	_initToolbar() {
 		this.toolbar = new Toolbar(this);
 		this.toolbar.build();
+	}
+
+	_initHistory() {
+		this.history = new History();
+		this.history.init(
+			() => ({ ...this.effectController }),
+			snapshot => {
+				Object.assign(this.effectController, snapshot);
+				const type = this.effectController.type;
+				const basePass = this.pipeline.buildPasses(type);
+				this.baseDefaultUniforms = basePass.defaultUniforms;
+				this.gui.rebuildParameters(type, this.effectController, this.baseDefaultUniforms);
+				this.gui.refreshAllDisplays();
+				this.render();
+			}
+		);
 	}
 
 	_initLayerPanel() {
@@ -219,12 +237,14 @@ class App {
 			active.name = type + " " + active.id;
 			if (this.layerPanel) this.layerPanel.refresh();
 		}
+		if (this.history) this.history.recordImmediate();
 	}
 
 	onResetEffectParameters() {
 		const defaults = getDefaultEffectParameters();
 		Object.assign(this.effectController, defaults);
 		this.gui.rebuildParameters(this.effectController.type, this.effectController, this.baseDefaultUniforms);
+		if (this.history) this.history.recordImmediate();
 	}
 
 	onResetColorBalance() {
@@ -276,6 +296,7 @@ class App {
 			this.effectController[key] = preset[key];
 		}
 		this.gui.refreshAllDisplays();
+		if (this.history) this.history.recordImmediate();
 	}
 
 	save() {
