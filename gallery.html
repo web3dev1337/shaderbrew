@@ -77,13 +77,14 @@ for(const s of stops)g.addColorStop(s.p,s.c);
 ctx.fillStyle=g;ctx.fillRect(0,0,256,1);
 const tex=new THREE.CanvasTexture(c);
 tex.minFilter=THREE.LinearFilter;tex.magFilter=THREE.LinearFilter;
-tex.wrapS=THREE.ClampToEdgeWrapping;
+tex.wrapS=THREE.ClampToEdgeWrapping;tex.wrapT=THREE.ClampToEdgeWrapping;
+tex.needsUpdate=true;
 return tex;
 }
 
 // Gradient map shader (post-process)
-const gradMapVert=`varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position,1.0);}`;
-const gradMapFrag=`uniform sampler2D tDiffuse;uniform sampler2D tGradient;uniform float intensity;varying vec2 vUv;void main(){vec4 t=texture2D(tDiffuse,vUv);float l=dot(t.rgb,vec3(0.299,0.587,0.114));vec4 g=texture2D(tGradient,vec2(l,0.5));gl_FragColor=vec4(mix(t.rgb,g.rgb,intensity),1.0);}`;
+const gradMapVert=`varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.0,1.0);}`;
+const gradMapFrag=`uniform sampler2D tDiffuse;uniform sampler2D tGradient;uniform float intensity;varying vec2 vUv;void main(){vec4 t=texture2D(tDiffuse,vUv);float l=clamp(dot(t.rgb,vec3(0.299,0.587,0.114)),0.0,1.0);vec4 g=texture2D(tGradient,vec2(l,0.5));gl_FragColor=vec4(mix(t.rgb,g.rgb,intensity),t.a);}`;
 const gradScene=new THREE.Scene();
 const gradCam=new THREE.Camera();
 const gradQuad=new THREE.Mesh(new THREE.PlaneGeometry(2,2),null);
@@ -169,7 +170,7 @@ const pixelBuf=new Uint8Array(RES*RES*4);
 // Gradient map render target for post-processing
 const gradRT=new THREE.WebGLRenderTarget(RES,RES,{minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter});
 const gradMat=new THREE.ShaderMaterial({
-uniforms:{tDiffuse:{value:null},tGradient:{value:null},intensity:{value:0.85}},
+uniforms:{tDiffuse:{value:null},tGradient:{value:null},intensity:{value:1.0}},
 vertexShader:gradMapVert,fragmentShader:gradMapFrag,depthTest:false,depthWrite:false
 });
 
@@ -249,8 +250,10 @@ let readRT=eff.rt;
 if(eff.gradientName&&gradTextures[eff.gradientName]){
 gradMat.uniforms.tDiffuse.value=eff.rt.texture;
 gradMat.uniforms.tGradient.value=gradTextures[eff.gradientName];
+gradMat.uniformsNeedUpdate=true;
 gradQuad.material=gradMat;
 renderer.setRenderTarget(gradRT);
+renderer.clear();
 renderer.render(gradScene,gradCam);
 renderer.setRenderTarget(null);
 readRT=gradRT;
