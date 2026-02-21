@@ -234,13 +234,13 @@ params:{cExplosionRadius:2,cExplosionBallness:4,cExplosionGrowth:3,cExplosionDen
 grad:gradFire,tStart:.3,tEnd:3.5},
 {name:"Magic Aura",effect:"Corona",
 params:{},
-grad:gradMagic,tStart:2,tEnd:9},
+grad:gradMagic,tStart:2,tEnd:9,mask:false},
 {name:"Lightning Arc",effect:"Caustics",
 params:{cSpeed:.8,tiling:false},
 grad:gradSpark,tStart:1,tEnd:6},
 {name:"Flame Flicker",effect:"Flame",
 params:{cSpeed:.6},
-grad:gradEmber,tStart:1,tEnd:5,mask:false}
+grad:gradEmber,tStart:1,tEnd:5}
 ];
 
 const sheetTextures=[];
@@ -633,7 +633,7 @@ magicLight.intensity=.12+Math.sin(t*2+1)*.03;
 
 // Animate static preview quads (loop through frames at ~8fps)
 for(const q of previewQuads){
-if(q.visible)q.material.uniforms.uFrame.value=(t*3)%(FRAMES);
+if(q.visible)q.material.uniforms.uFrame.value=(t*8)%(FRAMES);
 }
 
 ctrl.update();
