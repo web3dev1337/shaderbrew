@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sprite Gallery — 100 Animated Effects</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#030306;color:#ccc;font-family:'Segoe UI',system-ui,sans-serif}
+.header{text-align:center;padding:30px 20px 15px}
+.header h1{font-size:28px;color:#e0e0ff;letter-spacing:3px;font-family:monospace;
+background:linear-gradient(90deg,#ff6622,#ff44ff,#44aaff,#ff6622);background-size:300% 100%;
+-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:shine 4s linear infinite}
+@keyframes shine{0%{background-position:0% 50%}100%{background-position:300% 50%}}
+.header p{color:#555;font-size:13px;margin-top:4px}
+.header a{color:#e94560;text-decoration:none}
+.filters{max-width:1400px;margin:10px auto 20px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:0 20px}
+.filters button{font-family:monospace;font-size:12px;padding:7px 16px;border:1px solid #333;border-radius:6px;
+background:#111;color:#aaa;cursor:pointer;transition:all .2s}
+.filters button.active{background:#1a1a2e;color:#fff;border-color:#e94560}
+.filters button:hover{border-color:#666}
+.grid{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;padding:0 20px 40px}
+.card{background:#0a0a14;border:1px solid #1a1a2e;border-radius:8px;overflow:hidden;transition:border-color .2s,box-shadow .2s}
+.card:hover{border-color:#e94560;box-shadow:0 0 20px rgba(233,69,96,.15)}
+.card canvas{width:100%;aspect-ratio:1;display:block;background:#000}
+.card .info{padding:8px 10px}
+.card .name{font-family:monospace;font-size:12px;color:#e0e0ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .meta{font-size:10px;color:#555;font-family:monospace;margin-top:2px}
+.card .cat-tag{display:inline-block;font-size:9px;padding:1px 6px;border-radius:3px;color:#888;border:1px solid #222;margin-top:3px}
+.count{text-align:center;font-family:monospace;font-size:12px;color:#444;padding:10px;margin-bottom:10px}
+</style>
+</head>
+<body>
+<div class="header">
+<h1>SPRITE GALLERY</h1>
+<p>100 pre-rendered animated sprite sheets &mdash; 6&times;6 grid, 192px frames &mdash; <a href="particles.html">3D View</a> | <a href="gallery.html">Texture Gallery</a></p>
+</div>
+
+<div class="filters" id="filters"></div>
+<div class="count" id="count"></div>
+<div class="grid" id="grid"></div>
+
+<script>
+const GRID=6,FRAMES=GRID*GRID;
+const CATALOG=[
+{name:"Inferno Burst",cat:"fire",file:"001-inferno-burst",fps:10},
+{name:"Napalm Drop",cat:"fire",file:"002-napalm-drop",fps:8},
+{name:"Phoenix Flare",cat:"fire",file:"003-phoenix-flare",fps:8},
+{name:"Magma Splash",cat:"fire",file:"004-magma-splash",fps:7},
+{name:"Solar Eruption",cat:"fire",file:"005-solar-eruption",fps:6},
+{name:"Candle Light",cat:"fire",file:"006-candle-light",fps:5},
+{name:"Wildfire",cat:"fire",file:"007-wildfire",fps:10},
+{name:"Furnace Core",cat:"fire",file:"008-furnace-core",fps:5},
+{name:"Dragon Breath",cat:"fire",file:"009-dragon-breath",fps:12},
+{name:"Ember Drift",cat:"fire",file:"010-ember-drift",fps:4},
+{name:"Firework Pop",cat:"fire",file:"011-firework-pop",fps:12},
+{name:"Thermal Pulse",cat:"fire",file:"012-thermal-pulse",fps:7},
+{name:"Combustion",cat:"fire",file:"013-combustion",fps:9},
+{name:"Hellfire",cat:"fire",file:"014-hellfire",fps:8},
+{name:"Bonfire Glow",cat:"fire",file:"015-bonfire-glow",fps:6},
+{name:"Frost Nova",cat:"ice",file:"016-frost-nova",fps:8},
+{name:"Blizzard Swirl",cat:"ice",file:"017-blizzard-swirl",fps:7},
+{name:"Crystal Shard",cat:"ice",file:"018-crystal-shard",fps:6},
+{name:"Frozen Mist",cat:"ice",file:"019-frozen-mist",fps:4},
+{name:"Snowfall",cat:"ice",file:"020-snowfall",fps:5},
+{name:"Ice Spike",cat:"ice",file:"021-ice-spike",fps:7},
+{name:"Glacial Pulse",cat:"ice",file:"022-glacial-pulse",fps:5},
+{name:"Arctic Breath",cat:"ice",file:"023-arctic-breath",fps:6},
+{name:"Permafrost Crack",cat:"ice",file:"024-permafrost-crack",fps:5},
+{name:"Diamond Dust",cat:"ice",file:"025-diamond-dust",fps:8},
+{name:"Hail Burst",cat:"ice",file:"026-hail-burst",fps:10},
+{name:"Cryo Flash",cat:"ice",file:"027-cryo-flash",fps:9},
+{name:"Arcane Bolt",cat:"magic",file:"028-arcane-bolt",fps:6},
+{name:"Dark Ritual",cat:"magic",file:"029-dark-ritual",fps:5},
+{name:"Fairy Dust",cat:"magic",file:"030-fairy-dust",fps:7},
+{name:"Mana Burst",cat:"magic",file:"031-mana-burst",fps:8},
+{name:"Enchantment Glow",cat:"magic",file:"032-enchantment-glow",fps:5},
+{name:"Rune Pulse",cat:"magic",file:"033-rune-pulse",fps:6},
+{name:"Spirit Wisp",cat:"magic",file:"034-spirit-wisp",fps:5},
+{name:"Mystic Flame",cat:"magic",file:"035-mystic-flame",fps:7},
+{name:"Soul Fire",cat:"magic",file:"036-soul-fire",fps:6},
+{name:"Hex Sigil",cat:"magic",file:"037-hex-sigil",fps:5},
+{name:"Astral Flare",cat:"magic",file:"038-astral-flare",fps:7},
+{name:"Ether Burst",cat:"magic",file:"039-ether-burst",fps:9},
+{name:"Shadow Bolt",cat:"magic",file:"040-shadow-bolt",fps:8},
+{name:"Holy Radiance",cat:"magic",file:"041-holy-radiance",fps:5},
+{name:"Void Rift",cat:"magic",file:"042-void-rift",fps:6},
+{name:"Ocean Ripple",cat:"nature",file:"043-ocean-ripple",fps:6},
+{name:"Rain Splash",cat:"nature",file:"044-rain-splash",fps:8},
+{name:"Tidal Surge",cat:"nature",file:"045-tidal-surge",fps:6},
+{name:"Swamp Gas",cat:"nature",file:"046-swamp-gas",fps:4},
+{name:"Pollen Cloud",cat:"nature",file:"047-pollen-cloud",fps:4},
+{name:"Leaf Whirl",cat:"nature",file:"048-leaf-whirl",fps:7},
+{name:"Moss Glow",cat:"nature",file:"049-moss-glow",fps:5},
+{name:"Morning Dew",cat:"nature",file:"050-morning-dew",fps:4},
+{name:"Waterfall Mist",cat:"nature",file:"051-waterfall-mist",fps:7},
+{name:"Coral Pulse",cat:"nature",file:"052-coral-pulse",fps:5},
+{name:"Algae Bloom",cat:"nature",file:"053-algae-bloom",fps:6},
+{name:"Mud Splash",cat:"nature",file:"054-mud-splash",fps:7},
+{name:"Volcanic Ash",cat:"nature",file:"055-volcanic-ash",fps:6},
+{name:"Nebula Cloud",cat:"cosmic",file:"056-nebula-cloud",fps:5},
+{name:"Star Birth",cat:"cosmic",file:"057-star-birth",fps:9},
+{name:"Supernova",cat:"cosmic",file:"058-supernova",fps:8},
+{name:"Cosmic Ray",cat:"cosmic",file:"059-cosmic-ray",fps:9},
+{name:"Dark Matter",cat:"cosmic",file:"060-dark-matter",fps:4},
+{name:"Pulsar Beam",cat:"cosmic",file:"061-pulsar-beam",fps:10},
+{name:"Galaxy Swirl",cat:"cosmic",file:"062-galaxy-swirl",fps:5},
+{name:"Meteor Trail",cat:"cosmic",file:"063-meteor-trail",fps:8},
+{name:"Solar Wind",cat:"cosmic",file:"064-solar-wind",fps:5},
+{name:"Quasar Jet",cat:"cosmic",file:"065-quasar-jet",fps:11},
+{name:"Wormhole",cat:"cosmic",file:"066-wormhole",fps:6},
+{name:"Antimatter Pop",cat:"cosmic",file:"067-antimatter-pop",fps:12},
+{name:"Starfield Dust",cat:"cosmic",file:"068-starfield-dust",fps:5},
+{name:"Lightning Strike",cat:"energy",file:"069-lightning-strike",fps:10},
+{name:"Tesla Coil",cat:"energy",file:"070-tesla-coil",fps:9},
+{name:"Plasma Orb",cat:"energy",file:"071-plasma-orb",fps:6},
+{name:"EMP Wave",cat:"energy",file:"072-emp-wave",fps:12},
+{name:"Neon Surge",cat:"energy",file:"073-neon-surge",fps:10},
+{name:"Volt Stream",cat:"energy",file:"074-volt-stream",fps:11},
+{name:"Static Charge",cat:"energy",file:"075-static-charge",fps:6},
+{name:"Power Core",cat:"energy",file:"076-power-core",fps:7},
+{name:"Ion Trail",cat:"energy",file:"077-ion-trail",fps:8},
+{name:"Spark Shower",cat:"energy",file:"078-spark-shower",fps:10},
+{name:"Circuit Glow",cat:"energy",file:"079-circuit-glow",fps:7},
+{name:"Thunder Clap",cat:"energy",file:"080-thunder-clap",fps:10},
+{name:"Fusion Spark",cat:"energy",file:"081-fusion-spark",fps:12},
+{name:"Energy Shield",cat:"energy",file:"082-energy-shield",fps:5},
+{name:"Shadow Smoke",cat:"dark",file:"083-shadow-smoke",fps:4},
+{name:"Void Tendrils",cat:"dark",file:"084-void-tendrils",fps:5},
+{name:"Blight Cloud",cat:"dark",file:"085-blight-cloud",fps:4},
+{name:"Nightmare Eye",cat:"dark",file:"086-nightmare-eye",fps:5},
+{name:"Death Fog",cat:"dark",file:"087-death-fog",fps:3},
+{name:"Corruption",cat:"dark",file:"088-corruption",fps:5},
+{name:"Wither Haze",cat:"dark",file:"089-wither-haze",fps:3},
+{name:"Dark Blaze",cat:"dark",file:"090-dark-blaze",fps:7},
+{name:"Phantom Wisp",cat:"dark",file:"091-phantom-wisp",fps:4},
+{name:"Decay Spore",cat:"dark",file:"092-decay-spore",fps:5},
+{name:"Rainbow Burst",cat:"abstract",file:"093-rainbow-burst",fps:8},
+{name:"Neon Dreams",cat:"abstract",file:"094-neon-dreams",fps:7},
+{name:"Watercolor Wash",cat:"abstract",file:"095-watercolor-wash",fps:4},
+{name:"Ink Splash",cat:"abstract",file:"096-ink-splash",fps:8},
+{name:"Gold Dust",cat:"abstract",file:"097-gold-dust",fps:6},
+{name:"Cherry Blossom",cat:"abstract",file:"098-cherry-blossom",fps:4},
+{name:"Acid Wave",cat:"abstract",file:"099-acid-wave",fps:8},
+{name:"Prismatic Aura",cat:"abstract",file:"100-prismatic-aura",fps:6}
+];
+
+const catColors={fire:"#e94560",ice:"#44aaff",magic:"#bb66ff",nature:"#44cc66",cosmic:"#aa88ff",energy:"#ffaa22",dark:"#666677",abstract:"#ff66aa"};
+const cats=["all",...new Set(CATALOG.map(c=>c.cat))];
+
+const filtersEl=document.getElementById("filters");
+const gridEl=document.getElementById("grid");
+const countEl=document.getElementById("count");
+let activeCat="all";
+
+cats.forEach(c=>{
+  const b=document.createElement("button");
+  b.textContent=c==="all"?"All (100)":c.charAt(0).toUpperCase()+c.slice(1);
+  if(c==="all")b.classList.add("active");
+  b.onclick=()=>{
+    activeCat=c;
+    filtersEl.querySelectorAll("button").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active");
+    renderGrid();
+  };
+  filtersEl.appendChild(b);
+});
+
+const sprites=[];
+const observer=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    const s=sprites.find(s=>s.card===e.target);
+    if(s)s.visible=e.isIntersecting;
+  });
+},{threshold:0.1});
+
+function renderGrid(){
+  gridEl.innerHTML="";
+  sprites.forEach(s=>{observer.unobserve(s.card);});
+  sprites.length=0;
+  const filtered=activeCat==="all"?CATALOG:CATALOG.filter(c=>c.cat===activeCat);
+  countEl.textContent=`Showing ${filtered.length} of ${CATALOG.length} effects`;
+  filtered.forEach(item=>{
+    const card=document.createElement("div");
+    card.className="card";
+    const cv=document.createElement("canvas");
+    cv.width=192;cv.height=192;
+    const info=document.createElement("div");
+    info.className="info";
+    info.innerHTML=`<div class="name">${item.name}</div><div class="meta">${item.fps} fps &middot; 36 frames</div><span class="cat-tag" style="border-color:${catColors[item.cat]||'#333'};color:${catColors[item.cat]||'#888'}">${item.cat}</span>`;
+    card.appendChild(cv);card.appendChild(info);gridEl.appendChild(card);
+
+    const ctx=cv.getContext("2d");
+    const img=new Image();
+    img.src=`sprites/${item.file}.png`;
+    const entry={card,ctx,img,fps:item.fps,frame:0,lastT:0,loaded:false,visible:false};
+    img.onload=()=>{entry.loaded=true;};
+    sprites.push(entry);
+    observer.observe(card);
+  });
+}
+
+function animate(t){
+  for(const s of sprites){
+    if(!s.visible||!s.loaded)continue;
+    const dt=t-s.lastT;
+    if(dt<1000/s.fps)continue;
+    s.lastT=t;
+    const col=s.frame%GRID,row=Math.floor(s.frame/GRID);
+    s.ctx.clearRect(0,0,192,192);
+    s.ctx.drawImage(s.img,col*192,row*192,192,192,0,0,192,192);
+    s.frame=(s.frame+1)%FRAMES;
+  }
+  requestAnimationFrame(animate);
+}
+
+renderGrid();
+requestAnimationFrame(animate);
+</script>
+</body>
+</html>
