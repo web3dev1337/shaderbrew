@@ -23,6 +23,7 @@ import { TilePreviewPass } from "./tile-preview-pass.js";
 import { Toolbar } from "./ui/toolbar.js";
 import { PBRGenerator } from "./pbr-generator.js";
 import { PBRPanel } from "./ui/pbr-panel.js";
+import { Preview3D } from "./preview-3d.js";
 
 if (!WebGL.isWebGL2Available()) {
 	document.body.appendChild(WebGL.getWebGLErrorMessage());
@@ -43,6 +44,7 @@ class App {
 		this._initGradient();
 		this._initTilePreview();
 		this._initPBR();
+		this._initPreview3D();
 		this._initNoiseSphere();
 		this._initSpriteSheet();
 		this._initAlphaExport();
@@ -120,6 +122,11 @@ class App {
 		this.pbrPanel.build();
 	}
 
+	_initPreview3D() {
+		this.preview3D = new Preview3D(this.pbrGenerator);
+		this.preview3D.build();
+	}
+
 	_initToolbar() {
 		this.toolbar = new Toolbar(this);
 		this.toolbar.build();
@@ -146,6 +153,15 @@ class App {
 		pbrBtn.addEventListener("mouseenter", () => { pbrBtn.style.background = "#0f3460"; pbrBtn.style.borderColor = "#e94560"; });
 		pbrBtn.addEventListener("mouseleave", () => { pbrBtn.style.background = "#1a1a2e"; pbrBtn.style.borderColor = "#555"; });
 		document.body.appendChild(pbrBtn);
+
+		// 3D preview toggle button
+		const previewBtn = document.createElement("button");
+		previewBtn.textContent = "3D Preview";
+		previewBtn.style.cssText = "padding:8px 16px;border:1px solid #555;border-radius:4px;background:#1a1a2e;color:#e0e0ff;font-family:monospace;font-size:13px;cursor:pointer;transition:all 0.2s;position:fixed;bottom:55px;right:220px;z-index:9999";
+		previewBtn.addEventListener("click", () => this.preview3D.toggle());
+		previewBtn.addEventListener("mouseenter", () => { previewBtn.style.background = "#0f3460"; previewBtn.style.borderColor = "#e94560"; });
+		previewBtn.addEventListener("mouseleave", () => { previewBtn.style.background = "#1a1a2e"; previewBtn.style.borderColor = "#555"; });
+		document.body.appendChild(previewBtn);
 	}
 
 	_onLayerChange() {
@@ -381,12 +397,16 @@ class App {
 		}
 
 		// PBR map generation
-		if (this.pbrGenerator.enabled) {
-			const lastRT = this.pipeline.layers[this.pipeline.layers.length - 2]?.renderTarget;
-			if (lastRT) {
-				this.pbrGenerator.generate(lastRT.texture);
-				this.pbrPanel.updatePreviews(this.renderer, lastRT.texture);
-			}
+		const lastRT = this.pipeline.layers[this.pipeline.layers.length - 2]?.renderTarget;
+		if (this.pbrGenerator.enabled && lastRT) {
+			this.pbrGenerator.generate(lastRT.texture);
+			this.pbrPanel.updatePreviews(this.renderer, lastRT.texture);
+		}
+
+		// 3D preview
+		if (this.preview3D.visible && lastRT) {
+			this.preview3D.updateMaps(lastRT.texture);
+			this.preview3D.render();
 		}
 	}
 
