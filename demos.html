@@ -6,6 +6,11 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#030306;color:#ccc;font-family:'Segoe UI',system-ui,sans-serif;overflow-x:hidden}
+.embed body{overflow:hidden}
+.embed .header,.embed .links,.embed .mat-strips,.embed .info-bar{display:none}
+.embed #content{padding:10px 0}
+.embed #viewport{max-width:none;border-radius:10px}
+.embed #viewport canvas{height:100%}
 .header{text-align:center;padding:30px 20px 15px}
 .header h1{font-size:32px;color:#e0e0ff;letter-spacing:3px;font-family:monospace;margin-bottom:4px;
 background:linear-gradient(90deg,#e94560,#aa44ff,#44aaff,#e94560);background-size:300% 100%;
@@ -55,6 +60,10 @@ background:rgba(10,10,20,.6);border:1px solid #151520;border-radius:6px;padding:
 </style>
 </head>
 <body>
+<script>
+const embed=new URLSearchParams(window.location.search).has("embed");
+if(embed)document.documentElement.classList.add("embed");
+</script>
 
 <div class="header">
 <h1>PROCEDURAL MATERIAL FORGE</h1>
