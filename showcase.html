@@ -98,7 +98,7 @@ body{background:radial-gradient(1200px 600px at 50% -200px,#16162a 0%,#07070c 55
 <div class="hero-visual">
 <div class="hero-card">
 <canvas id="hero-canvas"></canvas>
-<div class="hero-caption"><strong>Dark Ritual Portal</strong> — Summoning Circle + Dimensional Portal (Add)</div>
+<div class="hero-caption"><strong>Dark Ritual Portal</strong> — Dark Ritual ring + Warp Tunnel core</div>
 </div>
 </div>
 </div>
@@ -154,7 +154,7 @@ Initializing WebGL + loading shaders...
 <section class="chapter" id="ch5b">
 <span class="chapter-num">CHAPTER 05B</span>
 <h2>Dark Ritual Portal — Sprite Build <span class="new">NEW</span></h2>
-<p>The latest magic sprite built from two custom GLSL pieces: a Summoning Circle and a Dimensional Portal, blended additively to form the final ritual gateway.</p>
+<p>The sprite-gallery version: Warp Tunnel fills the portal core, then the Dark Ritual ring (atlas #029) overlays it. A circular mask keeps the tunnel contained.</p>
 <div id="grid-ritual"></div>
 <div class="preview-wrap" id="grid-ritual-3d"></div>
 </section>
@@ -235,11 +235,15 @@ bScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),new THREE.MeshBasicMateri
 function makeRT(){return new THREE.WebGLRenderTarget(RES,RES,{minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter})}
 const rt=Array.from({length:6},makeRT);
 const pbrRT={struct:makeRT(),color:makeRT(),normal:makeRT(),rough:makeRT(),ao:makeRT(),metal:makeRT()};
-const ritualRT={summoning:makeRT(),portal:makeRT(),blend:makeRT(),normal:makeRT(),rough:makeRT(),ao:makeRT(),metal:makeRT()};
+const ritualRT={core:makeRT(),masked:makeRT(),ring:makeRT(),blend:makeRT(),normal:makeRT(),rough:makeRT(),ao:makeRT(),metal:makeRT()};
 
 const grungeTex=await new Promise(ok=>{
 new THREE.TextureLoader().load("images/grunge.png",t=>{
 t.wrapS=t.wrapT=THREE.RepeatWrapping;t.minFilter=THREE.LinearFilter;t.magFilter=THREE.LinearFilter;ok(t);
+});});
+const ritualAtlas=await new Promise(ok=>{
+new THREE.TextureLoader().load("sprites/029-dark-ritual.png",t=>{
+t.wrapS=t.wrapT=THREE.ClampToEdgeWrapping;t.minFilter=THREE.LinearFilter;t.magFilter=THREE.LinearFilter;ok(t);
 });});
 
 // === GRADIENTS ===
@@ -297,6 +301,37 @@ else if(blendMode==8)r=bD(base.rgb,bl.rgb);else r=bl.rgb;
 gl_FragColor=vec4(mix(base.rgb,r,opacity),1.);}`,
 depthTest:false,depthWrite:false});
 const blendQ=new THREE.Mesh(new THREE.PlaneGeometry(2,2),blendM);blendS.add(blendQ);
+
+const alphaBlendS=new THREE.Scene(),alphaBlendC=new THREE.Camera();
+const alphaBlendM=new THREE.ShaderMaterial({
+uniforms:{tBase:{value:null},tBlend:{value:null},opacity:{value:1}},
+vertexShader:ppV,
+fragmentShader:`uniform sampler2D tBase;uniform sampler2D tBlend;uniform float opacity;varying vec2 vUv;
+void main(){vec4 base=texture2D(tBase,vUv);vec4 bl=texture2D(tBlend,vUv);
+vec3 col=mix(base.rgb,bl.rgb,bl.a*opacity);gl_FragColor=vec4(col,1.);}`,
+depthTest:false,depthWrite:false});
+const alphaBlendQ=new THREE.Mesh(new THREE.PlaneGeometry(2,2),alphaBlendM);alphaBlendS.add(alphaBlendQ);
+
+const maskS=new THREE.Scene(),maskC=new THREE.Camera();
+const maskM=new THREE.ShaderMaterial({
+uniforms:{tDiffuse:{value:null},radius:{value:.45},feather:{value:.1}},
+vertexShader:ppV,
+fragmentShader:`uniform sampler2D tDiffuse;uniform float radius;uniform float feather;varying vec2 vUv;
+void main(){vec2 p=(vUv-0.5)*2.0;float d=length(p);
+float m=smoothstep(radius+feather,radius,d);vec4 c=texture2D(tDiffuse,vUv);
+gl_FragColor=vec4(c.rgb*m,1.);}`,
+depthTest:false,depthWrite:false});
+const maskQ=new THREE.Mesh(new THREE.PlaneGeometry(2,2),maskM);maskS.add(maskQ);
+
+const atlasS=new THREE.Scene(),atlasC=new THREE.Camera();
+const atlasM=new THREE.ShaderMaterial({
+uniforms:{tAtlas:{value:null},uGrid:{value:6},uFrame:{value:0}},
+vertexShader:ppV,
+fragmentShader:`uniform sampler2D tAtlas;uniform float uGrid;uniform float uFrame;varying vec2 vUv;
+void main(){float col=mod(uFrame,uGrid);float row=floor(uFrame/uGrid);
+vec2 cell=(vUv+vec2(col,uGrid-1.-row))/uGrid;gl_FragColor=texture2D(tAtlas,cell);}`,
+depthTest:false,depthWrite:false,transparent:true});
+const atlasQ=new THREE.Mesh(new THREE.PlaneGeometry(2,2),atlasM);atlasS.add(atlasQ);
 
 const ppS=new THREE.Scene(),ppC=new THREE.Camera();
 const ppQ=new THREE.Mesh(new THREE.PlaneGeometry(2,2),null);ppS.add(ppQ);
@@ -385,10 +420,29 @@ blendM.uniformsNeedUpdate=true;blendQ.material=blendM;
 renderer.setRenderTarget(outRT);renderer.clear();
 renderer.render(blendS,blendC);renderer.setRenderTarget(null);
 }
+function doAlphaBlend(baseRT,blendRT,opacity,outRT){
+alphaBlendM.uniforms.tBase.value=baseRT.texture;alphaBlendM.uniforms.tBlend.value=blendRT.texture;
+alphaBlendM.uniforms.opacity.value=opacity||1;
+alphaBlendM.uniformsNeedUpdate=true;alphaBlendQ.material=alphaBlendM;
+renderer.setRenderTarget(outRT);renderer.clear();
+renderer.render(alphaBlendS,alphaBlendC);renderer.setRenderTarget(null);
+}
 function doPBR(inRT,mat,outRT){
 mat.uniforms.tDiffuse.value=inRT.texture;mat.uniformsNeedUpdate=true;ppQ.material=mat;
 renderer.setRenderTarget(outRT);renderer.clear();
 renderer.render(ppS,ppC);renderer.setRenderTarget(null);
+}
+function doMask(inRT,radius,feather,outRT){
+maskM.uniforms.tDiffuse.value=inRT.texture;maskM.uniforms.radius.value=radius;maskM.uniforms.feather.value=feather;
+maskM.uniformsNeedUpdate=true;maskQ.material=maskM;
+renderer.setRenderTarget(outRT);renderer.clear();
+renderer.render(maskS,maskC);renderer.setRenderTarget(null);
+}
+function renderAtlasFrame(tex,frame,outRT){
+atlasM.uniforms.tAtlas.value=tex;atlasM.uniforms.uFrame.value=frame;
+atlasM.uniformsNeedUpdate=true;atlasQ.material=atlasM;
+renderer.setRenderTarget(outRT);renderer.clear();
+renderer.render(atlasS,atlasC);renderer.setRenderTarget(null);
 }
 function toCanvas(srcRT,canvas){
 renderer.readRenderTargetPixels(srcRT,0,0,RES,RES,pixelBuf);
@@ -412,10 +466,11 @@ function renderHero(){
 const cv=document.getElementById("hero-canvas");
 if(!cv)return;
 cv.width=RES;cv.height=RES;
-renderCustom(SHADERS.summoning,1.6,rt[0]);
-renderCustom(SHADERS.portal,2.2,rt[1]);
-doBlend(rt[0],rt[1],4,rt[2]);
-toCanvas(rt[2],cv);
+renderCustom(SHADERS.warp_tunnel,1.6,rt[0]);
+doMask(rt[0],0.45,0.1,rt[1]);
+renderAtlasFrame(ritualAtlas,12,rt[2]);
+doAlphaBlend(rt[1],rt[2],1.0,rt[3]);
+toCanvas(rt[3],cv);
 }
 
 // ===================================================================
@@ -543,22 +598,23 @@ function ch5b(){
 const g=document.getElementById("grid-ritual");
 const row=document.createElement("div");row.className="pipeline-row";g.appendChild(row);
 
-renderCustom(SHADERS.summoning,1.6,ritualRT.summoning);
-const cvA=card(row,"Summoning Circle","Custom GLSL base");
-toCanvas(ritualRT.summoning,cvA);
+renderCustom(SHADERS.warp_tunnel,1.6,ritualRT.core);
+doMask(ritualRT.core,0.45,0.1,ritualRT.masked);
+const cvA=card(row,"Warp Tunnel","Masked core (circle)");
+toCanvas(ritualRT.masked,cvA);
 
 const a1=document.createElement("span");a1.className="pipe-arrow";a1.textContent="+";
 row.appendChild(a1);
 
-renderCustom(SHADERS.portal,2.2,ritualRT.portal);
-const cvB=card(row,"Dimensional Portal","Custom GLSL ring");
-toCanvas(ritualRT.portal,cvB);
+renderAtlasFrame(ritualAtlas,12,ritualRT.ring);
+const cvB=card(row,"Dark Ritual Ring","Atlas #029");
+toCanvas(ritualRT.ring,cvB);
 
 const a2=document.createElement("span");a2.className="pipe-arrow";a2.textContent="→";
 row.appendChild(a2);
 
-doBlend(ritualRT.summoning,ritualRT.portal,4,ritualRT.blend);
-const cvF=card(row,"Add Blend","Dark Ritual Portal","highlight");
+doAlphaBlend(ritualRT.masked,ritualRT.ring,1.0,ritualRT.blend);
+const cvF=card(row,"Alpha Composite","Dark Ritual Portal","highlight");
 toCanvas(ritualRT.blend,cvF);
 
 // Build PBR maps from the ritual composite for the embedded 3D preview
