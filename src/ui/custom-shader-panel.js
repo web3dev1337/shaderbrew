@@ -1,3 +1,59 @@
+const ALL_CUSTOM_SHADERS = [
+	{ file: "100-prismatic-aura", name: "Prismatic Aura" },
+	{ file: "101-volumetric-nebula", name: "Volumetric Nebula" },
+	{ file: "102-black-hole", name: "Black Hole" },
+	{ file: "103-shockwave-pulse", name: "Shockwave Pulse" },
+	{ file: "104-plasma-containment", name: "Plasma Containment" },
+	{ file: "105-julia-fractal-morph", name: "Julia Fractal Morph" },
+	{ file: "106-warp-tunnel", name: "Warp Tunnel" },
+	{ file: "107-warp-inferno", name: "Warp Inferno" },
+	{ file: "108-warp-void", name: "Warp Void" },
+	{ file: "109-warp-electric", name: "Warp Electric" },
+	{ file: "110-warp-rainbow", name: "Warp Rainbow" },
+	{ file: "111-tornado-vortex", name: "Tornado Vortex" },
+	{ file: "112-bioluminescent", name: "Bioluminescent" },
+	{ file: "113-singularity", name: "Singularity" },
+	{ file: "114-aurora-borealis", name: "Aurora Borealis" },
+	{ file: "115-cosmic-jellyfish", name: "Cosmic Jellyfish" },
+	{ file: "116-god-rays", name: "God Rays" },
+	{ file: "117-reality-glitch", name: "Reality Glitch" },
+	{ file: "118-crystal-geode", name: "Crystal Geode" },
+	{ file: "119-phoenix-rebirth", name: "Phoenix Rebirth" },
+	{ file: "120-supernova", name: "Supernova" },
+	{ file: "121-dimensional-portal", name: "Dimensional Portal" },
+	{ file: "122-deep-ocean", name: "Deep Ocean" },
+	{ file: "123-galaxy-spiral", name: "Galaxy Spiral" },
+	{ file: "124-mandelbrot-zoom", name: "Mandelbrot Zoom" },
+	{ file: "125-chain-lightning", name: "Chain Lightning" },
+	{ file: "126-solar-flare", name: "Solar Flare" },
+	{ file: "127-whirlpool", name: "Whirlpool" },
+	{ file: "128-dna-helix", name: "DNA Helix" },
+	{ file: "129-lava-flow", name: "Lava Flow" },
+	{ file: "130-time-vortex", name: "Time Vortex" },
+	{ file: "131-fluid-ink", name: "Fluid Ink" },
+	{ file: "132-quantum-entangle", name: "Quantum Entangle" },
+	{ file: "133-gravity-well", name: "Gravity Well" },
+	{ file: "134-sound-visualizer", name: "Sound Visualizer" },
+	{ file: "135-smoke-ring", name: "Smoke Ring" },
+	{ file: "136-magic-runes", name: "Magic Runes" },
+	{ file: "137-dissolve", name: "Dissolve" },
+	{ file: "138-energy-shield", name: "Energy Shield" },
+	{ file: "139-reality-shatter", name: "Reality Shatter" },
+	{ file: "140-blood-moon", name: "Blood Moon" },
+	{ file: "141-particle-collider", name: "Particle Collider" },
+	{ file: "142-dragon-breath", name: "Dragon Breath" },
+	{ file: "143-neural-network", name: "Neural Network" },
+	{ file: "144-cosmic-eye", name: "Cosmic Eye" },
+	{ file: "145-hypercube", name: "Hypercube" },
+	{ file: "146-soul-extraction", name: "Soul Extraction" },
+	{ file: "147-neon-rain", name: "Neon Rain" },
+	{ file: "148-galaxy-collision", name: "Galaxy Collision" },
+	{ file: "149-emp-blast", name: "EMP Blast" },
+	{ file: "150-void-tendril", name: "Void Tendril" },
+	{ file: "151-summoning-circle", name: "Summoning Circle" },
+	{ file: "152-lightning-smite", name: "Lightning Smite" },
+];
+
 export class CustomShaderPanel {
 	constructor() {
 		this.container = null;
@@ -20,19 +76,16 @@ export class CustomShaderPanel {
 		const header = document.createElement("div");
 		header.style.cssText = "padding:10px 12px;border-bottom:1px solid #1f1f2f;display:flex;align-items:center;justify-content:space-between;flex-shrink:0";
 
+		const titleWrap = document.createElement("div");
 		const title = document.createElement("div");
 		title.textContent = "Custom GLSL";
 		title.style.cssText = "color:#e0e0ff;font-size:13px;font-weight:bold";
-		header.appendChild(title);
-
-		const actions = document.createElement("div");
-		actions.style.cssText = "display:flex;gap:6px;align-items:center";
-
-		const link = document.createElement("a");
-		link.href = "sprite-gallery.html?source=custom";
-		link.textContent = "Gallery";
-		link.style.cssText = "color:#e94560;text-decoration:none;font-size:11px";
-		actions.appendChild(link);
+		titleWrap.appendChild(title);
+		const count = document.createElement("div");
+		count.textContent = ALL_CUSTOM_SHADERS.length + " shaders";
+		count.style.cssText = "color:#555;font-size:10px;margin-top:2px";
+		titleWrap.appendChild(count);
+		header.appendChild(titleWrap);
 
 		const close = document.createElement("button");
 		close.textContent = "\u2715";
@@ -40,56 +93,39 @@ export class CustomShaderPanel {
 		close.addEventListener("mouseenter", () => { close.style.background = "rgba(233,69,96,0.2)"; close.style.color = "#fff"; });
 		close.addEventListener("mouseleave", () => { close.style.background = "#111122"; close.style.color = "#999"; });
 		close.addEventListener("click", () => this.hide());
-		actions.appendChild(close);
-
-		header.appendChild(actions);
+		header.appendChild(close);
 		this.container.appendChild(header);
 
-		// Scrollable grid
-		const grid = document.createElement("div");
-		grid.style.cssText = `
-			flex: 1; overflow-y: auto; overflow-x: hidden;
-			padding: 8px; display: flex; flex-direction: column; gap: 8px;
-		`;
-		this.container.appendChild(grid);
+		// Scrollable list
+		const list = document.createElement("div");
+		list.style.cssText = "flex:1;overflow-y:auto;overflow-x:hidden;padding:6px";
+		this.container.appendChild(list);
 
-		const items = [
-			{ name: "Volumetric Nebula", file: "101-volumetric-nebula", fps: 6, desc: "Raymarched emission" },
-			{ name: "Black Hole", file: "102-black-hole", fps: 5, desc: "Lensing + accretion disk" },
-			{ name: "Warp Tunnel", file: "106-warp-tunnel", fps: 10, desc: "Hyperspace streaks" },
-			{ name: "Cosmic Jellyfish", file: "115-cosmic-jellyfish", fps: 6, desc: "Bioluminescent flow" },
-			{ name: "God Rays", file: "116-god-rays", fps: 6, desc: "Volumetric beams" },
-			{ name: "Phoenix Rebirth", file: "119-phoenix-rebirth", fps: 8, desc: "Flame wings" },
-			{ name: "Dimensional Portal", file: "121-dimensional-portal", fps: 8, desc: "Ring distortion" },
-			{ name: "Time Vortex", file: "130-time-vortex", fps: 8, desc: "Clockwork spiral" },
-			{ name: "Reality Shatter", file: "139-reality-shatter", fps: 7, desc: "Fractured space" },
-			{ name: "Particle Collider", file: "141-particle-collider", fps: 10, desc: "Beam collision" },
-			{ name: "Void Tendril", file: "150-void-tendril", fps: 7, desc: "Abyssal reach" },
-			{ name: "Summoning Circle", file: "151-summoning-circle", fps: 7, desc: "Arcane sigils" }
-		];
-
-		for (const item of items) {
+		for (const item of ALL_CUSTOM_SHADERS) {
 			const card = document.createElement("div");
-			card.style.cssText = "background:#0a0a14;border:1px solid #1a1a2e;border-radius:6px;overflow:hidden;transition:border-color 0.15s;cursor:pointer;flex-shrink:0";
+			card.style.cssText = "background:#0a0a14;border:1px solid #1a1a2e;border-radius:6px;overflow:hidden;transition:border-color 0.15s;cursor:pointer;margin-bottom:6px";
 			card.addEventListener("mouseenter", () => { card.style.borderColor = "#e94560"; });
 			card.addEventListener("mouseleave", () => { card.style.borderColor = "#1a1a2e"; });
+			card.addEventListener("click", () => {
+				window.open(`sprite-gallery.html?source=custom&highlight=${item.file}`, "_blank");
+			});
 
 			const canvas = document.createElement("canvas");
-			canvas.width = 276;
-			canvas.height = 276;
+			canvas.width = 288;
+			canvas.height = 288;
 			canvas.style.cssText = "width:100%;aspect-ratio:1;display:block;background:#000";
 			card.appendChild(canvas);
 
 			const label = document.createElement("div");
 			label.style.cssText = "padding:6px 8px;border-top:1px solid #1a1a2e";
-			label.innerHTML = `<div style="color:#e0e0ff;font-size:12px;font-weight:bold">${item.name}</div><div style="color:#666;font-size:10px;margin-top:2px">${item.desc}</div>`;
+			label.innerHTML = `<span style="color:#e0e0ff;font-size:12px">${item.name}</span>`;
 			card.appendChild(label);
-			grid.appendChild(card);
+			list.appendChild(card);
 
 			const ctx = canvas.getContext("2d");
 			const img = new Image();
 			img.src = `sprites/${item.file}.png`;
-			const entry = { ctx, img, fps: item.fps, frame: 0, last: 0, loaded: false, cell: 276, cw: 276 };
+			const entry = { ctx, img, frame: 0, last: 0, loaded: false, cell: 288, cw: 288, el: card };
 			img.onload = () => {
 				entry.loaded = true;
 				entry.cell = Math.round(img.naturalWidth / 6);
@@ -98,13 +134,14 @@ export class CustomShaderPanel {
 			this.entries.push(entry);
 		}
 
+		// Lazy animation — only animate visible cards
+		this._list = list;
 		document.body.appendChild(this.container);
 	}
 
 	show() {
 		this.visible = true;
 		this.container.style.display = "flex";
-		// Hide lil-gui so they don't stack
 		const gui = document.querySelector(".lil-gui.root");
 		if (gui) gui.style.display = "none";
 		this._ensureAnim();
@@ -113,7 +150,6 @@ export class CustomShaderPanel {
 	hide() {
 		this.visible = false;
 		this.container.style.display = "none";
-		// Restore lil-gui
 		const gui = document.querySelector(".lil-gui.root");
 		if (gui) gui.style.display = "";
 	}
@@ -131,9 +167,13 @@ export class CustomShaderPanel {
 
 	_animate(ts) {
 		if (this.visible && !document.hidden) {
+			const listRect = this._list.getBoundingClientRect();
 			for (const entry of this.entries) {
 				if (!entry.loaded) continue;
-				if (ts - entry.last < 1000 / entry.fps) continue;
+				// Only animate cards in view
+				const r = entry.el.getBoundingClientRect();
+				if (r.bottom < listRect.top || r.top > listRect.bottom) continue;
+				if (ts - entry.last < 140) continue;
 				entry.last = ts;
 				entry.frame = (entry.frame + 1) % 36;
 				this._drawFrame(entry);
