@@ -164,6 +164,13 @@ export class GradientEditor {
 	}
 
 	getTexture() { return this.texture; }
+	getState() {
+		return {
+			enabled: this.enabled,
+			intensity: this.intensity,
+			stops: this.stops.map(s => ({ position: s.position, color: s.color }))
+		};
+	}
 
 	setState(state) {
 		if (!state) return;

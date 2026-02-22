@@ -299,8 +299,12 @@ class App {
 	onLoadFile(fileInput) {
 		const reader = new FileReader();
 		reader.addEventListener("load", e => {
-			const preset = JSON.parse(e.target.result);
-			this.applyPreset(preset);
+			const payload = JSON.parse(e.target.result);
+			if (payload && Array.isArray(payload.layers)) {
+				this.applyProject(payload);
+			} else {
+				this.applyPreset(payload);
+			}
 		}, false);
 		reader.readAsText(fileInput.files[0]);
 	}
@@ -350,12 +354,32 @@ class App {
 		if (this.history) this.history.recordImmediate();
 	}
 
+	saveProject() {
+		const project = {
+			resolution: this.canvas.width,
+			layers: this.layerManager.toJSON(),
+			gradient: this.gradientEditor.getState()
+		};
+		let json;
+		try {
+			json = JSON.stringify(project, null, "\t");
+			json = json.replace(/[\n\t]+([\d.e\-[\]]+)/g, "$1");
+		} catch {
+			json = JSON.stringify(project);
+		}
+		const blob = new Blob([json], { type: "text/plain" });
+		const a = document.createElement("a");
+		a.href = URL.createObjectURL(blob);
+		a.download = "EffectTextureMaker_Project.json";
+		a.click();
+	}
+
 	save() {
 		let json;
 		try {
 			json = JSON.stringify(this.effectController, null, "\t");
 			json = json.replace(/[\n\t]+([\d.e\-[\]]+)/g, "$1");
-		} catch (e) {
+		} catch {
 			json = JSON.stringify(this.effectController);
 		}
 

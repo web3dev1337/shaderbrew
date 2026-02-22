@@ -81,6 +81,25 @@ export class ExportPanel {
 
 		this.container.appendChild(pbrRow);
 
+		// Project section
+		const projectTitle = document.createElement("div");
+		projectTitle.textContent = "Project:";
+		projectTitle.style.cssText = "color:#888;font-size:11px;margin:10px 0 6px";
+		this.container.appendChild(projectTitle);
+
+		const projectRow = document.createElement("div");
+		projectRow.style.cssText = "display:flex;gap:6px;flex-wrap:wrap;justify-content:center";
+
+		this._addExportBtn(projectRow, "Save Project", () => {
+			this.exportManager.app.saveProject();
+		});
+
+		this._addExportBtn(projectRow, "Load JSON", () => {
+			this.exportManager.app.load();
+		});
+
+		this.container.appendChild(projectRow);
+
 		document.body.appendChild(this.container);
 	}
 

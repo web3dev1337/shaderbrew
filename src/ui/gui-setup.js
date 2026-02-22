@@ -27,8 +27,9 @@ export class GuiSetup {
 		this.fileInput.addEventListener("click", e => { e.target.value = null; });
 
 		this.root = new GUI();
-		this.root.add(app, "load");
-		this.root.add(app, "save");
+		this.root.add(app, "load").name("Load JSON");
+		this.root.add(app, "save").name("Save Effect");
+		this.root.add(app, "saveProject").name("Save Project");
 
 		const resCtrl = this.root.add(effectController, "resolution", ["8", "16", "32", "64", "128", "256", "512", "1024", "2048"]);
 		this._track(resCtrl, val => app.onResolutionChange(val), true);
