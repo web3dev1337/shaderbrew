@@ -57,6 +57,7 @@ UI (src/ui/):
   pbr-panel.js         PBR map thumbnails + parameter sliders
   export-panel.js      Resolution selector + format buttons
   action-dock.js       Bottom action dock (presets, gradient, PBR, 3D, export)
+  layout-panel.js      Workspace layout and performance toggles
   top-nav.js           Global top navigation bar for page-to-page browsing
 
 PRESET & LOADER:

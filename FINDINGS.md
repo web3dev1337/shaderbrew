@@ -11,6 +11,7 @@ Updated: 2026-02-22
 - [x] Showcase: add step-by-step visual build breakdown for Dark Ritual Portal (warp tunnel, mask, atlas ring, alpha map, alpha composite).
 - [x] Editor: allow saving/loading full projects (layers + gradient) and expose in UI.
 - [x] Editor: replace scattered bottom buttons with a single action dock (presets, gradient, PBR, 3D, export).
+- [x] Editor: add workspace layout + performance panel (toggle layers/params/toolbar/stats, live render).
 
 ## Additional Findings (Backlog)
 - Save/load only covers a single `effectController`, not layer stacks, gradient, or PBR state.

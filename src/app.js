@@ -28,6 +28,7 @@ import { History } from "./history.js";
 import { ExportManager } from "./export.js";
 import { ExportPanel } from "./ui/export-panel.js";
 import { ActionDock } from "./ui/action-dock.js";
+import { LayoutPanel } from "./ui/layout-panel.js";
 
 if (!WebGL.isWebGL2Available()) {
 	document.body.appendChild(WebGL.getWebGLErrorMessage());
@@ -42,6 +43,12 @@ class App {
 		this.finalTarget = null;
 		this.liveRender = true;
 		this.needsRender = true;
+		this.layout = {
+			showLayers: true,
+			showParams: true,
+			showToolbar: true,
+			showStats: false
+		};
 	}
 
 	init() {
@@ -62,7 +69,10 @@ class App {
 		this._initHistory();
 		this._initExport();
 		this._initPresets();
+		this._initLayoutPanel();
 		this._initActionDock();
+		this.updateLayout();
+		setTimeout(() => this.updateLayout(), 0);
 		console.log("[fxgen] initialized");
 	}
 
@@ -79,6 +89,7 @@ class App {
 		document.body.appendChild(this.canvas);
 
 		this.stats = new Stats();
+		this.stats.dom.id = "stats";
 		document.body.appendChild(this.stats.dom);
 
 		this.camera = new THREE.PerspectiveCamera(45, 1, 1, 1000);
@@ -206,6 +217,11 @@ class App {
 	_initPresets() {
 		this.presetLoader = new PresetLoader(this);
 		this.presetLoader.buildUI({ showToggle: false });
+	}
+
+	_initLayoutPanel() {
+		this.layoutPanel = new LayoutPanel(this);
+		this.layoutPanel.build();
 	}
 
 	_initActionDock() {
@@ -511,7 +527,46 @@ class App {
 			this.colorTarget = this._createColorTarget(this.canvas.width, this.canvas.height);
 		}
 		if (this.toolbar) this.toolbar.updateResolution(this.canvas.width, this.canvas.height);
+		this.updateLayout();
 		this.requestRender();
+	}
+
+	updateLayout() {
+		const navHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--top-nav-height")) || 0;
+		const left = this.layout.showLayers ? 260 : 0;
+		const right = this.layout.showParams ? 300 : 0;
+		const toolbarHeight = this.layout.showToolbar ? 36 : 0;
+
+		if (this.canvas) {
+			this.canvas.style.left = `${left}px`;
+			this.canvas.style.right = `${right}px`;
+			this.canvas.style.top = `${navHeight + toolbarHeight}px`;
+			this.canvas.style.bottom = "50px";
+		}
+
+		if (this.toolbar && this.toolbar.container) {
+			this.toolbar.container.style.display = this.layout.showToolbar ? "flex" : "none";
+			this.toolbar.container.style.left = `${left}px`;
+			this.toolbar.container.style.right = `${right}px`;
+			this.toolbar.container.style.top = `${navHeight}px`;
+		}
+
+		if (this.layerPanel && this.layerPanel.container) {
+			this.layerPanel.container.style.display = this.layout.showLayers ? "flex" : "none";
+			this.layerPanel.container.style.top = `${navHeight}px`;
+		}
+
+		if (this.gui && this.gui.root && this.gui.root.domElement) {
+			this.gui.root.domElement.style.display = this.layout.showParams ? "block" : "none";
+		}
+
+		if (this.stats && this.stats.dom) {
+			this.stats.dom.style.display = this.layout.showStats ? "block" : "none";
+			this.stats.dom.style.position = "fixed";
+			this.stats.dom.style.left = `${left + 8}px`;
+			this.stats.dom.style.top = `${navHeight + toolbarHeight + 8}px`;
+			this.stats.dom.style.zIndex = "10001";
+		}
 	}
 
 	requestRender() {
