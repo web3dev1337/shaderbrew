@@ -7,40 +7,44 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#030306;color:#ccc;font-family:monospace;overflow-x:hidden}
-.header{text-align:center;padding:30px 20px 10px}
-.header h1{font-size:28px;letter-spacing:4px;
+.header{text-align:center;padding:1.875rem 1.25rem 0.625rem}
+.header h1{font-size:1.5rem;letter-spacing:4px;
 background:linear-gradient(90deg,#ff6622,#ff44ff,#44aaff,#ff6622);background-size:300% 100%;
 -webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:shine 4s linear infinite}
 @keyframes shine{0%{background-position:0% 50%}100%{background-position:300% 50%}}
-.header p{color:#555;font-size:12px;margin-top:6px}
+.header p{color:#555;font-size:0.75rem;margin-top:0.375rem}
 .header a{color:#e94560;text-decoration:none}
 
-#loading{text-align:center;padding:40px;color:#777;font-size:13px}
-.bar{width:360px;height:4px;background:#111;margin:12px auto 0;border-radius:3px;overflow:hidden}
+#loading{text-align:center;padding:2.5rem;color:#777;font-size:0.8rem}
+.bar{width:min(360px,80vw);height:4px;background:#111;margin:0.75rem auto 0;border-radius:3px;overflow:hidden}
 .bar-fill{width:0;height:100%;background:linear-gradient(90deg,#ff6622,#ff44ff,#44aaff);transition:width .3s}
-#load-text{margin-top:8px;font-size:11px;color:#444}
+#load-text{margin-top:0.5rem;font-size:0.6875rem;color:#444}
 
-.filter-bar{max-width:1400px;margin:0 auto 16px;display:flex;gap:6px;justify-content:center;flex-wrap:wrap;padding:0 16px}
-.toggle-btn{font-family:monospace;font-size:11px;padding:7px 14px;border:1px solid #333;border-radius:6px;
+.filter-bar{max-width:1400px;margin:0 auto 1rem;display:flex;gap:0.375rem;justify-content:center;flex-wrap:wrap;padding:0 1rem}
+.toggle-btn{font-family:monospace;font-size:0.6875rem;padding:0.4375rem 0.875rem;border:1px solid #333;border-radius:0.375rem;
 background:#0a0a12;color:#888;cursor:pointer;transition:all .2s;letter-spacing:.5px}
 .toggle-btn.active{background:#1a1a2e;color:#fff;border-color:#e94560}
 .toggle-btn:hover{border-color:#555;color:#bbb}
 
 #content{display:none}
-.grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;max-width:1400px;margin:0 auto;padding:0 16px 40px}
-@media(max-width:1100px){.grid{grid-template-columns:repeat(4,1fr)}}
-@media(max-width:600px){.grid{grid-template-columns:repeat(2,1fr)}}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(140px, calc(50% - 0.375rem)),1fr));gap:0.75rem;max-width:1400px;margin:0 auto;padding:0 1rem 2.5rem}
 
-.card{background:#0a0a12;border:1px solid #1a1a2e;border-radius:8px;overflow:hidden;transition:all .25s}
-.card:hover{border-color:#e94560;box-shadow:0 0 20px rgba(233,69,96,.2);transform:translateY(-2px)}
+.card{background:#0a0a12;border:1px solid #1a1a2e;border-radius:0.5rem;overflow:hidden;transition:all .25s}
+.card:hover{border-color:#e94560;box-shadow:0 0 20px rgba(233,69,96,.2);transform:translateY(-1px)}
 .card canvas{width:100%;aspect-ratio:1;display:block;background:#000}
-.card .info{padding:6px 8px;border-top:1px solid #1a1a2e;display:flex;justify-content:space-between;align-items:center}
-.card .name{font-size:10px;color:#d0d0e8;font-weight:bold;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.card .cat-tag{font-size:8px;padding:1px 6px;border-radius:8px;background:#1a1a2e;color:#666;text-transform:uppercase;flex-shrink:0;margin-left:4px}
+.card .info{padding:0.375rem 0.5rem;border-top:1px solid #1a1a2e;display:flex;justify-content:space-between;align-items:center}
+.card .name{font-size:0.625rem;color:#d0d0e8;font-weight:bold;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .cat-tag{font-size:0.5rem;padding:1px 0.375rem;border-radius:0.5rem;background:#1a1a2e;color:#666;text-transform:uppercase;flex-shrink:0;margin-left:0.25rem}
 .card.hidden{display:none}
 
-.links{text-align:center;padding:20px;font-size:11px;color:#444;border-top:1px solid #111}
-.links a{color:#e94560;text-decoration:none;margin:0 10px}
+.links{text-align:center;padding:1.25rem;font-size:0.6875rem;color:#444;border-top:1px solid #111}
+.links a{color:#e94560;text-decoration:none;margin:0 0.625rem}
+@media(max-width:600px){
+.header{padding:1rem 0.75rem 0.375rem}
+.header h1{font-size:1.125rem;letter-spacing:2px}
+.filter-bar{gap:0.25rem;padding:0 0.5rem}
+.toggle-btn{padding:0.3125rem 0.5rem;font-size:0.625rem}
+}
 </style>
 </head>
 <body>

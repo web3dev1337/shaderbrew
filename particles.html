@@ -2,57 +2,64 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Animated Sprite Sheet Particles — Live 3D</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#030306;color:#ccc;font-family:'Segoe UI',system-ui,sans-serif;overflow-x:hidden}
-.header{text-align:center;padding:30px 20px 15px}
-.header h1{font-size:32px;color:#e0e0ff;letter-spacing:3px;font-family:monospace;
+.header{text-align:center;padding:1.875rem 1.25rem 0.9375rem}
+.header h1{font-size:1.75rem;color:#e0e0ff;letter-spacing:3px;font-family:monospace;
 background:linear-gradient(90deg,#ff6622,#ff44ff,#44aaff,#ff6622);background-size:300% 100%;
 -webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:shine 4s linear infinite}
 @keyframes shine{0%{background-position:0% 50%}100%{background-position:300% 50%}}
-.header p{color:#555;font-size:13px}
+.header p{color:#555;font-size:0.8rem;font-family:monospace}
 .header a{color:#e94560;text-decoration:none}
-#loading{text-align:center;padding:40px;color:#555;font-family:monospace}
-.bar{width:300px;height:3px;background:#111;margin:10px auto 0;border-radius:3px;overflow:hidden}
+#loading{text-align:center;padding:2.5rem;color:#555;font-family:monospace}
+.bar{width:min(300px,80vw);height:3px;background:#111;margin:0.625rem auto 0;border-radius:3px;overflow:hidden}
 .bar-fill{width:0;height:100%;background:linear-gradient(90deg,#ff6622,#ff44ff);transition:width .3s}
 #viewport{width:100%;max-width:1400px;margin:0 auto;position:relative;
-border:1px solid #1a1a2e;border-radius:4px;overflow:hidden;
+border:1px solid #1a1a2e;border-radius:0.5rem;overflow:hidden;
 box-shadow:0 0 60px rgba(255,100,30,.08),0 0 120px rgba(200,50,200,.04)}
 #viewport canvas{width:100%;display:block}
-.toggle-bar{max-width:1400px;margin:10px auto;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:0 20px}
-.toggle-btn{font-family:monospace;font-size:12px;padding:8px 16px;border:1px solid #333;border-radius:6px;
+.toggle-bar{max-width:1400px;margin:0.625rem auto;display:flex;gap:0.375rem;justify-content:center;flex-wrap:wrap;padding:0 1.25rem}
+.toggle-btn{font-family:monospace;font-size:0.75rem;padding:0.5rem 1rem;border:1px solid #333;border-radius:0.375rem;
 background:#111;color:#aaa;cursor:pointer;transition:all .2s}
 .toggle-btn.active{background:#1a1a2e;color:#fff;border-color:#e94560}
 .toggle-btn:hover{border-color:#666}
-.perf-controls{max-width:1400px;margin:8px auto;display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;padding:0 20px}
-.perf-controls .label{font-family:monospace;font-size:10px;color:#666;letter-spacing:.2em;text-transform:uppercase}
-.perf-controls button{font-family:monospace;font-size:11px;padding:6px 12px;border:1px solid #333;border-radius:16px;background:#111;color:#888;cursor:pointer;transition:all .2s}
+.perf-controls{max-width:1400px;margin:0.5rem auto;display:flex;gap:0.5rem;align-items:center;justify-content:center;flex-wrap:wrap;padding:0 1.25rem}
+.perf-controls .label{font-family:monospace;font-size:0.625rem;color:#666;letter-spacing:.2em;text-transform:uppercase}
+.perf-controls button{font-family:monospace;font-size:0.6875rem;padding:0.375rem 0.75rem;border:1px solid #333;border-radius:1rem;background:#111;color:#888;cursor:pointer;transition:all .2s}
 .perf-controls button.on{background:#1a1a2e;border-color:#e94560;color:#fff}
-.browse-nav{max-width:1400px;margin:8px auto;display:none;align-items:center;justify-content:center;gap:12px;padding:0 20px;font-family:monospace}
-.browse-nav button{font-family:monospace;font-size:14px;padding:8px 20px;border:1px solid #333;border-radius:6px;background:#111;color:#aaa;cursor:pointer;transition:all .2s}
+.browse-nav{max-width:1400px;margin:0.5rem auto;display:none;align-items:center;justify-content:center;gap:0.75rem;padding:0 1.25rem;font-family:monospace}
+.browse-nav button{font-family:monospace;font-size:0.875rem;padding:0.5rem 1.25rem;border:1px solid #333;border-radius:0.375rem;background:#111;color:#aaa;cursor:pointer;transition:all .2s}
 .browse-nav button:hover{border-color:#e94560;color:#fff}
-.browse-nav .browse-label{font-size:14px;color:#e0e0ff;min-width:280px;text-align:center}
-.browse-nav .browse-sub{font-size:11px;color:#555;text-align:center}
-.browse-nav .browse-counter{font-size:11px;color:#e94560}
-.info-bar{max-width:1400px;margin:15px auto;padding:12px;text-align:center;font-family:monospace;font-size:11px;color:#444;border-top:1px solid #111}
-.info-bar kbd{background:#1a1a2e;padding:2px 6px;border-radius:3px;color:#888;font-size:10px}
-.sheet-strip{max-width:1400px;margin:20px auto;padding:0 20px;display:flex;gap:24px;justify-content:center;flex-wrap:wrap}
+.browse-nav .browse-label{font-size:0.875rem;color:#e0e0ff;min-width:17.5rem;text-align:center}
+.browse-nav .browse-sub{font-size:0.6875rem;color:#555;text-align:center}
+.browse-nav .browse-counter{font-size:0.6875rem;color:#e94560}
+.info-bar{max-width:1400px;margin:0.9375rem auto;padding:0.75rem;text-align:center;font-family:monospace;font-size:0.6875rem;color:#444;border-top:1px solid #111}
+.info-bar kbd{background:#1a1a2e;padding:0.125rem 0.375rem;border-radius:3px;color:#888;font-size:0.625rem}
+.sheet-strip{max-width:1400px;margin:1.25rem auto;padding:0 1.25rem;display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap}
 .sheet-card{text-align:center;font-family:monospace}
-.sheet-card canvas{width:200px;height:200px;border-radius:6px;border:1px solid #1a1a2e;background:#000;display:block;margin-bottom:4px}
-.sheet-card .label{font-size:11px;color:#aaa;font-weight:bold}.sheet-card .sub{font-size:9px;color:#555}
+.sheet-card canvas{width:12.5rem;height:12.5rem;border-radius:0.375rem;border:1px solid #1a1a2e;background:#000;display:block;margin-bottom:0.25rem}
+.sheet-card .label{font-size:0.6875rem;color:#aaa;font-weight:bold}.sheet-card .sub{font-size:0.5625rem;color:#555}
 
-.frame-section{max-width:1400px;margin:30px auto;padding:0 20px}
-.frame-section h2{font-family:monospace;font-size:14px;color:#e0e0ff;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid #1a1a2e}
-.frame-group{margin-bottom:30px}
-.frame-group h3{font-family:monospace;font-size:12px;color:#e94560;margin-bottom:8px}
-.frame-group .sub{font-family:monospace;font-size:10px;color:#555;margin-bottom:10px}
-.frame-grid{display:grid;grid-template-columns:repeat(9,1fr);gap:6px}
-.frame-grid canvas{width:100%;aspect-ratio:1;border-radius:4px;border:1px solid #1a1a2e;background:#000;display:block}
-.frame-grid .frame-num{text-align:center;font-family:monospace;font-size:9px;color:#444;margin-top:2px}
+.frame-section{max-width:1400px;margin:1.875rem auto;padding:0 1.25rem}
+.frame-section h2{font-family:monospace;font-size:0.875rem;color:#e0e0ff;margin-bottom:0.75rem;padding-bottom:0.375rem;border-bottom:1px solid #1a1a2e}
+.frame-group{margin-bottom:1.875rem}
+.frame-group h3{font-family:monospace;font-size:0.75rem;color:#e94560;margin-bottom:0.5rem}
+.frame-group .sub{font-family:monospace;font-size:0.625rem;color:#555;margin-bottom:0.625rem}
+.frame-grid{display:grid;grid-template-columns:repeat(9,1fr);gap:0.375rem}
+.frame-grid canvas{width:100%;aspect-ratio:1;border-radius:0.25rem;border:1px solid #1a1a2e;background:#000;display:block}
+.frame-grid .frame-num{text-align:center;font-family:monospace;font-size:0.5625rem;color:#444;margin-top:0.125rem}
 @media(max-width:900px){.frame-grid{grid-template-columns:repeat(6,1fr)}}
-.links{text-align:center;padding:20px;font-family:monospace;font-size:12px}
-.links a{color:#e94560;text-decoration:none;margin:0 10px}
+@media(max-width:600px){
+.header h1{font-size:1.25rem;letter-spacing:2px}
+.frame-grid{grid-template-columns:repeat(4,1fr)}
+.browse-nav .browse-label{min-width:auto}
+.sheet-card canvas{width:9rem;height:9rem}
+}
+.links{text-align:center;padding:1.25rem;font-family:monospace;font-size:0.75rem}
+.links a{color:#e94560;text-decoration:none;margin:0 0.625rem}
 </style>
 </head>
 <body>
