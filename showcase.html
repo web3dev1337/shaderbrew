@@ -461,6 +461,32 @@ c.appendChild(l);container.appendChild(c);return cv;
 }
 function prog(p){pbar.style.width=p+"%";}
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const animators=[];
+let animLoopStarted=false;
+
+function addAnimator(canvas,fps,update){
+	const anim={canvas,fps,update,last:0,visible:true};
+	const obs=new IntersectionObserver(entries=>{
+		entries.forEach(e=>{anim.visible=e.isIntersecting;});
+	},{threshold:.2});
+	obs.observe(canvas);
+	animators.push(anim);
+	if(!animLoopStarted){
+		animLoopStarted=true;
+		requestAnimationFrame(animLoop);
+	}
+}
+
+function animLoop(ts){
+	for(const a of animators){
+		if(!a.visible||document.hidden)continue;
+		if(ts-a.last>=1000/a.fps){
+			a.last=ts;
+			a.update(ts,a);
+		}
+	}
+	requestAnimationFrame(animLoop);
+}
 
 function renderHero(){
 const cv=document.getElementById("hero-canvas");
@@ -471,6 +497,15 @@ doMask(rt[0],0.45,0.1,rt[1]);
 renderAtlasFrame(ritualAtlas,12,rt[2]);
 doAlphaBlend(rt[1],rt[2],1.0,rt[3]);
 toCanvas(rt[3],cv);
+	addAnimator(cv,5,(t)=>{
+		const frame=Math.floor((t/1000)*5)%FRAMES;
+		const time=0+(frame/(FRAMES-1))*15;
+		renderCustom(SHADERS.warp_tunnel,time,rt[0]);
+		doMask(rt[0],0.45,0.1,rt[1]);
+		renderAtlasFrame(ritualAtlas,frame,rt[2]);
+		doAlphaBlend(rt[1],rt[2],1.0,rt[3]);
+		toCanvas(rt[3],cv);
+	});
 }
 
 // ===================================================================
@@ -602,6 +637,13 @@ renderCustom(SHADERS.warp_tunnel,1.6,ritualRT.core);
 doMask(ritualRT.core,0.45,0.1,ritualRT.masked);
 const cvA=card(row,"Warp Tunnel","Masked core (circle)");
 toCanvas(ritualRT.masked,cvA);
+addAnimator(cvA,5,(t)=>{
+	const frame=Math.floor((t/1000)*5)%FRAMES;
+	const time=0+(frame/(FRAMES-1))*15;
+	renderCustom(SHADERS.warp_tunnel,time,ritualRT.core);
+	doMask(ritualRT.core,0.45,0.1,ritualRT.masked);
+	toCanvas(ritualRT.masked,cvA);
+});
 
 const a1=document.createElement("span");a1.className="pipe-arrow";a1.textContent="+";
 row.appendChild(a1);
@@ -609,6 +651,11 @@ row.appendChild(a1);
 renderAtlasFrame(ritualAtlas,12,ritualRT.ring);
 const cvB=card(row,"Dark Ritual Ring","Atlas #029");
 toCanvas(ritualRT.ring,cvB);
+addAnimator(cvB,5,(t)=>{
+	const frame=Math.floor((t/1000)*5)%FRAMES;
+	renderAtlasFrame(ritualAtlas,frame,ritualRT.ring);
+	toCanvas(ritualRT.ring,cvB);
+});
 
 const a2=document.createElement("span");a2.className="pipe-arrow";a2.textContent="→";
 row.appendChild(a2);
@@ -616,6 +663,15 @@ row.appendChild(a2);
 doAlphaBlend(ritualRT.masked,ritualRT.ring,1.0,ritualRT.blend);
 const cvF=card(row,"Alpha Composite","Dark Ritual Portal","highlight");
 toCanvas(ritualRT.blend,cvF);
+addAnimator(cvF,5,(t)=>{
+	const frame=Math.floor((t/1000)*5)%FRAMES;
+	const time=0+(frame/(FRAMES-1))*15;
+	renderCustom(SHADERS.warp_tunnel,time,ritualRT.core);
+	doMask(ritualRT.core,0.45,0.1,ritualRT.masked);
+	renderAtlasFrame(ritualAtlas,frame,ritualRT.ring);
+	doAlphaBlend(ritualRT.masked,ritualRT.ring,1.0,ritualRT.blend);
+	toCanvas(ritualRT.blend,cvF);
+});
 
 // Build PBR maps from the ritual composite for the embedded 3D preview
 doPBR(ritualRT.blend,normalM,ritualRT.normal);
