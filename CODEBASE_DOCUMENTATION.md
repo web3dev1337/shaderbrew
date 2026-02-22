@@ -1,6 +1,6 @@
 # EffectTextureMaker — Codebase Documentation
 
-Enhanced fork of mebiusbox's MIT-licensed WebGL procedural texture generator. Transformed from a single-effect viewer into a multi-layer texture creation tool with PBR export, 3D preview, gradient editor, undo/redo, and 119 pre-rendered sprite sheet particle effects.
+Enhanced fork of mebiusbox's MIT-licensed WebGL procedural texture generator. Transformed from a single-effect viewer into a multi-layer texture creation tool with PBR export, 3D preview, gradient editor, undo/redo, and 160 animated sprite sheet effects (100 FXGEN + 52 custom GLSL + 8 composites).
 
 ## Quick Navigation
 
@@ -9,20 +9,21 @@ ENTRY POINTS:
   editor.html          Main editor (loads src/app.js)
   index.html           Original editor (loads fxgen.module.min.js, kept for compat)
   gallery.html         Live animated gallery of 70+ effects
-  showcase.html        3D showcase with animated previews
+  showcase.html        Feature showcase (pipeline + custom GLSL previews)
   demos.html           Interactive material demos
   particles.html       3D particle viewport + Browse 100 mode
   particle-gallery.html  100-particle grid gallery
-  sprite-gallery.html  119 animated sprite sheet gallery (static PNGs)
+  sprite-gallery.html  160 animated sprite sheet gallery (FXGEN + custom GLSL + composites)
   gen-sprites.html     Headless generator: 100 pixy-based sprite sheets
-  gen-custom.html      Headless generator: 19 custom GLSL sprite sheets
+  gen-custom.html      Headless generator: 52 custom GLSL sprite sheets
+  gen-hires-test.html  One-off hi-res custom shader test
 
 PROJECT TRACKING:
   FINDINGS.md          Findings checklist and usability roadmap
 
 CORE MODULES (src/):
   app.js               Main coordinator — init, animate, render
-  defaults.js          65+ effect types, ~100 default parameters
+  defaults.js          68 effect types, ~100 default parameters
   pixy-api.js          Facade around pixy.module.min.js exports
   render-pipeline.js   6-pass pipeline: Base→Polar→CB→Tiling→Normal→Copy
   layer-manager.js     Multi-layer CRUD, reorder, duplicate
@@ -57,6 +58,7 @@ UI (src/ui/):
   pbr-panel.js         PBR map thumbnails + parameter sliders
   export-panel.js      Resolution selector + format buttons
   action-dock.js       Bottom action dock (presets, gradient, PBR, 3D, export)
+  custom-shader-panel.js Custom GLSL sprite preview panel
   layout-panel.js      Workspace layout and performance toggles
   quickstart.js        Quick-start overlay for first-time flow
   top-nav.js           Global top navigation bar for page-to-page browsing
@@ -72,12 +74,13 @@ DATA:
   presets/              38 JSON preset files (13 custom + 25 built-in)
   presets/manifest.json Manifest for the preset browser (labels, categories, file paths)
   presets/projects/     Example multi-layer project JSONs
-  sprites/              118 pre-rendered sprite sheet PNGs (6×6 grid, 192px frames)
+  sprites/              160 pre-rendered sprite sheet PNGs (6×6 grid, 192px frames)
+  game-sprites/          Split-frame outputs for game engine imports
   images/grunge.png     Texture used by shader effects
 
 SCRIPTS:
   save-sprites.mjs     Puppeteer: renders gen-sprites.html → 100 PNGs to sprites/
-  save-custom.mjs      Puppeteer: renders gen-custom.html → 19 PNGs to sprites/
+  save-custom.mjs      Puppeteer: renders gen-custom.html → 52 PNGs to sprites/
 
 TOOLING:
   eslint.config.mjs   ESLint config (run `npm run lint`)
@@ -143,29 +146,9 @@ Output: PNG sprite sheet, 192px per frame, 36 frames total
 
 ### Custom GLSL Shaders (gen-custom.html)
 
-19 shaders written from scratch, bypassing pixy entirely. Each is a standalone fragment shader with `uniform float time` and `uniform vec2 resolution`.
+52 shaders written from scratch, bypassing pixy entirely. Each is a standalone fragment shader with `uniform float time` and `uniform vec2 resolution`. The catalog lives in `gen-custom.html`, and shader sources live in `shader-defs.js`.
 
-| # | Shader | Technique | Color Theory |
-|---|--------|-----------|-------------|
-| 101 | Volumetric Nebula | Raymarched 3D FBM volume, emission+absorption | Emission-based |
-| 102 | Black Hole | Schwarzschild lensing, accretion disk, photon ring | Temperature (blue-white→red) |
-| 103 | Shockwave Pulse | Expanding ring + debris field | Grayscale (masked) |
-| 104 | Plasma Containment | Raymarched sphere volume, Fresnel rim | Core warm, shell cool |
-| 105 | Julia Fractal Morph | Morphing Julia set constant, smooth iteration | Palette cycling |
-| 106 | Warp Tunnel | Hyperspace streaks + noise walls | Split-complementary (blue-violet + amber) |
-| 107 | Warp Inferno | Tighter spiral, fire walls | Analogous warm (gold→orange→ember) |
-| 108 | Warp Void | Slow, ominous tendrils | Triadic (violet + teal + gold spark) |
-| 109 | Warp Electric | Fast dense streaks, electric arcs | Complementary (cyan + coral) |
-| 110 | Warp Rainbow | Depth-driven hue sweep | Analogous cool (teal→blue→violet HSV) |
-| 111 | Tornado Vortex | Raymarched funnel with rotational twist | Dust tones |
-| 112 | Bioluminescent | Pulsing organism, veins, tentacles | Teal + blue + purple |
-| 113 | Singularity | Spiral infall, Hawking radiation | Warm streams + blue radiation |
-| 114 | Aurora Borealis | 5 layered curtains, height-dependent color | Green→teal→purple→red |
-| 115 | Cosmic Jellyfish | Pulsating bell dome + trailing tentacles | Purple + cyan bioluminescent |
-| 116 | God Rays | 12 volumetric beams, cloud occlusion, dust | Golden-white |
-| 117 | Reality Glitch | RGB split, scan lines, matrix rain | Green terminal + corruption |
-| 118 | Crystal Geode | Voronoi crystal facets, internal sparkle | Per-crystal hue cycling |
-| 119 | Phoenix Rebirth | Wings, flame columns, ember particles | Analogous warm fire |
+Examples: Volumetric Nebula, Black Hole, Warp Tunnel, Dimensional Portal, Cosmic Jellyfish, Reality Shatter, Particle Collider, Void Tendril, Summoning Circle.
 
 ### Layer System
 

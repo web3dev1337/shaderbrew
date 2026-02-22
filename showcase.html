@@ -66,6 +66,10 @@ body{background:radial-gradient(1200px 600px at 50% -200px,#16162a 0%,#07070c 55
 .forge-frame{width:100%;max-width:1400px;margin:0 auto;border:1px solid #1a1a2e;border-radius:10px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.45)}
 .forge-frame iframe{width:100%;height:520px;border:0;display:block;background:#050508}
 .section-note{color:#e94560;font-size:12px;font-family:monospace;margin-bottom:12px;opacity:.8}
+.section-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.section-actions a{display:inline-block;padding:6px 12px;border-radius:6px;border:1px solid #333;background:#111;color:#bbb;text-decoration:none;font-family:monospace;font-size:11px;letter-spacing:.4px;transition:all .2s}
+.section-actions a.primary{background:#1a1a3e;border-color:#e94560;color:#fff}
+.section-actions a:hover{border-color:#e94560;color:#fff}
 .vs-label{background:#e94560;color:#fff;padding:2px 8px;border-radius:4px;font-family:monospace;font-size:10px;letter-spacing:1px;align-self:center;flex-shrink:0}
 .outro{text-align:center;padding:50px 20px;max-width:700px;margin:0 auto}
 .outro h2{color:#e0e0ff;margin-bottom:10px;font-size:22px}
@@ -144,6 +148,18 @@ Initializing WebGL + loading shaders...
 <div class="section-note">Pipeline overview</div>
 <div id="grid-ritual"></div>
 <div class="preview-wrap" id="grid-ritual-3d"></div>
+</section>
+<div class="arrow">&#x25BC;</div>
+
+<section class="chapter" id="custom-library">
+<span class="chapter-num">CUSTOM GLSL</span>
+<h2>Custom Shader Library <span class="new">NEW</span></h2>
+<p>52 hand-written fragment shaders that bypass the FXGEN library entirely — volumetric raymarching, fractals, portals, and cosmic phenomena. Each tile below is a live GLSL render, animated from its sprite sheet frames.</p>
+<div class="demo-grid wide" id="grid-custom"></div>
+<div class="section-actions">
+<a class="primary" href="sprite-gallery.html?source=custom">View all 52 custom shaders</a>
+<a href="sprite-gallery.html?source=fxgen">Compare FXGEN library</a>
+</div>
 </section>
 <div class="arrow">&#x25BC;</div>
 
@@ -978,12 +994,46 @@ g.appendChild(info);
 }
 
 // ===================================================================
+// CUSTOM GLSL LIBRARY — hand-written shader previews
+// ===================================================================
+function chCustom(){
+const g=document.getElementById("grid-custom");
+if(!g)return;
+const demos=[
+{shader:"volumetric_nebula",name:"Volumetric Nebula",desc:"Raymarched FBM cloud",tStart:0,tEnd:20,fps:6},
+{shader:"black_hole",name:"Black Hole",desc:"Lensing + accretion disk",tStart:0,tEnd:25,fps:5},
+{shader:"warp_tunnel",name:"Warp Tunnel",desc:"Hyperspace streaks",tStart:0,tEnd:15,fps:10},
+{shader:"cosmic_jellyfish",name:"Cosmic Jellyfish",desc:"Bioluminescent flow",tStart:0,tEnd:20,fps:6},
+{shader:"god_rays",name:"God Rays",desc:"Volumetric beams",tStart:0,tEnd:20,fps:6},
+{shader:"reality_shatter",name:"Reality Shatter",desc:"Cracked spacetime",tStart:.5,tEnd:16,fps:7},
+{shader:"phoenix",name:"Phoenix Rebirth",desc:"Flame wings",tStart:0,tEnd:15,fps:8},
+{shader:"portal",name:"Dimensional Portal",desc:"Rift ring distortion",tStart:0,tEnd:20,fps:8},
+{shader:"time_vortex",name:"Time Vortex",desc:"Clockwork spiral",tStart:0,tEnd:20,fps:8},
+{shader:"particle_collider",name:"Particle Collider",desc:"Beam collision",tStart:0,tEnd:10,fps:10},
+{shader:"void_tendril",name:"Void Tendril",desc:"Abyssal reach",tStart:0,tEnd:20,fps:7},
+{shader:"summoning",name:"Summoning Circle",desc:"Arcane sigils",tStart:0,tEnd:20,fps:7}
+];
+for(const d of demos){
+const cv=card(g,d.name,d.desc);
+renderCustom(SHADERS[d.shader],d.tStart,rt[0]);
+toCanvas(rt[0],cv);
+addAnimator(cv,d.fps,(t)=>{
+const frame=Math.floor((t/1000)*d.fps)%FRAMES;
+const time=d.tStart+(frame/(FRAMES-1))*(d.tEnd-d.tStart);
+renderCustom(SHADERS[d.shader],time,rt[0]);
+toCanvas(rt[0],cv);
+});
+}
+}
+
+// ===================================================================
 // INIT
 // ===================================================================
 async function init(){
 prog(5);await sleep(50);
 renderHero();prog(8);await sleep(30);
 ch5b();prog(18);await sleep(20);
+chCustom();prog(26);await sleep(20);
 ch1();prog(30);await sleep(20);
 ch2();prog(44);await sleep(20);
 ch3();prog(58);await sleep(20);
