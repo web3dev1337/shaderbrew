@@ -808,8 +808,8 @@ const structP={time:8,tiling:true,cNoiseOctave:5,cNoiseFrequency:4,cNoiseAmplitu
 cNoiseLacunarity:2,cNoisePersistence:.5,cRidge:.6,cRidgeOffset:.5,cVoronoiNoise:.3,cVoronoiCell:.2};
 renderFx("CoherentNoise",structP,pbrRT.struct);
 
-// Apply Ember gradient for a rich colored version
-doGrad(pbrRT.struct,"Ember",pbrRT.color);
+// Apply Plasma gradient for a rich colored version
+doGrad(pbrRT.struct,"Plasma",pbrRT.color);
 
 // Generate PBR maps from the structural (pre-gradient) texture
 doPBR(pbrRT.struct,normalM,pbrRT.normal);
@@ -818,7 +818,7 @@ doPBR(pbrRT.struct,aoM,pbrRT.ao);
 doPBR(pbrRT.struct,metalM,pbrRT.metal);
 
 const maps=[
-{rt:pbrRT.color,name:"Color (Ember Gradient)",desc:"Gradient-mapped color — what you see"},
+{rt:pbrRT.color,name:"Color (Plasma Gradient)",desc:"Gradient-mapped color — what you see"},
 {rt:pbrRT.normal,name:"Normal Map",desc:"Sobel filter — surface bumps and ridges"},
 {rt:pbrRT.rough,name:"Roughness",desc:"Inverted luminance — shiny peaks, rough valleys"},
 {rt:pbrRT.ao,name:"Ambient Occlusion",desc:"Height analysis — darkened crevices"},
@@ -860,7 +860,7 @@ r3.domElement.style.cssText="border-radius:10px;border:1px solid #222;cursor:gra
 g.appendChild(r3.domElement);
 
 const scene3=new THREE.Scene();
-scene3.background=new THREE.Color(0x08080f);
+scene3.background=new THREE.Color(0x11111a);
 
 const cam3=new THREE.PerspectiveCamera(40,W/H,.1,100);
 cam3.position.set(2.5,2,4);cam3.lookAt(0,.2,0);
@@ -889,16 +889,16 @@ const accent=new THREE.PointLight(0x77bbff,1.0,10);accent.position.set(3,0,-3);s
 
 // Shared PBR material
 const mat3=new THREE.MeshStandardMaterial({
-color:0xffffff,roughness:.3,metalness:.35,
+color:0xffffff,roughness:.22,metalness:.5,
 map:colorTex,
 normalMap:normalTex,
 roughnessMap:roughTex,
 aoMap:aoTex,
 metalnessMap:metalTex,
-envMapIntensity:1.8,
-emissive:new THREE.Color(0x220600),
+envMapIntensity:2.4,
+emissive:new THREE.Color(0x330011),
 emissiveMap:colorTex,
-emissiveIntensity:.6
+emissiveIntensity:.9
 });
 mat3.normalScale.set(1.5,1.5);
 mat3.needsUpdate=true;
@@ -960,9 +960,9 @@ updatePreviewState();
 const info=document.createElement("div");info.className="preview-info";
 info.innerHTML=`
 <h3>Interactive 3D Preview</h3>
-<p>The Ember-gradient texture from Chapter 6 applied as a full PBR material across three geometries.</p>
+<p>The Plasma-gradient texture from Chapter 6 applied as a full PBR material across three geometries.</p>
 <ul class="map-list">
-<li>Color map (Ember gradient-mapped)</li>
+<li>Color map (Plasma gradient-mapped)</li>
 <li>Normal map (Sobel, strength 1.5)</li>
 <li>Roughness map (inverted luminance)</li>
 <li>Ambient Occlusion (height-based)</li>
