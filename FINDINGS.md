@@ -15,9 +15,12 @@ Updated: 2026-02-22
 - [x] Editor: add keyboard shortcuts for key panels (B, G, P, 3, E, L).
 - [x] Editor: add Quick Start overlay with guided actions and reopen from Layout panel.
 - [x] Editor: add preset thumbnails (auto-captured on load with local cache).
+- [x] Sprite Gallery: add source filters + tags to separate FXGEN library, custom GLSL, and composites.
+- [x] Sprite Gallery: support query params for `source`/`cat` deep links and show accurate counts.
 
 ## Additional Findings (Backlog)
 - Save/load only covers a single `effectController`, not layer stacks, gradient, or PBR state.
 - `sprite-gallery.html` catalog count and `sprites/` count are out of sync with docs.
 - `CODEBASE_DOCUMENTATION.md` lists outdated sprite totals and does not mention `gen-hires-test.html` or `game-sprites/`.
 - Stats overlay is always visible and floating panels can overlap on small viewports.
+- Sprite Gallery now separates FXGEN library, custom GLSL, and composites with source tags + filters.

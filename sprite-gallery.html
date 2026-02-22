@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Sprite Gallery — 151 Animated Effects</title>
+<title>Sprite Gallery — 160 Animated Effects</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#030306;color:#ccc;font-family:'Segoe UI',system-ui,sans-serif}
@@ -25,16 +25,19 @@ background:#111;color:#aaa;cursor:pointer;transition:all .2s}
 .card .info{padding:8px 10px}
 .card .name{font-family:monospace;font-size:12px;color:#e0e0ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .card .meta{font-size:10px;color:#555;font-family:monospace;margin-top:2px}
-.card .cat-tag{display:inline-block;font-size:9px;padding:1px 6px;border-radius:3px;color:#888;border:1px solid #222;margin-top:3px}
+.card .tag-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:3px}
+.card .cat-tag{display:inline-block;font-size:9px;padding:1px 6px;border-radius:3px;color:#888;border:1px solid #222}
+.card .source-tag{text-transform:uppercase;letter-spacing:0.08em}
 .count{text-align:center;font-family:monospace;font-size:12px;color:#444;padding:10px;margin-bottom:10px}
 </style>
 </head>
 <body>
 <div class="header">
 <h1>SPRITE GALLERY</h1>
-<p>160 animated sprite sheets (100 procedural + 52 custom + 8 composites) &mdash; 6&times;6 grid, 192px frames &mdash; <a href="particles.html">3D View</a> | <a href="gallery.html">Texture Gallery</a></p>
+<p>160 animated sprite sheets (100 FXGEN library + 52 custom GLSL + 8 composites) &mdash; 6&times;6 grid, 192px frames &mdash; <a href="particles.html">3D View</a> | <a href="gallery.html">Texture Gallery</a></p>
 </div>
 
+<div class="filters" id="sourceFilters"></div>
 <div class="filters" id="filters"></div>
 <div class="count" id="count"></div>
 <div class="grid" id="grid"></div>
@@ -205,19 +208,58 @@ const CATALOG=[
 {name:"Void Rift",cat:"dark",file:"208-void-rift",fps:7}
 ];
 
+const SOURCE_LABELS={all:"All",fxgen:"FXGEN Library",custom:"Custom GLSL",composite:"Composite Builds"};
+const SOURCE_COLORS={fxgen:"#44aaff",custom:"#e94560",composite:"#ffaa22"};
 const catColors={fire:"#e94560",ice:"#44aaff",magic:"#bb66ff",nature:"#44cc66",cosmic:"#aa88ff",energy:"#ffaa22",dark:"#666677",abstract:"#ff66aa"};
 const cats=["all",...new Set(CATALOG.map(c=>c.cat))];
 
+const sourceFiltersEl=document.getElementById("sourceFilters");
 const filtersEl=document.getElementById("filters");
 const gridEl=document.getElementById("grid");
 const countEl=document.getElementById("count");
 let activeCat="all";
+let activeSource="all";
+
+function sourceFor(file){
+  const id=parseInt(file.split("-")[0],10);
+  if(Number.isNaN(id))return"fxgen";
+  if(id>=200)return"composite";
+  if(id>=101)return"custom";
+  return"fxgen";
+}
+
+const sourceCounts={fxgen:0,custom:0,composite:0};
+CATALOG.forEach(item=>{
+  item.source=sourceFor(item.file);
+  if(sourceCounts[item.source]!=null)sourceCounts[item.source]+=1;
+});
+
+const params=new URLSearchParams(window.location.search);
+const sourceParam=params.get("source");
+if(sourceParam&&SOURCE_LABELS[sourceParam])activeSource=sourceParam;
+const catParam=params.get("cat");
+if(catParam&&cats.includes(catParam))activeCat=catParam;
+
+["all","fxgen","custom","composite"].forEach(src=>{
+  const b=document.createElement("button");
+  const srcCount=src==="all"?CATALOG.length:sourceCounts[src];
+  const label=SOURCE_LABELS[src]||src;
+  b.textContent=`${label} (${srcCount})`;
+  if(src===activeSource)b.classList.add("active");
+  b.onclick=()=>{
+    activeSource=src;
+    sourceFiltersEl.querySelectorAll("button").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active");
+    renderGrid();
+  };
+  sourceFiltersEl.appendChild(b);
+});
 
 cats.forEach(c=>{
   const b=document.createElement("button");
   const catCount=c==="all"?CATALOG.length:CATALOG.filter(x=>x.cat===c).length;
   b.textContent=c==="all"?`All (${CATALOG.length})`:c.charAt(0).toUpperCase()+c.slice(1)+` (${catCount})`;
-  if(c==="all")b.classList.add("active");
+  if(c===activeCat)b.classList.add("active");
   b.onclick=()=>{
     activeCat=c;
     filtersEl.querySelectorAll("button").forEach(x=>x.classList.remove("active"));
@@ -239,8 +281,14 @@ function renderGrid(){
   gridEl.innerHTML="";
   sprites.forEach(s=>{observer.unobserve(s.card);});
   sprites.length=0;
-  const filtered=activeCat==="all"?CATALOG:CATALOG.filter(c=>c.cat===activeCat);
-  countEl.textContent=`Showing ${filtered.length} of ${CATALOG.length} effects`;
+  const filtered=CATALOG.filter(item=>{
+    if(activeSource!=="all"&&item.source!==activeSource)return false;
+    if(activeCat!=="all"&&item.cat!==activeCat)return false;
+    return true;
+  });
+  const sourceLabel=SOURCE_LABELS[activeSource]||activeSource;
+  const catLabel=activeCat==="all"?"All Categories":activeCat;
+  countEl.textContent=`Showing ${filtered.length} of ${CATALOG.length} effects — ${sourceLabel} · ${catLabel}`;
   filtered.forEach(item=>{
     const card=document.createElement("div");
     card.className="card";
@@ -248,7 +296,9 @@ function renderGrid(){
     cv.width=192;cv.height=192;
     const info=document.createElement("div");
     info.className="info";
-    info.innerHTML=`<div class="name">${item.name}</div><div class="meta">${item.fps} fps &middot; 36 frames</div><span class="cat-tag" style="border-color:${catColors[item.cat]||'#333'};color:${catColors[item.cat]||'#888'}">${item.cat}</span>`;
+    const sourceLabel=SOURCE_LABELS[item.source]||item.source;
+    const sourceColor=SOURCE_COLORS[item.source]||"#666";
+    info.innerHTML=`<div class="name">${item.name}</div><div class="meta">${item.fps} fps &middot; 36 frames</div><div class="tag-row"><span class="cat-tag" style="border-color:${catColors[item.cat]||'#333'};color:${catColors[item.cat]||'#888'}">${item.cat}</span><span class="cat-tag source-tag" style="border-color:${sourceColor};color:${sourceColor}">${sourceLabel}</span></div>`;
     card.appendChild(cv);card.appendChild(info);gridEl.appendChild(card);
 
     const ctx=cv.getContext("2d");
