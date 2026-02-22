@@ -25,6 +25,10 @@ box-shadow:0 0 60px rgba(255,100,30,.08),0 0 120px rgba(200,50,200,.04)}
 background:#111;color:#aaa;cursor:pointer;transition:all .2s}
 .toggle-btn.active{background:#1a1a2e;color:#fff;border-color:#e94560}
 .toggle-btn:hover{border-color:#666}
+.perf-controls{max-width:1400px;margin:8px auto;display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;padding:0 20px}
+.perf-controls .label{font-family:monospace;font-size:10px;color:#666;letter-spacing:.2em;text-transform:uppercase}
+.perf-controls button{font-family:monospace;font-size:11px;padding:6px 12px;border:1px solid #333;border-radius:16px;background:#111;color:#888;cursor:pointer;transition:all .2s}
+.perf-controls button.on{background:#1a1a2e;border-color:#e94560;color:#fff}
 .browse-nav{max-width:1400px;margin:8px auto;display:none;align-items:center;justify-content:center;gap:12px;padding:0 20px;font-family:monospace}
 .browse-nav button{font-family:monospace;font-size:14px;padding:8px 20px;border:1px solid #333;border-radius:6px;background:#111;color:#aaa;cursor:pointer;transition:all .2s}
 .browse-nav button:hover{border-color:#e94560;color:#fff}
@@ -60,6 +64,14 @@ background:#111;color:#aaa;cursor:pointer;transition:all .2s}
 <div id="loading">Generating sprite sheets (64 frames)...<div class="bar"><div class="bar-fill" id="pbar"></div></div></div>
 <div id="content" style="display:none">
 <div id="viewport"></div>
+<div class="perf-controls" id="perfControls">
+<span class="label">Quality</span>
+<button data-quality="low">Low</button>
+<button data-quality="med">Med</button>
+<button data-quality="high">High</button>
+<button id="pauseAnim">Pause</button>
+<span class="label" id="perfMeta"></span>
+</div>
 <div class="toggle-bar" id="toggles"></div>
 <div class="browse-nav" id="browseNav">
 <button id="browsePrev">&larr; Prev</button>
@@ -96,16 +108,55 @@ import{RenderPass}from"three/addons/postprocessing/RenderPass.js";
 import{UnrealBloomPass}from"three/addons/postprocessing/UnrealBloomPass.js";
 import{OutputPass}from"three/addons/postprocessing/OutputPass.js";
 
-const SRES=192,GRID=6,FRAMES=GRID*GRID; // 6x6 = 36 frames per sheet — double the frames for smoother animation
+const QUALITY_PRESETS={low:{sres:128,maxDpr:1,fps:30},med:{sres:192,maxDpr:1.5,fps:45},high:{sres:256,maxDpr:2,fps:60}};
+const pUrl=new URL(window.location.href);
+const qParam=pUrl.searchParams.get("q");
+const autoQuality=(window.innerWidth<900||((navigator.hardwareConcurrency||8)<=4))?"low":"med";
+const QUALITY=QUALITY_PRESETS[qParam]?qParam:autoQuality;
+const Q=QUALITY_PRESETS[QUALITY];
+
+const SRES=Q.sres,GRID=6,FRAMES=GRID*GRID; // 6x6 = 36 frames per sheet
 const SHEET=SRES*GRID; // 1152px atlas
 const pbar=document.getElementById("pbar");
 function prog(p){pbar.style.width=p+"%";}
 const clock=new THREE.Clock();
 
+const perfMeta=document.getElementById("perfMeta");
+if(perfMeta)perfMeta.textContent=`${QUALITY.toUpperCase()} · ${SRES}px · ${Q.fps}fps cap`;
+document.querySelectorAll("[data-quality]").forEach(btn=>{
+const q=btn.getAttribute("data-quality");
+if(q===QUALITY)btn.classList.add("on");
+btn.onclick=()=>{
+if(q===QUALITY)return;
+const next=new URL(window.location.href);
+next.searchParams.set("q",q);
+window.location.href=next.toString();
+};
+});
+
+let paused=false;
+const pauseBtn=document.getElementById("pauseAnim");
+if(pauseBtn){
+pauseBtn.onclick=()=>{
+paused=!paused;
+pauseBtn.classList.toggle("on",paused);
+pauseBtn.textContent=paused?"Resume":"Pause";
+};
+}
+
+let viewportVisible=true;
+const viewportEl=document.getElementById("viewport");
+if(viewportEl){
+const viewObs=new IntersectionObserver(entries=>{
+entries.forEach(e=>{viewportVisible=e.isIntersecting;});
+},{threshold:.2});
+viewObs.observe(viewportEl);
+}
+
 // ── Single renderer ──
 const W=1400,H=700;
 const r3=new THREE.WebGLRenderer({antialias:true,powerPreference:"high-performance"});
-r3.setSize(W,H);r3.setPixelRatio(Math.min(window.devicePixelRatio,2));
+r3.setSize(W,H);r3.setPixelRatio(Math.min(window.devicePixelRatio,Q.maxDpr));
 r3.toneMapping=THREE.ACESFilmicToneMapping;r3.toneMappingExposure=1.3;
 r3.autoClear=true;
 r3.domElement.style.cssText="cursor:grab;display:block;width:100%;height:auto";
@@ -842,9 +893,13 @@ browseCounter.textContent=(browseIdx+1)+" / "+CATALOG.length;
 // ANIMATION LOOP
 // ══════════════════════════════════════════════════════════════════
 let prevTime=0;
+let lastFrame=0;
 function animate(){
 requestAnimationFrame(animate);
 const t=clock.getElapsedTime();
+if(paused||document.hidden||!viewportVisible){prevTime=t;return;}
+if(t-lastFrame<1/Q.fps)return;
+lastFrame=t;
 const dt=Math.min(t-prevTime,.05);
 prevTime=t;
 
