@@ -98,7 +98,7 @@ body{background:radial-gradient(1200px 600px at 50% -200px,#16162a 0%,#07070c 55
 <div class="hero-visual">
 <div class="hero-card">
 <canvas id="hero-canvas"></canvas>
-<div class="hero-caption"><strong>Void Portal Fusion</strong> — Corona + FlameEye + Void gradient</div>
+<div class="hero-caption"><strong>Dark Ritual Portal</strong> — Summoning Circle + Dimensional Portal (Add)</div>
 </div>
 </div>
 </div>
@@ -151,6 +151,15 @@ Initializing WebGL + loading shaders...
 </section>
 <div class="arrow">&#x25BC;</div>
 
+<section class="chapter" id="ch5b">
+<span class="chapter-num">CHAPTER 05B</span>
+<h2>Dark Ritual Portal — Sprite Build <span class="new">NEW</span></h2>
+<p>The latest magic sprite built from two custom GLSL pieces: a Summoning Circle and a Dimensional Portal, blended additively to form the final ritual gateway.</p>
+<div id="grid-ritual"></div>
+<div class="preview-wrap" id="grid-ritual-3d"></div>
+</section>
+<div class="arrow">&#x25BC;</div>
+
 <section class="chapter" id="ch6">
 <span class="chapter-num">CHAPTER 06</span>
 <h2>PBR Map Generation <span class="new">NEW</span></h2>
@@ -183,6 +192,7 @@ Initializing WebGL + loading shaders...
 import*as THREE from"three";
 import*as PIXY from"pixy";
 import{OrbitControls}from"three/addons/controls/OrbitControls.js";
+import{SHADERS}from"./shader-defs.js";
 
 const QUALITY_PRESETS={low:256,med:384,high:512};
 const url=new URL(window.location.href);
@@ -225,6 +235,7 @@ bScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),new THREE.MeshBasicMateri
 function makeRT(){return new THREE.WebGLRenderTarget(RES,RES,{minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter})}
 const rt=Array.from({length:6},makeRT);
 const pbrRT={struct:makeRT(),color:makeRT(),normal:makeRT(),rough:makeRT(),ao:makeRT(),metal:makeRT()};
+const ritualRT={summoning:makeRT(),portal:makeRT(),blend:makeRT(),normal:makeRT(),rough:makeRT(),ao:makeRT(),metal:makeRT()};
 
 const grungeTex=await new Promise(ok=>{
 new THREE.TextureLoader().load("images/grunge.png",t=>{
@@ -289,6 +300,17 @@ const blendQ=new THREE.Mesh(new THREE.PlaneGeometry(2,2),blendM);blendS.add(blen
 
 const ppS=new THREE.Scene(),ppC=new THREE.Camera();
 const ppQ=new THREE.Mesh(new THREE.PlaneGeometry(2,2),null);ppS.add(ppQ);
+
+function renderCustom(shader,time,target){
+const mat=new THREE.ShaderMaterial({
+uniforms:{time:{value:time||0},resolution:{value:new THREE.Vector2(RES,RES)}},
+vertexShader:ppV,fragmentShader:shader,depthTest:false,depthWrite:false
+});
+ppQ.material=mat;
+renderer.setRenderTarget(target);renderer.clear();
+renderer.render(ppS,ppC);renderer.setRenderTarget(null);
+mat.dispose();
+}
 
 const normalM=new THREE.ShaderMaterial({
 uniforms:{tDiffuse:{value:null},resolution:{value:new THREE.Vector2(RES,RES)},strength:{value:3.0}},vertexShader:ppV,
@@ -390,11 +412,10 @@ function renderHero(){
 const cv=document.getElementById("hero-canvas");
 if(!cv)return;
 cv.width=RES;cv.height=RES;
-renderFx("Corona",{time:2.5,cIntensity:.8,cRadius:.4},rt[0]);
-renderFx("FlameEye",{time:4,cFlameEyeInnerFade:1.1,cFlameEyeOuterFade:.6,cFlameEyeBorder:.75},rt[1]);
+renderCustom(SHADERS.summoning,1.6,rt[0]);
+renderCustom(SHADERS.portal,2.2,rt[1]);
 doBlend(rt[0],rt[1],4,rt[2]);
-doGrad(rt[2],"Void",rt[3]);
-toCanvas(rt[3],cv);
+toCanvas(rt[2],cv);
 }
 
 // ===================================================================
@@ -492,9 +513,6 @@ const combos=[
 {a:{type:"Electric",p:{time:1.5}},
  b:{type:"MagicCircle",p:{time:2,cSpeed:.15}},
  mode:4,modeName:"Add",grad:"Neon",desc:"Arcane lightning ritual"},
-{a:{type:"Corona",p:{time:2.2,cIntensity:.7,cRadius:.45}},
- b:{type:"FlameEye",p:{time:3.8,cFlameEyeInnerFade:1.1,cFlameEyeOuterFade:.6,cFlameEyeBorder:.8}},
- mode:4,modeName:"Add",grad:"Void",desc:"Void portal fusion — corona + flame eye + void gradient"},
 {a:{type:"Caustics",p:{time:3,tiling:true}},
  b:{type:"Trabeculum",p:{time:1,cTrabeculumVariation:3}},
  mode:3,modeName:"Overlay",grad:"Ocean",desc:"Deep sea bioluminescent coral"},
@@ -516,6 +534,82 @@ const a3=document.createElement("span");a3.className="pipe-arrow";a3.textContent
 doGrad(rt[2],c.grad,rt[3]);
 const cvF=card(row,c.grad+" Gradient",c.desc,"highlight");toCanvas(rt[3],cvF);
 }
+}
+
+// ===================================================================
+// CHAPTER 5B: DARK RITUAL PORTAL — custom GLSL sprite build
+// ===================================================================
+function ch5b(){
+const g=document.getElementById("grid-ritual");
+const row=document.createElement("div");row.className="pipeline-row";g.appendChild(row);
+
+renderCustom(SHADERS.summoning,1.6,ritualRT.summoning);
+const cvA=card(row,"Summoning Circle","Custom GLSL base");
+toCanvas(ritualRT.summoning,cvA);
+
+const a1=document.createElement("span");a1.className="pipe-arrow";a1.textContent="+";
+row.appendChild(a1);
+
+renderCustom(SHADERS.portal,2.2,ritualRT.portal);
+const cvB=card(row,"Dimensional Portal","Custom GLSL ring");
+toCanvas(ritualRT.portal,cvB);
+
+const a2=document.createElement("span");a2.className="pipe-arrow";a2.textContent="→";
+row.appendChild(a2);
+
+doBlend(ritualRT.summoning,ritualRT.portal,4,ritualRT.blend);
+const cvF=card(row,"Add Blend","Dark Ritual Portal","highlight");
+toCanvas(ritualRT.blend,cvF);
+
+// Build PBR maps from the ritual composite for the embedded 3D preview
+doPBR(ritualRT.blend,normalM,ritualRT.normal);
+doPBR(ritualRT.blend,roughM,ritualRT.rough);
+doPBR(ritualRT.blend,aoM,ritualRT.ao);
+doPBR(ritualRT.blend,metalM,ritualRT.metal);
+
+const wrap=document.getElementById("grid-ritual-3d");
+const r=new THREE.WebGLRenderer({antialias:true,alpha:true});
+const W=360,H=280;
+r.setSize(W,H);r.setPixelRatio(Math.min(window.devicePixelRatio,1.5));
+r.toneMapping=THREE.ACESFilmicToneMapping;r.toneMappingExposure=1.2;
+r.domElement.style.cssText="border-radius:10px;border:1px solid #222;background:#0a0a12";
+wrap.appendChild(r.domElement);
+
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x08080f);
+const cam=new THREE.PerspectiveCamera(40,W/H,.1,50);
+cam.position.set(0,0,3.2);
+
+const mat=new THREE.MeshStandardMaterial({
+color:0xffffff,roughness:.4,metalness:.6,
+map:ritualRT.blend.texture,
+normalMap:ritualRT.normal.texture,
+roughnessMap:ritualRT.rough.texture,
+aoMap:ritualRT.ao.texture,
+metalnessMap:ritualRT.metal.texture
+});
+mat.normalScale.set(1.2,1.2);
+
+const mesh=new THREE.Mesh(new THREE.SphereGeometry(1,48,48),mat);
+scene.add(mesh);
+
+const amb=new THREE.AmbientLight(0x445566,.9);scene.add(amb);
+const key=new THREE.DirectionalLight(0xffffff,1.4);key.position.set(2,3,4);scene.add(key);
+const rim=new THREE.DirectionalLight(0x6633ff,.6);rim.position.set(-2,1,-3);scene.add(rim);
+
+r.render(scene,cam);
+
+const info=document.createElement("div");info.className="preview-info";
+info.innerHTML=`
+<h3>Ritual Preview (Static)</h3>
+<p>The final composite is converted into PBR maps and applied to a 3D surface for material validation.</p>
+<ul class="map-list">
+<li>Color map (Dark Ritual composite)</li>
+<li>Normal map (Sobel)</li>
+<li>Roughness map (luminance)</li>
+<li>AO + Metallic maps</li>
+</ul>`;
+wrap.appendChild(info);
 }
 
 // ===================================================================
@@ -677,8 +771,9 @@ ch1();prog(12);await sleep(20);
 ch2();prog(25);await sleep(20);
 ch3();prog(40);await sleep(20);
 ch4();prog(55);await sleep(20);
-ch5();prog(72);await sleep(20);
-ch6();prog(88);await sleep(20);
+ch5();prog(70);await sleep(20);
+ch5b();prog(80);await sleep(20);
+ch6();prog(90);await sleep(20);
 ch7();prog(100);await sleep(200);
 document.getElementById("loading").style.display="none";
 document.getElementById("chapters").style.display="block";
