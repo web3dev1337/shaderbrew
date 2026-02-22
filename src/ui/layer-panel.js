@@ -4,6 +4,8 @@
  */
 import { BLEND_MODES } from "../shaders/blend.js";
 import { EFFECT_TYPES } from "../defaults.js";
+import { CUSTOM_EFFECT_TYPES, CUSTOM_PREFIX, isCustomEffect, getCustomShaderKey } from "../custom-shader-registry.js";
+import { SHADERS } from "../../shader-defs.js";
 
 const EFFECT_CATEGORIES = {
 	"Fire & Heat": ["Flame", "FlameEye", "Fire", "FlameLance", "Bonfire", "Explosion", "Explosion2"],
@@ -14,6 +16,7 @@ const EFFECT_CATEGORIES = {
 	"Beams & Lines": ["Laser", "Laser2", "Gradation", "GradationLine", "Lightning"],
 	"Organic": ["Cell", "Speckle", "Grunge", "InkSplat", "BrushStroke", "Squiggles", "Trabeculum"],
 	"Particle & FX": ["Particle", "BinaryMatrix"],
+	"Custom GLSL": CUSTOM_EFFECT_TYPES,
 };
 
 export class LayerPanel {
@@ -380,8 +383,16 @@ export class LayerPanel {
 
 	_selectEffect(fx, layer) {
 		layer.effectController.type = fx;
-		layer.name = fx + " " + layer.id;
-		layer.pipeline.buildPasses(fx);
+		const displayName = isCustomEffect(fx) ? fx.slice(CUSTOM_PREFIX.length) : fx;
+		layer.name = displayName + " " + layer.id;
+		if (isCustomEffect(fx)) {
+			const key = getCustomShaderKey(fx);
+			const src = key && SHADERS[key];
+			if (src) layer.pipeline.buildCustomPass(src);
+			else layer.pipeline.buildPasses("Wood");
+		} else {
+			layer.pipeline.buildPasses(fx);
+		}
 		this._closePicker();
 		this.refresh();
 		this.onLayerChange();

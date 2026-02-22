@@ -31,6 +31,8 @@ import { ActionDock } from "./ui/action-dock.js";
 import { LayoutPanel } from "./ui/layout-panel.js";
 import { QuickStart } from "./ui/quickstart.js";
 import { CustomShaderPanel } from "./ui/custom-shader-panel.js";
+import { isCustomEffect, getCustomShaderKey } from "./custom-shader-registry.js";
+import { SHADERS } from "../shader-defs.js";
 
 if (!WebGL.isWebGL2Available()) {
 	document.body.appendChild(WebGL.getWebGLErrorMessage());
@@ -233,7 +235,7 @@ class App {
 	}
 
 	_initCustomShaders() {
-		this.customShaderPanel = new CustomShaderPanel();
+		this.customShaderPanel = new CustomShaderPanel(this);
 		this.customShaderPanel.build();
 	}
 
@@ -276,7 +278,18 @@ class App {
 	}
 
 	onTypeChange(type) {
-		const basePass = this.pipeline.buildPasses(type);
+		let basePass;
+		if (isCustomEffect(type)) {
+			const key = getCustomShaderKey(type);
+			const src = key && SHADERS[key];
+			if (src) {
+				basePass = this.pipeline.buildCustomPass(src);
+			} else {
+				basePass = this.pipeline.buildPasses("Wood");
+			}
+		} else {
+			basePass = this.pipeline.buildPasses(type);
+		}
 		this.baseDefaultUniforms = basePass.defaultUniforms;
 		this.gui.rebuildParameters(type, this.effectController, this.baseDefaultUniforms);
 

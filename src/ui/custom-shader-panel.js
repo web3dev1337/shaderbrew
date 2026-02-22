@@ -1,5 +1,6 @@
+import { CUSTOM_SHADER_CATALOG, CUSTOM_PREFIX } from "../custom-shader-registry.js";
+
 const ALL_CUSTOM_SHADERS = [
-	{ file: "100-prismatic-aura", name: "Prismatic Aura" },
 	{ file: "101-volumetric-nebula", name: "Volumetric Nebula" },
 	{ file: "102-black-hole", name: "Black Hole" },
 	{ file: "103-shockwave-pulse", name: "Shockwave Pulse" },
@@ -55,7 +56,8 @@ const ALL_CUSTOM_SHADERS = [
 ];
 
 export class CustomShaderPanel {
-	constructor() {
+	constructor(app) {
+		this.app = app;
 		this.container = null;
 		this.entries = [];
 		this.visible = false;
@@ -107,7 +109,7 @@ export class CustomShaderPanel {
 			card.addEventListener("mouseenter", () => { card.style.borderColor = "#e94560"; });
 			card.addEventListener("mouseleave", () => { card.style.borderColor = "#1a1a2e"; });
 			card.addEventListener("click", () => {
-				window.open(`sprite-gallery.html?source=custom&highlight=${item.file}`, "_blank");
+				this._applyShader(item.name);
 			});
 
 			const canvas = document.createElement("canvas");
@@ -188,5 +190,18 @@ export class CustomShaderPanel {
 		const row = Math.floor(entry.frame / 6);
 		entry.ctx.clearRect(0, 0, entry.cw, entry.cw);
 		entry.ctx.drawImage(entry.img, col * c, row * c, c, c, 0, 0, entry.cw, entry.cw);
+	}
+
+	_applyShader(name) {
+		if (!this.app) return;
+		const effectType = CUSTOM_PREFIX + name;
+		const layer = this.app.layerManager.getActiveLayer();
+		if (layer) {
+			this.app.onTypeChange(effectType);
+			layer.effectController.type = effectType;
+			layer.effectController.animate = true;
+			if (this.app.layerPanel) this.app.layerPanel.refresh();
+		}
+		this.hide();
 	}
 }

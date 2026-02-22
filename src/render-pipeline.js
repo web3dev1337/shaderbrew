@@ -1,9 +1,17 @@
 /**
  * 6-pass render pipeline for a single effect layer.
  * Base → PolarConversion → ColorBalance → Tiling → NormalMap → Copy
+ * Also supports custom GLSL shaders that bypass pixy entirely.
  */
 import * as THREE from "three";
 import { FxgenShader, FxgenShaderUtils } from "./pixy-api.js";
+
+const FULLSCREEN_VERT = `
+varying vec2 vUv;
+void main() {
+	vUv = uv;
+	gl_Position = vec4(position, 1.0);
+}`;
 
 export class RenderPipeline {
 	constructor(renderer, width, height) {
@@ -16,14 +24,16 @@ export class RenderPipeline {
 
 		this.shaderDefines = new FxgenShader().generateDefines();
 		this.layers = [];
+		this.isCustom = false;
 	}
 
 	/**
-	 * Build all 6 pipeline passes for a given effect type.
+	 * Build all 6 pipeline passes for a pixy effect type.
 	 */
 	buildPasses(effectType) {
 		this.disposePasses();
 		this.layers = [];
+		this.isCustom = false;
 
 		const shader = new FxgenShader();
 
@@ -117,9 +127,46 @@ export class RenderPipeline {
 	}
 
 	/**
+	 * Build a single-pass pipeline for a custom GLSL fragment shader.
+	 * Custom shaders use `time` and `resolution` uniforms.
+	 */
+	buildCustomPass(fragmentShader) {
+		this.disposePasses();
+		this.layers = [];
+		this.isCustom = true;
+
+		const uniforms = {
+			time: { value: 0.0 },
+			resolution: { value: new THREE.Vector2(this.width, this.height) },
+		};
+
+		const material = new THREE.ShaderMaterial({
+			vertexShader: FULLSCREEN_VERT,
+			fragmentShader,
+			uniforms,
+			glslVersion: null,
+		});
+
+		const basePass = {
+			name: "CustomBase",
+			uniforms,
+			material,
+			renderTarget: this._createRT(),
+			defaultUniforms: { time: { value: 0.0 }, resolution: { value: new THREE.Vector2(this.width, this.height) } },
+		};
+		this.layers.push(basePass);
+
+		return basePass;
+	}
+
+	/**
 	 * Render the full pipeline with given effect controller settings.
 	 */
 	render(effectController, mouse, perspectiveCamera, grungeTexture, outputTarget) {
+		if (this.isCustom) {
+			return this._renderCustom(effectController, outputTarget);
+		}
+
 		for (let i = 0; i < this.layers.length; i++) {
 			let pass = this.layers[i];
 			const target = outputTarget && i === this.layers.length - 1 ? outputTarget : pass.renderTarget;
@@ -174,6 +221,18 @@ export class RenderPipeline {
 			this.renderer.setRenderTarget(null);
 			this.scene.overrideMaterial = null;
 		}
+	}
+
+	_renderCustom(effectController, outputTarget) {
+		const pass = this.layers[0];
+		pass.uniforms.resolution.value.set(this.width, this.height);
+		pass.uniforms.time.value = effectController.time || 0;
+
+		this.scene.overrideMaterial = pass.material;
+		this.renderer.setRenderTarget(outputTarget || pass.renderTarget);
+		this.renderer.render(this.scene, this.camera);
+		this.renderer.setRenderTarget(null);
+		this.scene.overrideMaterial = null;
 	}
 
 	resize(width, height) {

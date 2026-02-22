@@ -5,6 +5,8 @@ import * as THREE from "three";
 import { getDefaultEffectController, getDefaultEffectParameters } from "./defaults.js";
 import { RenderPipeline } from "./render-pipeline.js";
 import { BLEND_MODES } from "./shaders/blend.js";
+import { isCustomEffect, getCustomShaderKey } from "./custom-shader-registry.js";
+import { SHADERS } from "../shader-defs.js";
 
 let layerIdCounter = 0;
 
@@ -23,7 +25,14 @@ export class LayerManager {
 			{ type: effectType }
 		);
 		const pipeline = new RenderPipeline(this.renderer, width, height);
-		pipeline.buildPasses(effectType);
+		if (isCustomEffect(effectType)) {
+			const key = getCustomShaderKey(effectType);
+			const src = key && SHADERS[key];
+			if (src) pipeline.buildCustomPass(src);
+			else pipeline.buildPasses("Wood");
+		} else {
+			pipeline.buildPasses(effectType);
+		}
 
 		const layer = {
 			id,
