@@ -82,6 +82,17 @@ export class LayoutPanel {
 		resetRow.appendChild(resetBtn);
 		this.container.appendChild(resetRow);
 
+		const helpRow = document.createElement("div");
+		helpRow.style.cssText = "margin-top:8px;text-align:center";
+		const helpBtn = document.createElement("button");
+		helpBtn.textContent = "Quick Start";
+		helpBtn.style.cssText = "padding:6px 12px;border:1px solid #444;border-radius:4px;background:#1a1a2e;color:#ccc;font-family:monospace;font-size:11px;cursor:pointer;transition:all 0.15s";
+		helpBtn.addEventListener("mouseenter", () => { helpBtn.style.background = "#0f3460"; helpBtn.style.borderColor = "#e94560"; helpBtn.style.color = "#fff"; });
+		helpBtn.addEventListener("mouseleave", () => { helpBtn.style.background = "#1a1a2e"; helpBtn.style.borderColor = "#444"; helpBtn.style.color = "#ccc"; });
+		helpBtn.addEventListener("click", () => this.app.quickStart?.show(true));
+		helpRow.appendChild(helpBtn);
+		this.container.appendChild(helpRow);
+
 		document.body.appendChild(this.container);
 		this._syncToggles();
 	}

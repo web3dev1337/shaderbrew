@@ -29,6 +29,7 @@ import { ExportManager } from "./export.js";
 import { ExportPanel } from "./ui/export-panel.js";
 import { ActionDock } from "./ui/action-dock.js";
 import { LayoutPanel } from "./ui/layout-panel.js";
+import { QuickStart } from "./ui/quickstart.js";
 
 if (!WebGL.isWebGL2Available()) {
 	document.body.appendChild(WebGL.getWebGLErrorMessage());
@@ -71,6 +72,7 @@ class App {
 		this._initPresets();
 		this._initLayoutPanel();
 		this._initActionDock();
+		this._initQuickStart();
 		this._initShortcuts();
 		this.updateLayout();
 		setTimeout(() => this.updateLayout(), 0);
@@ -228,6 +230,11 @@ class App {
 	_initActionDock() {
 		this.actionDock = new ActionDock(this);
 		this.actionDock.build();
+	}
+
+	_initQuickStart() {
+		this.quickStart = new QuickStart(this);
+		this.quickStart.build();
 	}
 
 	_initShortcuts() {

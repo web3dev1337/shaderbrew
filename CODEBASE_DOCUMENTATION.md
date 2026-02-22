@@ -58,6 +58,7 @@ UI (src/ui/):
   export-panel.js      Resolution selector + format buttons
   action-dock.js       Bottom action dock (presets, gradient, PBR, 3D, export)
   layout-panel.js      Workspace layout and performance toggles
+  quickstart.js        Quick-start overlay for first-time flow
   top-nav.js           Global top navigation bar for page-to-page browsing
 
 PRESET & LOADER:

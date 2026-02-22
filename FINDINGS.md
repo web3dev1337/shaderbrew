@@ -13,6 +13,7 @@ Updated: 2026-02-22
 - [x] Editor: replace scattered bottom buttons with a single action dock (presets, gradient, PBR, 3D, export).
 - [x] Editor: add workspace layout + performance panel (toggle layers/params/toolbar/stats, live render).
 - [x] Editor: add keyboard shortcuts for key panels (B, G, P, 3, E, L).
+- [x] Editor: add Quick Start overlay with guided actions and reopen from Layout panel.
 
 ## Additional Findings (Backlog)
 - Save/load only covers a single `effectController`, not layer stacks, gradient, or PBR state.
