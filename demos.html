@@ -104,6 +104,7 @@ import{RenderPass}from"three/addons/postprocessing/RenderPass.js";
 import{UnrealBloomPass}from"three/addons/postprocessing/UnrealBloomPass.js";
 import{OutputPass}from"three/addons/postprocessing/OutputPass.js";
 
+const EMBED=new URLSearchParams(window.location.search).has("embed");
 const RES=512;
 const pixelBuf=new Uint8Array(RES*RES*4);
 const pbar=document.getElementById("pbar");
@@ -431,11 +432,19 @@ scene.background=new THREE.Color(0x080810);
 scene.fog=new THREE.FogExp2(0x080810,.018);
 
 const cam=new THREE.PerspectiveCamera(40,W/H,.1,100);
-cam.position.set(0,5,12);cam.lookAt(0,1,0);
+if(EMBED){
+	cam.position.set(0,4,16);cam.lookAt(0,.6,0);
+}else{
+	cam.position.set(0,5,12);cam.lookAt(0,1,0);
+}
 
 const ctrl=new OrbitControls(cam,r3.domElement);
 ctrl.enableDamping=true;ctrl.dampingFactor=.06;
-ctrl.target.set(0,1,0);ctrl.maxDistance=25;ctrl.minDistance=4;
+if(EMBED){
+	ctrl.target.set(0,.6,0);ctrl.maxDistance=30;ctrl.minDistance=6;
+}else{
+	ctrl.target.set(0,1,0);ctrl.maxDistance=25;ctrl.minDistance=4;
+}
 ctrl.autoRotate=true;ctrl.autoRotateSpeed=.8;
 
 // Environment
