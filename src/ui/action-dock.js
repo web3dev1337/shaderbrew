@@ -37,6 +37,7 @@ export class ActionDock {
 		this._addButton("PBR Maps", () => this._togglePanel(this.app.pbrPanel), () => this._isPanelOpen(this.app.pbrPanel));
 		this._addButton("3D Preview", () => this._togglePreview(), () => this.app.preview3D && this.app.preview3D.visible);
 		this._addButton("Export", () => this._togglePanel(this.app.exportPanel), () => this._isPanelOpen(this.app.exportPanel));
+		this._addButton("Custom GLSL", () => this._togglePanel(this.app.customShaderPanel), () => this._isPanelOpen(this.app.customShaderPanel));
 		this._addButton("Layout", () => this._togglePanel(this.app.layoutPanel), () => this._isPanelOpen(this.app.layoutPanel));
 
 		document.body.appendChild(this.container);

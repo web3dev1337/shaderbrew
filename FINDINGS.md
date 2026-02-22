@@ -17,6 +17,8 @@ Updated: 2026-02-22
 - [x] Editor: add preset thumbnails (auto-captured on load with local cache).
 - [x] Sprite Gallery: add source filters + tags to separate FXGEN library, custom GLSL, and composites.
 - [x] Sprite Gallery: support query params for `source`/`cat` deep links and show accurate counts.
+- [x] Editor: add Custom GLSL panel with live sprite previews + link to full gallery.
+- [ ] Showcase: add Custom GLSL library section with animated shader previews + links.
 
 ## Additional Findings (Backlog)
 - Save/load only covers a single `effectController`, not layer stacks, gradient, or PBR state.

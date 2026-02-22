@@ -30,6 +30,7 @@ import { ExportPanel } from "./ui/export-panel.js";
 import { ActionDock } from "./ui/action-dock.js";
 import { LayoutPanel } from "./ui/layout-panel.js";
 import { QuickStart } from "./ui/quickstart.js";
+import { CustomShaderPanel } from "./ui/custom-shader-panel.js";
 
 if (!WebGL.isWebGL2Available()) {
 	document.body.appendChild(WebGL.getWebGLErrorMessage());
@@ -73,6 +74,7 @@ class App {
 		this._initHistory();
 		this._initExport();
 		this._initPresets();
+		this._initCustomShaders();
 		this._initLayoutPanel();
 		this._initActionDock();
 		this._initQuickStart();
@@ -230,6 +232,11 @@ class App {
 		this.layoutPanel.build();
 	}
 
+	_initCustomShaders() {
+		this.customShaderPanel = new CustomShaderPanel();
+		this.customShaderPanel.build();
+	}
+
 	_initActionDock() {
 		this.actionDock = new ActionDock(this);
 		this.actionDock.build();
@@ -254,6 +261,7 @@ class App {
 			else if (key === "e") this.exportPanel?.toggle();
 			else if (key === "3") this.preview3D?.toggle();
 			else if (key === "l") this.layoutPanel?.toggle();
+			else if (key === "c") this.customShaderPanel?.toggle();
 			else return;
 
 			e.preventDefault();
@@ -649,6 +657,7 @@ class App {
 		dockPanel(this.pbrPanel);
 		dockPanel(this.exportPanel);
 		dockPanel(this.layoutPanel);
+		dockPanel(this.customShaderPanel);
 	}
 
 	requestRender() {
