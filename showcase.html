@@ -836,7 +836,8 @@ const g=document.getElementById("grid-3d");
 const r3=new THREE.WebGLRenderer({antialias:true,alpha:false});
 const W=580,H=500;
 r3.setSize(W,H);r3.setPixelRatio(Math.min(window.devicePixelRatio,2));
-r3.toneMapping=THREE.ACESFilmicToneMapping;r3.toneMappingExposure=1.5;
+r3.outputColorSpace=THREE.SRGBColorSpace;
+r3.toneMapping=THREE.ACESFilmicToneMapping;r3.toneMappingExposure=2.2;
 r3.shadowMap.enabled=true;r3.shadowMap.type=THREE.PCFSoftShadowMap;
 r3.domElement.style.cssText="border-radius:10px;border:1px solid #222;cursor:grab";
 g.appendChild(r3.domElement);
@@ -857,29 +858,33 @@ envScene.add(new THREE.HemisphereLight(0x334466,0x111111,2));
 const envLight=new THREE.DirectionalLight(0xffeedd,.8);envLight.position.set(3,5,3);envScene.add(envLight);
 const envRT=pmrem.fromScene(envScene,0,.1,100);
 pmrem.dispose();
+scene3.environment=envRT.texture;
 
 // Lighting
-const hemi=new THREE.HemisphereLight(0x445566,0x111111,.6);scene3.add(hemi);
-const key=new THREE.DirectionalLight(0xffeedd,2.5);key.position.set(4,6,4);key.castShadow=true;
+const hemi=new THREE.HemisphereLight(0x667799,0x1a1a22,1.1);scene3.add(hemi);
+const key=new THREE.DirectionalLight(0xffeedd,3.2);key.position.set(4,6,4);key.castShadow=true;
 key.shadow.mapSize.set(1024,1024);key.shadow.camera.near=1;key.shadow.camera.far=20;
 key.shadow.camera.left=-3;key.shadow.camera.right=3;key.shadow.camera.top=3;key.shadow.camera.bottom=-3;
 scene3.add(key);
-const fill=new THREE.DirectionalLight(0x6688cc,1);fill.position.set(-3,2,-2);scene3.add(fill);
-const rim=new THREE.PointLight(0xff6633,.8,10);rim.position.set(-2,1,3);scene3.add(rim);
-const accent=new THREE.PointLight(0x4488ff,.4,8);accent.position.set(3,0,-3);scene3.add(accent);
+const fill=new THREE.DirectionalLight(0x88aadd,1.5);fill.position.set(-3,2,-2);scene3.add(fill);
+const rim=new THREE.PointLight(0xff7733,1.2,12);rim.position.set(-2,1,3);scene3.add(rim);
+const accent=new THREE.PointLight(0x66aaff,.8,10);accent.position.set(3,0,-3);scene3.add(accent);
 
 // Shared PBR material
 const mat3=new THREE.MeshStandardMaterial({
-color:0xffffff,roughness:.4,metalness:.6,
+color:0xffffff,roughness:.35,metalness:.4,
 map:pbrRT.color.texture,
 normalMap:pbrRT.normal.texture,
 roughnessMap:pbrRT.rough.texture,
 aoMap:pbrRT.ao.texture,
 metalnessMap:pbrRT.metal.texture,
-envMap:envRT.texture,
-envMapIntensity:1.2
+envMapIntensity:1.8,
+emissive:new THREE.Color(0x220600),
+emissiveMap:pbrRT.color.texture,
+emissiveIntensity:.35
 });
 mat3.normalScale.set(1.5,1.5);
+pbrRT.color.texture.colorSpace=THREE.SRGBColorSpace;
 
 // Three objects to show the material
 const sphere=new THREE.Mesh(new THREE.SphereGeometry(.8,64,64),mat3);
@@ -897,7 +902,7 @@ scene3.add(cube);
 // Ground plane
 const ground=new THREE.Mesh(
 new THREE.PlaneGeometry(12,12),
-new THREE.MeshStandardMaterial({color:0x0a0a12,roughness:.95,metalness:0})
+new THREE.MeshStandardMaterial({color:0x15151f,roughness:.9,metalness:0})
 );
 ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;
 scene3.add(ground);
