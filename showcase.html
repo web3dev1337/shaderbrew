@@ -44,6 +44,12 @@ body{background:radial-gradient(1200px 600px at 50% -200px,#16162a 0%,#07070c 55
 .pipeline-row{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
 .pipeline-row .pipe-arrow{color:#e94560;font-family:monospace;font-size:22px;font-weight:bold;flex-shrink:0;padding:0 2px}
 .pipeline-row .card{flex:1;min-width:160px;max-width:260px}
+.build-section{padding-top:40px}
+.step-list{list-style:disc;padding-left:18px;margin:10px 0 16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+.step-list li{background:#0a0a12;border:1px solid #1a1a2e;border-radius:8px;padding:10px;list-style-position:inside}
+.step-list li canvas{width:100%;aspect-ratio:1;display:block;background:#000;border-radius:6px;margin:6px 0 8px}
+.step-title{font-family:monospace;font-size:11px;color:#e0e0ff;letter-spacing:.4px}
+.step-desc{font-size:10px;color:#666}
 .pbr-strip{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
 .preview-wrap{display:flex;justify-content:center;align-items:flex-start;gap:20px;flex-wrap:wrap}
 .preview-wrap canvas{border-radius:10px;border:1px solid #1a1a2e;cursor:grab}
@@ -111,20 +117,22 @@ Initializing WebGL + loading shaders...
 
 <div id="chapters" style="display:none">
 
+<section class="chapter build-section" id="ritual-build">
+<span class="chapter-num">FEATURED BUILD</span>
+<h2>Dark Ritual Portal — Sprite Build <span class="new">NEW</span></h2>
+<p>Step-by-step construction of the hero portal. Each tile below renders live from the same shader chain used to generate the sprite sheet: custom GLSL warp tunnel, circular mask, atlas sampling, alpha extraction, and alpha blend.</p>
+<ul class="step-list" id="ritual-steps"></ul>
+<div class="section-note">Pipeline overview</div>
+<div id="grid-ritual"></div>
+<div class="preview-wrap" id="grid-ritual-3d"></div>
+</section>
+<div class="arrow">&#x25BC;</div>
+
 <section class="chapter" id="ch1">
 <span class="chapter-num">CHAPTER 01</span>
 <h2>The Raw Canvas</h2>
 <p>The original tool generates 70+ procedural textures from pure math — explosions, energy fields, fluid simulations, geometric mandalas. Visually striking patterns, but locked to grayscale or basic tinting.</p>
 <div class="demo-grid wide" id="grid-raw"></div>
-</section>
-<div class="arrow">&#x25BC;</div>
-
-<section class="chapter" id="ch5b">
-<span class="chapter-num">CHAPTER 05B</span>
-<h2>Dark Ritual Portal — Sprite Build <span class="new">NEW</span></h2>
-<p>The sprite-gallery version: Warp Tunnel fills the portal core, then the Dark Ritual ring (atlas #029) overlays it. A circular mask keeps the tunnel contained.</p>
-<div id="grid-ritual"></div>
-<div class="preview-wrap" id="grid-ritual-3d"></div>
 </section>
 <div class="arrow">&#x25BC;</div>
 
@@ -241,7 +249,7 @@ bScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),new THREE.MeshBasicMateri
 function makeRT(){return new THREE.WebGLRenderTarget(RES,RES,{minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter})}
 const rt=Array.from({length:6},makeRT);
 const pbrRT={struct:makeRT(),color:makeRT(),normal:makeRT(),rough:makeRT(),ao:makeRT(),metal:makeRT()};
-const ritualRT={core:makeRT(),masked:makeRT(),ring:makeRT(),blend:makeRT(),normal:makeRT(),rough:makeRT(),ao:makeRT(),metal:makeRT()};
+const ritualRT={core:makeRT(),masked:makeRT(),ring:makeRT(),ringAlpha:makeRT(),blend:makeRT(),normal:makeRT(),rough:makeRT(),ao:makeRT(),metal:makeRT()};
 
 const grungeTex=await new Promise(ok=>{
 new THREE.TextureLoader().load("images/grunge.png",t=>{
@@ -321,6 +329,14 @@ void main(){vec4 base=texture2D(tBase,vUv);vec4 bl=texture2D(tBlend,vUv);
 vec3 col=mix(base.rgb,bl.rgb,bl.a*opacity);gl_FragColor=vec4(col,1.);}`,
 depthTest:false,depthWrite:false});
 const alphaBlendQ=new THREE.Mesh(new THREE.PlaneGeometry(2,2),alphaBlendM);alphaBlendS.add(alphaBlendQ);
+
+const alphaViewS=new THREE.Scene(),alphaViewC=new THREE.Camera();
+const alphaViewM=new THREE.ShaderMaterial({
+uniforms:{tDiffuse:{value:null}},vertexShader:ppV,
+fragmentShader:`uniform sampler2D tDiffuse;varying vec2 vUv;
+void main(){float a=texture2D(tDiffuse,vUv).a;gl_FragColor=vec4(vec3(a),1.);}`,
+depthTest:false,depthWrite:false});
+const alphaViewQ=new THREE.Mesh(new THREE.PlaneGeometry(2,2),alphaViewM);alphaViewS.add(alphaViewQ);
 
 const maskS=new THREE.Scene(),maskC=new THREE.Camera();
 const maskM=new THREE.ShaderMaterial({
@@ -437,6 +453,12 @@ alphaBlendM.uniformsNeedUpdate=true;alphaBlendQ.material=alphaBlendM;
 renderer.setRenderTarget(outRT);renderer.clear();
 renderer.render(alphaBlendS,alphaBlendC);renderer.setRenderTarget(null);
 }
+function doAlphaView(inRT,outRT){
+alphaViewM.uniforms.tDiffuse.value=inRT.texture;
+alphaViewM.uniformsNeedUpdate=true;alphaViewQ.material=alphaViewM;
+renderer.setRenderTarget(outRT);renderer.clear();
+renderer.render(alphaViewS,alphaViewC);renderer.setRenderTarget(null);
+}
 function doPBR(inRT,mat,outRT){
 mat.uniforms.tDiffuse.value=inRT.texture;mat.uniformsNeedUpdate=true;ppQ.material=mat;
 renderer.setRenderTarget(outRT);renderer.clear();
@@ -462,12 +484,24 @@ for(let y=0;y<RES;y++){const s=(RES-1-y)*RES*4,d=y*RES*4;
 for(let x=0;x<RES*4;x++)img.data[d+x]=pixelBuf[s+x];}
 ctx.putImageData(img,0,0);
 }
+function copyCanvas(src,dst){
+const ctx=dst.getContext("2d");
+ctx.clearRect(0,0,dst.width,dst.height);
+ctx.drawImage(src,0,0,dst.width,dst.height);
+}
 function card(container,name,desc,cls){
 const c=document.createElement("div");c.className="card"+(cls?" "+cls:"");
 const cv=document.createElement("canvas");cv.width=RES;cv.height=RES;c.appendChild(cv);
 const l=document.createElement("div");l.className="lbl";
 l.innerHTML=`<span class="nm">${name}</span><span class="desc">${desc||""}</span>`;
 c.appendChild(l);container.appendChild(c);return cv;
+}
+function stepItem(list,name,desc,cls){
+const li=document.createElement("li");if(cls)li.className=cls;
+const t=document.createElement("div");t.className="step-title";t.textContent=name;li.appendChild(t);
+const cv=document.createElement("canvas");cv.width=RES;cv.height=RES;li.appendChild(cv);
+const d=document.createElement("div");d.className="step-desc";d.textContent=desc||"";li.appendChild(d);
+list.appendChild(li);return cv;
 }
 function prog(p){pbar.style.width=p+"%";}
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -634,46 +668,47 @@ const cvF=card(row,c.grad+" Gradient",c.desc,"highlight");toCanvas(rt[3],cvF);
 // ===================================================================
 function ch5b(){
 const g=document.getElementById("grid-ritual");
+const steps=document.getElementById("ritual-steps");
+if(steps)steps.innerHTML="";
+
+const cvWarp=steps?stepItem(steps,"Warp Tunnel — custom GLSL warp_tunnel","Raymarched tunnel core + streak noise"):null;
+const cvMask=steps?stepItem(steps,"Circle Mask — smoothstep radial","Keeps the tunnel inside the ring"):null;
+const cvRing=steps?stepItem(steps,"Dark Ritual Ring — atlas sampler #029","Sprite sheet frame with alpha"):null;
+const cvRingAlpha=steps?stepItem(steps,"Ring Alpha — extracted from atlas","Alpha channel used for the blend"):null;
+const cvComp=steps?stepItem(steps,"Alpha Composite — alphaBlend shader","Ring over tunnel using atlas alpha"):null;
+
 const row=document.createElement("div");row.className="pipeline-row";g.appendChild(row);
-
-renderCustom(SHADERS.warp_tunnel,1.6,ritualRT.core);
-doMask(ritualRT.core,0.45,0.1,ritualRT.masked);
-const cvA=card(row,"Warp Tunnel","Masked core (circle)");
-toCanvas(ritualRT.masked,cvA);
-addAnimator(cvA,ANIM_FPS,(t)=>{
-	const frame=Math.floor((t/1000)*ANIM_FPS)%FRAMES;
-	const time=0+(frame/(FRAMES-1))*15;
-	renderCustom(SHADERS.warp_tunnel,time,ritualRT.core);
-	doMask(ritualRT.core,0.45,0.1,ritualRT.masked);
-	toCanvas(ritualRT.masked,cvA);
-});
-
+const cvA=card(row,"Warp Tunnel + Mask","Custom GLSL + radial mask");
 const a1=document.createElement("span");a1.className="pipe-arrow";a1.textContent="+";
 row.appendChild(a1);
-
-renderAtlasFrame(ritualAtlas,12,ritualRT.ring);
-const cvB=card(row,"Dark Ritual Ring","Atlas #029");
-toCanvas(ritualRT.ring,cvB);
-addAnimator(cvB,ANIM_FPS,(t)=>{
-	const frame=Math.floor((t/1000)*ANIM_FPS)%FRAMES;
-	renderAtlasFrame(ritualAtlas,frame,ritualRT.ring);
-	toCanvas(ritualRT.ring,cvB);
-});
-
+const cvB=card(row,"Dark Ritual Ring","Atlas #029 (sprites/029-dark-ritual.png)");
 const a2=document.createElement("span");a2.className="pipe-arrow";a2.textContent="→";
 row.appendChild(a2);
-
-doAlphaBlend(ritualRT.masked,ritualRT.ring,1.0,ritualRT.blend);
 const cvF=card(row,"Alpha Composite","Dark Ritual Portal","highlight");
-toCanvas(ritualRT.blend,cvF);
-addAnimator(cvF,ANIM_FPS,(t)=>{
-	const frame=Math.floor((t/1000)*ANIM_FPS)%FRAMES;
+
+const renderFrame=(frame)=>{
 	const time=0+(frame/(FRAMES-1))*15;
 	renderCustom(SHADERS.warp_tunnel,time,ritualRT.core);
+	if(cvWarp)toCanvas(ritualRT.core,cvWarp);
 	doMask(ritualRT.core,0.45,0.1,ritualRT.masked);
+	if(cvMask)toCanvas(ritualRT.masked,cvMask);
+	if(cvMask)copyCanvas(cvMask,cvA);else toCanvas(ritualRT.masked,cvA);
+
 	renderAtlasFrame(ritualAtlas,frame,ritualRT.ring);
+	if(cvRing)toCanvas(ritualRT.ring,cvRing);
+	if(cvRing)copyCanvas(cvRing,cvB);else toCanvas(ritualRT.ring,cvB);
+	doAlphaView(ritualRT.ring,ritualRT.ringAlpha);
+	if(cvRingAlpha)toCanvas(ritualRT.ringAlpha,cvRingAlpha);
+
 	doAlphaBlend(ritualRT.masked,ritualRT.ring,1.0,ritualRT.blend);
-	toCanvas(ritualRT.blend,cvF);
+	if(cvComp)toCanvas(ritualRT.blend,cvComp);
+	if(cvComp)copyCanvas(cvComp,cvF);else toCanvas(ritualRT.blend,cvF);
+};
+
+renderFrame(12);
+addAnimator(cvA,ANIM_FPS,(t)=>{
+	const frame=Math.floor((t/1000)*ANIM_FPS)%FRAMES;
+	renderFrame(frame);
 });
 
 // Build PBR maps from the ritual composite for the embedded 3D preview
@@ -882,12 +917,12 @@ g.appendChild(info);
 async function init(){
 prog(5);await sleep(50);
 renderHero();prog(8);await sleep(30);
-ch1();prog(12);await sleep(20);
-ch5b();prog(20);await sleep(20);
-ch2();prog(32);await sleep(20);
-ch3();prog(48);await sleep(20);
-ch4();prog(62);await sleep(20);
-ch5();prog(76);await sleep(20);
+ch5b();prog(18);await sleep(20);
+ch1();prog(30);await sleep(20);
+ch2();prog(44);await sleep(20);
+ch3();prog(58);await sleep(20);
+ch4();prog(72);await sleep(20);
+ch5();prog(82);await sleep(20);
 ch6();prog(90);await sleep(20);
 ch7();prog(100);await sleep(200);
 document.getElementById("loading").style.display="none";
