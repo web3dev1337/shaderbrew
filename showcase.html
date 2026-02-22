@@ -326,7 +326,8 @@ uniforms:{tBase:{value:null},tBlend:{value:null},opacity:{value:1}},
 vertexShader:ppV,
 fragmentShader:`uniform sampler2D tBase;uniform sampler2D tBlend;uniform float opacity;varying vec2 vUv;
 void main(){vec4 base=texture2D(tBase,vUv);vec4 bl=texture2D(tBlend,vUv);
-vec3 col=mix(base.rgb,bl.rgb,bl.a*opacity);gl_FragColor=vec4(col,1.);}`,
+float a=bl.a*opacity;vec3 col=base.rgb*(1.0-a)+bl.rgb*opacity;
+float outA=base.a+a*(1.0-base.a);gl_FragColor=vec4(col,outA);}`,
 depthTest:false,depthWrite:false});
 const alphaBlendQ=new THREE.Mesh(new THREE.PlaneGeometry(2,2),alphaBlendM);alphaBlendS.add(alphaBlendQ);
 
@@ -344,8 +345,8 @@ uniforms:{tDiffuse:{value:null},radius:{value:.45},feather:{value:.1}},
 vertexShader:ppV,
 fragmentShader:`uniform sampler2D tDiffuse;uniform float radius;uniform float feather;varying vec2 vUv;
 void main(){vec2 p=(vUv-0.5)*2.0;float d=length(p);
-float m=smoothstep(radius+feather,radius,d);vec4 c=texture2D(tDiffuse,vUv);
-gl_FragColor=vec4(c.rgb*m,1.);}`,
+float m=1.0-smoothstep(radius-feather,radius+feather,d);vec4 c=texture2D(tDiffuse,vUv);
+float a=c.a*m;gl_FragColor=vec4(c.rgb*a,a);}`,
 depthTest:false,depthWrite:false});
 const maskQ=new THREE.Mesh(new THREE.PlaneGeometry(2,2),maskM);maskS.add(maskQ);
 
