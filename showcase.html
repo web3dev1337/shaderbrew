@@ -861,18 +861,18 @@ pmrem.dispose();
 scene3.environment=envRT.texture;
 
 // Lighting
-const hemi=new THREE.HemisphereLight(0x667799,0x1a1a22,1.1);scene3.add(hemi);
-const key=new THREE.DirectionalLight(0xffeedd,3.2);key.position.set(4,6,4);key.castShadow=true;
+const hemi=new THREE.HemisphereLight(0x7c8fb3,0x222233,1.6);scene3.add(hemi);
+const key=new THREE.DirectionalLight(0xffeedd,4.0);key.position.set(4,6,4);key.castShadow=true;
 key.shadow.mapSize.set(1024,1024);key.shadow.camera.near=1;key.shadow.camera.far=20;
 key.shadow.camera.left=-3;key.shadow.camera.right=3;key.shadow.camera.top=3;key.shadow.camera.bottom=-3;
 scene3.add(key);
-const fill=new THREE.DirectionalLight(0x88aadd,1.5);fill.position.set(-3,2,-2);scene3.add(fill);
-const rim=new THREE.PointLight(0xff7733,1.2,12);rim.position.set(-2,1,3);scene3.add(rim);
-const accent=new THREE.PointLight(0x66aaff,.8,10);accent.position.set(3,0,-3);scene3.add(accent);
+const fill=new THREE.DirectionalLight(0x9ab6e6,2.0);fill.position.set(-3,2,-2);scene3.add(fill);
+const rim=new THREE.PointLight(0xff8844,1.6,12);rim.position.set(-2,1,3);scene3.add(rim);
+const accent=new THREE.PointLight(0x77bbff,1.0,10);accent.position.set(3,0,-3);scene3.add(accent);
 
 // Shared PBR material
 const mat3=new THREE.MeshStandardMaterial({
-color:0xffffff,roughness:.35,metalness:.4,
+color:0xffffff,roughness:.3,metalness:.35,
 map:pbrRT.color.texture,
 normalMap:pbrRT.normal.texture,
 roughnessMap:pbrRT.rough.texture,
@@ -881,21 +881,29 @@ metalnessMap:pbrRT.metal.texture,
 envMapIntensity:1.8,
 emissive:new THREE.Color(0x220600),
 emissiveMap:pbrRT.color.texture,
-emissiveIntensity:.35
+emissiveIntensity:.6
 });
 mat3.normalScale.set(1.5,1.5);
 pbrRT.color.texture.colorSpace=THREE.SRGBColorSpace;
+mat3.aoMapIntensity=.5;
+
+const ensureUv2=geo=>{
+if(geo.attributes.uv&&!geo.attributes.uv2)geo.setAttribute("uv2",geo.attributes.uv);
+};
 
 // Three objects to show the material
-const sphere=new THREE.Mesh(new THREE.SphereGeometry(.8,64,64),mat3);
+const sphereGeo=new THREE.SphereGeometry(.8,64,64);ensureUv2(sphereGeo);
+const sphere=new THREE.Mesh(sphereGeo,mat3);
 sphere.position.set(-1.5,.8,0);sphere.castShadow=true;sphere.receiveShadow=true;
 scene3.add(sphere);
 
-const torus=new THREE.Mesh(new THREE.TorusKnotGeometry(.55,.2,128,32),mat3);
+const torusGeo=new THREE.TorusKnotGeometry(.55,.2,128,32);ensureUv2(torusGeo);
+const torus=new THREE.Mesh(torusGeo,mat3);
 torus.position.set(.8,1,0);torus.castShadow=true;torus.receiveShadow=true;
 scene3.add(torus);
 
-const cube=new THREE.Mesh(new THREE.BoxGeometry(1,1,1,4,4,4),mat3);
+const cubeGeo=new THREE.BoxGeometry(1,1,1,4,4,4);ensureUv2(cubeGeo);
+const cube=new THREE.Mesh(cubeGeo,mat3);
 cube.position.set(2.8,.7,-.5);cube.rotation.y=.5;cube.castShadow=true;cube.receiveShadow=true;
 scene3.add(cube);
 
