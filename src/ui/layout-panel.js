@@ -40,6 +40,36 @@ export class LayoutPanel {
 			this.app.updateLayout();
 		});
 
+		const autoRow = document.createElement("div");
+		autoRow.style.cssText = "display:flex;align-items:center;gap:8px;margin-bottom:8px";
+		this.container.appendChild(autoRow);
+		this._addToggle(autoRow, "Auto Layout", this.app.layout.autoLayout, checked => {
+			this.app.layout.autoLayout = checked;
+			this.app.updateLayout();
+		});
+
+		const dockRow = document.createElement("div");
+		dockRow.style.cssText = "display:flex;align-items:center;gap:8px;margin-bottom:8px";
+		const dockLabel = document.createElement("span");
+		dockLabel.textContent = "Dock Panels:";
+		dockLabel.style.cssText = "color:#888;font-size:11px";
+		dockRow.appendChild(dockLabel);
+		this.dockSelect = document.createElement("select");
+		this.dockSelect.style.cssText = "background:#222;color:#ccc;border:1px solid #444;border-radius:3px;font-size:11px;padding:2px;font-family:monospace";
+		for (const optVal of ["left", "center", "right"]) {
+			const opt = document.createElement("option");
+			opt.value = optVal;
+			opt.textContent = optVal.charAt(0).toUpperCase() + optVal.slice(1);
+			opt.selected = optVal === this.app.layout.panelDock;
+			this.dockSelect.appendChild(opt);
+		}
+		this.dockSelect.addEventListener("change", () => {
+			this.app.layout.panelDock = this.dockSelect.value;
+			this.app.updateLayout();
+		});
+		dockRow.appendChild(this.dockSelect);
+		this.container.appendChild(dockRow);
+
 		const perfTitle = document.createElement("div");
 		perfTitle.textContent = "Performance:";
 		perfTitle.style.cssText = "color:#888;font-size:11px;margin:6px 0";
@@ -133,6 +163,8 @@ export class LayoutPanel {
 			if (label.dataset.toggle === "Toolbar") cb.checked = this.app.layout.showToolbar;
 			if (label.dataset.toggle === "Stats") cb.checked = this.app.layout.showStats;
 			if (label.dataset.toggle === "Live Render") cb.checked = this.app.liveRender;
+			if (label.dataset.toggle === "Auto Layout") cb.checked = this.app.layout.autoLayout;
 		});
+		if (this.dockSelect) this.dockSelect.value = this.app.layout.panelDock;
 	}
 }

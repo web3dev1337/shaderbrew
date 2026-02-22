@@ -48,7 +48,9 @@ class App {
 			showLayers: true,
 			showParams: true,
 			showToolbar: true,
-			showStats: false
+			showStats: false,
+			autoLayout: true,
+			panelDock: "center"
 		};
 	}
 
@@ -562,9 +564,15 @@ class App {
 
 	updateLayout() {
 		const navHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--top-nav-height")) || 0;
-		const left = this.layout.showLayers ? 260 : 0;
-		const right = this.layout.showParams ? 300 : 0;
-		const toolbarHeight = this.layout.showToolbar ? 36 : 0;
+		const w = window.innerWidth || 1200;
+		const auto = !!this.layout.autoLayout;
+		const showLayers = this.layout.showLayers && (!auto || w >= 900);
+		const showParams = this.layout.showParams && (!auto || w >= 1100);
+		const showToolbar = this.layout.showToolbar && (!auto || w >= 800);
+
+		const left = showLayers ? 260 : 0;
+		const right = showParams ? 300 : 0;
+		const toolbarHeight = showToolbar ? 36 : 0;
 
 		if (this.canvas) {
 			this.canvas.style.left = `${left}px`;
@@ -574,19 +582,19 @@ class App {
 		}
 
 		if (this.toolbar && this.toolbar.container) {
-			this.toolbar.container.style.display = this.layout.showToolbar ? "flex" : "none";
+			this.toolbar.container.style.display = showToolbar ? "flex" : "none";
 			this.toolbar.container.style.left = `${left}px`;
 			this.toolbar.container.style.right = `${right}px`;
 			this.toolbar.container.style.top = `${navHeight}px`;
 		}
 
 		if (this.layerPanel && this.layerPanel.container) {
-			this.layerPanel.container.style.display = this.layout.showLayers ? "flex" : "none";
+			this.layerPanel.container.style.display = showLayers ? "flex" : "none";
 			this.layerPanel.container.style.top = `${navHeight}px`;
 		}
 
 		if (this.gui && this.gui.root && this.gui.root.domElement) {
-			this.gui.root.domElement.style.display = this.layout.showParams ? "block" : "none";
+			this.gui.root.domElement.style.display = showParams ? "block" : "none";
 		}
 
 		if (this.stats && this.stats.dom) {
@@ -596,6 +604,37 @@ class App {
 			this.stats.dom.style.top = `${navHeight + toolbarHeight + 8}px`;
 			this.stats.dom.style.zIndex = "10001";
 		}
+
+		if (this.preview3D && this.preview3D.container) {
+			this.preview3D.container.style.right = showParams ? "300px" : "0px";
+			this.preview3D.container.style.top = `${navHeight + toolbarHeight}px`;
+		}
+
+		const dock = this.layout.panelDock || "center";
+		const dockPanel = panel => {
+			if (!panel) return;
+			const el = panel.container || panel.panel;
+			if (!el) return;
+			if (dock === "left") {
+				el.style.left = "10px";
+				el.style.right = "auto";
+				el.style.transform = "none";
+			} else if (dock === "right") {
+				el.style.right = "10px";
+				el.style.left = "auto";
+				el.style.transform = "none";
+			} else {
+				el.style.left = "50%";
+				el.style.right = "auto";
+				el.style.transform = "translateX(-50%)";
+			}
+		};
+
+		dockPanel(this.presetLoader);
+		dockPanel(this.gradientEditor);
+		dockPanel(this.pbrPanel);
+		dockPanel(this.exportPanel);
+		dockPanel(this.layoutPanel);
 	}
 
 	requestRender() {
