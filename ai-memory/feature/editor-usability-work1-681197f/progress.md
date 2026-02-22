@@ -1,12 +1,15 @@
-- [ ] Fix panel mutual exclusion in editor
-- [ ] Fix PBR panel positioning
-- [ ] Remove duplicate preset toggle button
-- [ ] Fix time display overlap with action dock
-- [ ] Fix z-index hierarchy
-- [ ] Fix 3D preview positioning with nav
-- [ ] Fix shortcut keys to use panel exclusion
-- [ ] Add responsive viewport meta to editor.html
-- [ ] Fix gallery.html grid sizing for mobile
-- [ ] Fix particle-gallery responsive grid
-- [ ] Improve editor responsive layout
-- [ ] Design consistency across pages
+- [x] Fix panel mutual exclusion in editor
+- [x] Fix PBR panel positioning
+- [x] Remove duplicate preset toggle button
+- [x] Fix time display overlap with action dock
+- [x] Fix z-index hierarchy
+- [x] Fix 3D preview positioning with nav
+- [x] Fix shortcut keys to use panel exclusion
+- [x] Add responsive viewport meta to editor.html
+- [x] Fix gallery.html grid sizing for mobile
+- [x] Fix particle-gallery responsive grid
+- [x] Fix sprite-gallery responsive
+- [x] Fix particles.html responsive
+- [x] Add viewport meta to showcase + demos
+- [x] Design consistency across all UI modules
+- [x] Improve editor responsive layout
