@@ -56,6 +56,7 @@ UI (src/ui/):
   toolbar.js           Quick-action buttons (tile, animate, 3D, reset)
   pbr-panel.js         PBR map thumbnails + parameter sliders
   export-panel.js      Resolution selector + format buttons
+  top-nav.js           Global top navigation bar for page-to-page browsing
 
 PRESET & LOADER:
   preset-loader.js     Preset bar UI + JSON/URL loading
