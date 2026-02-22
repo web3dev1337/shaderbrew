@@ -138,7 +138,7 @@ export class ActionDock {
 	_isPanelOpen(panelId) {
 		const panel = this._getPanel(panelId);
 		if (!panel) return false;
-		if (panelId === "preview3d") return panel.visible;
+		if (panelId === "preview3d" || panelId === "customglsl") return panel.visible;
 		const el = panel.container || panel.panel;
 		return el && el.style.display !== "none";
 	}
