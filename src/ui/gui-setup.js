@@ -30,53 +30,53 @@ export class GuiSetup {
 		this.root.add(app, "load");
 		this.root.add(app, "save");
 
-		this.root.add(effectController, "resolution", ["8", "16", "32", "64", "128", "256", "512", "1024", "2048"])
-			.onChange(val => app.onResolutionChange(val));
+		const resCtrl = this.root.add(effectController, "resolution", ["8", "16", "32", "64", "128", "256", "512", "1024", "2048"]);
+		this._track(resCtrl, val => app.onResolutionChange(val), true);
 
-		this.root.add(effectController, "type", EFFECT_TYPES)
-			.onChange(type => app.onTypeChange(type));
+		const typeCtrl = this.root.add(effectController, "type", EFFECT_TYPES);
+		this._track(typeCtrl, type => app.onTypeChange(type), true);
 
-		this.root.add(effectController, "time", 0, 100);
-		this.root.add(effectController, "animate");
+		this._track(this.root.add(effectController, "time", 0, 100));
+		this._track(this.root.add(effectController, "animate"), null, true);
 
 		// Parameters folder
 		this.pars = this.root.addFolder("Parameters");
 		this.pars.add(app, "onResetEffectParameters").name("reset");
 
-		this.root.add(effectController, "polarConversion");
+		this._track(this.root.add(effectController, "polarConversion"), null, true);
 
 		// Toon folder
 		this.tone = this.root.addFolder("Toon");
-		this.tone.add(effectController, "cToonEnable").name("enable");
-		this.tone.add(effectController, "cToonDark", 0, 1).name("dark");
-		this.tone.add(effectController, "cToonLight", 0, 1).name("light");
+		this._track(this.tone.add(effectController, "cToonEnable").name("enable"), null, true);
+		this._track(this.tone.add(effectController, "cToonDark", 0, 1).name("dark"));
+		this._track(this.tone.add(effectController, "cToonLight", 0, 1).name("light"));
 		this.tone.open(false);
 
 		// Tiling folder
 		const tilingFolder = this.root.addFolder("Tiling");
-		tilingFolder.add(effectController, "tiling").name("enable");
-		tilingFolder.add(effectController, "cRadialMask", 0, 1).name("radial mask");
+		this._track(tilingFolder.add(effectController, "tiling").name("enable"), null, true);
+		this._track(tilingFolder.add(effectController, "cRadialMask", 0, 1).name("radial mask"));
 		tilingFolder.open(false);
 		this.tiling = tilingFolder;
 
 		// NormalMap folder
 		const nmFolder = this.root.addFolder("NormalMap");
-		nmFolder.add(effectController, "normalMap").name("Generate");
-		nmFolder.add(effectController, "cHeightScale", 0, 10);
+		this._track(nmFolder.add(effectController, "normalMap").name("Generate"), null, true);
+		this._track(nmFolder.add(effectController, "cHeightScale", 0, 10));
 		nmFolder.open(false);
 		this.normalMap = nmFolder;
 
 		// Color Balance folder
 		const cbFolder = this.root.addFolder("ColorBalance");
-		cbFolder.add(effectController, "cColorBalanceShadowsR", -1, 1, 0.025).name("Shadows-R");
-		cbFolder.add(effectController, "cColorBalanceShadowsG", -1, 1, 0.025).name("Shadows-G");
-		cbFolder.add(effectController, "cColorBalanceShadowsB", -1, 1, 0.025).name("Shadows-B");
-		cbFolder.add(effectController, "cColorBalanceMidtonesR", -1, 1, 0.025).name("Midtones-R");
-		cbFolder.add(effectController, "cColorBalanceMidtonesG", -1, 1, 0.025).name("Midtones-G");
-		cbFolder.add(effectController, "cColorBalanceMidtonesB", -1, 1, 0.025).name("Midtones-B");
-		cbFolder.add(effectController, "cColorBalanceHighlightsR", -1, 1, 0.025).name("Highlights-R");
-		cbFolder.add(effectController, "cColorBalanceHighlightsG", -1, 1, 0.025).name("Highlights-G");
-		cbFolder.add(effectController, "cColorBalanceHighlightsB", -1, 1, 0.025).name("Highlights-B");
+		this._track(cbFolder.add(effectController, "cColorBalanceShadowsR", -1, 1, 0.025).name("Shadows-R"));
+		this._track(cbFolder.add(effectController, "cColorBalanceShadowsG", -1, 1, 0.025).name("Shadows-G"));
+		this._track(cbFolder.add(effectController, "cColorBalanceShadowsB", -1, 1, 0.025).name("Shadows-B"));
+		this._track(cbFolder.add(effectController, "cColorBalanceMidtonesR", -1, 1, 0.025).name("Midtones-R"));
+		this._track(cbFolder.add(effectController, "cColorBalanceMidtonesG", -1, 1, 0.025).name("Midtones-G"));
+		this._track(cbFolder.add(effectController, "cColorBalanceMidtonesB", -1, 1, 0.025).name("Midtones-B"));
+		this._track(cbFolder.add(effectController, "cColorBalanceHighlightsR", -1, 1, 0.025).name("Highlights-R"));
+		this._track(cbFolder.add(effectController, "cColorBalanceHighlightsG", -1, 1, 0.025).name("Highlights-G"));
+		this._track(cbFolder.add(effectController, "cColorBalanceHighlightsB", -1, 1, 0.025).name("Highlights-B"));
 		cbFolder.add(app, "onResetColorBalance").name("reset");
 		cbFolder.open(false);
 		this.cb = cbFolder;
@@ -125,7 +125,9 @@ export class GuiSetup {
 			if (!config) continue;
 
 			if (paramName.indexOf("Enable") >= 0) {
-				this.parsItems.push(this.pars.add(effectController, paramName).name(config.name));
+				const ctrl = this.pars.add(effectController, paramName).name(config.name);
+				this._track(ctrl, null, true);
+				this.parsItems.push(ctrl);
 			} else {
 				const override = overrides[paramName];
 				if (override) {
@@ -135,10 +137,12 @@ export class GuiSetup {
 					const ctrl = this.pars.add(effectController, paramName, override.minValue, override.maxValue).name(config.name);
 					if ("step" in config) ctrl.step(config.step);
 					if ("step" in override) ctrl.step(override.step);
+					this._track(ctrl);
 					this.parsItems.push(ctrl);
 				} else {
 					const ctrl = this.pars.add(effectController, paramName, config.minValue, config.maxValue).name(config.name);
 					if ("step" in config) ctrl.step(config.step);
+					this._track(ctrl);
 					this.parsItems.push(ctrl);
 				}
 			}
@@ -152,5 +156,21 @@ export class GuiSetup {
 		for (const k in this.tiling.controllers) this.tiling.controllers[k].updateDisplay();
 		for (const k in this.normalMap.controllers) this.normalMap.controllers[k].updateDisplay();
 		for (const k in this.cb.controllers) this.cb.controllers[k].updateDisplay();
+	}
+
+	_track(ctrl, onChange, immediate = false) {
+		if (!ctrl) return ctrl;
+		ctrl.onChange(value => {
+			if (onChange) onChange(value);
+			if (!this.app.history) return;
+			if (immediate) this.app.history.recordImmediate();
+			else this.app.history.record();
+		});
+		if (!immediate && ctrl.onFinishChange) {
+			ctrl.onFinishChange(() => {
+				if (this.app.history) this.app.history.recordImmediate();
+			});
+		}
+		return ctrl;
 	}
 }

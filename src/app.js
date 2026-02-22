@@ -213,6 +213,7 @@ class App {
 			this.gui.refreshAllDisplays();
 		}
 		this.render();
+		if (this.history) this.history.recordImmediate();
 	}
 
 	_initNoiseSphere() {
@@ -279,6 +280,7 @@ class App {
 		this.effectController.cColorBalanceHighlightsG = 0;
 		this.effectController.cColorBalanceHighlightsB = 0;
 		for (const k in this.gui.cb.controllers) this.gui.cb.controllers[k].updateDisplay();
+		if (this.history) this.history.recordImmediate();
 	}
 
 	onAlphaVisibilityChange(visible) {
