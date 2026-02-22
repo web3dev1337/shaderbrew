@@ -579,7 +579,7 @@ class App {
 		}
 
 		if (this.preview3D.visible && finalTexture) {
-			this.preview3D.updateMaps(finalTexture);
+			this.preview3D.updateFromCanvas(this.canvas);
 			this.preview3D.setStatus?.({
 				gradientEnabled: this.gradientEditor.enabled,
 				gradientIntensity: this.gradientEditor.intensity,
