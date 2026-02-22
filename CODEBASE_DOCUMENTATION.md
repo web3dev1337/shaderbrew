@@ -82,6 +82,10 @@ SCRIPTS:
 TOOLING:
   eslint.config.mjs   ESLint config (run `npm run lint`)
   package.json        npm scripts + dev dependencies
+
+DEPLOYMENT:
+  .github/workflows/pages.yml   GitHub Pages deploy workflow (serves repo root)
+  .nojekyll                    Disable Jekyll processing for static assets
 ```
 
 ## Architecture
