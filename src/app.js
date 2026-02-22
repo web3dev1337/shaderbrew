@@ -37,6 +37,8 @@ class App {
 		this.mouse = new THREE.Vector2(0.5, 0.5);
 		this.clock = new THREE.Clock();
 		this.preventSave = false;
+		this.colorTarget = null;
+		this.finalTarget = null;
 	}
 
 	init() {
@@ -100,6 +102,7 @@ class App {
 		this.pipeline = new RenderPipeline(this.renderer, this.canvas.width, this.canvas.height);
 		const basePass = this.pipeline.buildPasses(this.effectController.type);
 		this.baseDefaultUniforms = basePass.defaultUniforms;
+		this.colorTarget = this._createColorTarget(this.canvas.width, this.canvas.height);
 	}
 
 	_initLayers() {
@@ -346,7 +349,7 @@ class App {
 		this.spriteSheet.capture(time => {
 			this.effectController.time = time;
 			this.render();
-			return this.pipeline.layers[this.pipeline.layers.length - 2].renderTarget.texture;
+			return this.getFinalTexture() || this.colorTarget.texture;
 		}, this.canvas);
 
 		if (!this.preventSave) {
@@ -392,59 +395,56 @@ class App {
 	render() {
 		this.stats.update();
 
+		let baseTexture = null;
+		let baseTarget = null;
+
 		if (this.layerManager.layers.length > 1) {
-			// Multi-layer: render all layers, composite them
 			const results = this.layerManager.renderAll(this.mouse, this.camera, this.grungeTexture);
 			const composited = this.compositor.composite(results);
-
-			// Apply gradient map if enabled
-			if (this.gradientEditor.enabled && composited) {
-				this.gradientPass.apply(composited, this.gradientEditor.getTexture(), this.gradientEditor.intensity);
-			} else if (composited) {
-				// Blit composited result to screen
-				this.compositor._blit(composited, null);
-			}
+			baseTexture = composited;
+			baseTarget = this.compositor.lastOutput;
 		} else {
-			// Single layer: use direct pipeline (original behavior)
 			this.pipeline.render(
 				this.effectController,
 				this.mouse,
 				this.camera,
-				this.grungeTexture
+				this.grungeTexture,
+				this.colorTarget
 			);
+			baseTexture = this.colorTarget.texture;
+			baseTarget = this.colorTarget;
+		}
 
-			// Apply gradient map if enabled
-			if (this.gradientEditor.enabled) {
-				const lastRT = this.pipeline.layers[this.pipeline.layers.length - 2]?.renderTarget;
-				if (lastRT) {
-					this.gradientPass.apply(lastRT.texture, this.gradientEditor.getTexture(), this.gradientEditor.intensity);
-				}
-			}
+		let finalTexture = baseTexture;
+		let finalTarget = baseTarget;
 
-			if (this.effectController.cNoiseSphereEnable) {
-				const secondToLastRT = this.pipeline.layers[this.pipeline.layers.length - 2].renderTarget;
-				this.noiseSphere.render(this.renderer, this.camera, secondToLastRT.texture);
+		if (this.gradientEditor.enabled && baseTexture) {
+			this.gradientPass.apply(baseTexture, this.gradientEditor.getTexture(), this.gradientEditor.intensity, this.gradientPass.renderTarget);
+			finalTexture = this.gradientPass.renderTarget.texture;
+			finalTarget = this.gradientPass.renderTarget;
+		}
+
+		this.finalTarget = finalTarget;
+
+		if (finalTexture) {
+			if (this.tilePreviewPass.enabled) {
+				this.tilePreviewPass.apply(finalTexture, null);
+			} else {
+				this.compositor._blit(finalTexture, null);
 			}
 		}
 
-		// 2x2 tiling preview (final pass, renders to screen)
-		if (this.tilePreviewPass.enabled) {
-			const lastRT = this.pipeline.layers[this.pipeline.layers.length - 2]?.renderTarget;
-			if (lastRT) {
-				this.tilePreviewPass.apply(lastRT.texture, null);
-			}
+		if (this.effectController.cNoiseSphereEnable && finalTexture) {
+			this.noiseSphere.render(this.renderer, this.camera, finalTexture);
 		}
 
-		// PBR map generation
-		const lastRT = this.pipeline.layers[this.pipeline.layers.length - 2]?.renderTarget;
-		if (this.pbrGenerator.enabled && lastRT) {
-			this.pbrGenerator.generate(lastRT.texture);
-			this.pbrPanel.updatePreviews(this.renderer, lastRT.texture);
+		if (this.pbrGenerator.enabled && finalTexture) {
+			this.pbrGenerator.generate(finalTexture);
+			this.pbrPanel.updatePreviews(this.renderer, finalTarget);
 		}
 
-		// 3D preview
-		if (this.preview3D.visible && lastRT) {
-			this.preview3D.updateMaps(lastRT.texture);
+		if (this.preview3D.visible && finalTexture) {
+			this.preview3D.updateMaps(finalTexture);
 			this.preview3D.render();
 		}
 	}
@@ -457,8 +457,28 @@ class App {
 		this.gradientPass.resize(this.canvas.width, this.canvas.height);
 		this.pbrGenerator.resize(this.canvas.width, this.canvas.height);
 		this.spriteSheet.resize(this.canvas.width, this.canvas.height);
+		if (this.colorTarget) {
+			this.colorTarget.dispose();
+			this.colorTarget = this._createColorTarget(this.canvas.width, this.canvas.height);
+		}
 		if (this.toolbar) this.toolbar.updateResolution(this.canvas.width, this.canvas.height);
 		this.render();
+	}
+
+	getFinalRenderTarget() {
+		return this.finalTarget;
+	}
+
+	getFinalTexture() {
+		return this.finalTarget ? this.finalTarget.texture : null;
+	}
+
+	_createColorTarget(width, height) {
+		return new THREE.WebGLRenderTarget(width, height, {
+			minFilter: THREE.LinearFilter,
+			magFilter: THREE.LinearFilter,
+			stencilBuffer: false
+		});
 	}
 }
 

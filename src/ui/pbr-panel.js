@@ -92,8 +92,9 @@ export class PBRPanel {
 		this.container.style.display = this.container.style.display === "none" ? "block" : "none";
 	}
 
-	updatePreviews(renderer, colorTexture) {
+	updatePreviews(renderer, colorSource) {
 		if (!this.pbr.enabled) return;
+		const colorTexture = colorSource && colorSource.isWebGLRenderTarget ? colorSource.texture : colorSource;
 
 		const maps = {
 			color: colorTexture,
@@ -106,7 +107,11 @@ export class PBRPanel {
 		for (const [name, texture] of Object.entries(maps)) {
 			const canvas = this.previews[name];
 			if (!canvas || !texture) continue;
-			this._readTextureToCanvas(renderer, texture, canvas);
+			if (name === "color" && colorSource && colorSource.isWebGLRenderTarget) {
+				this._readRTToCanvas(renderer, colorSource, canvas);
+			} else {
+				this._readTextureToCanvas(renderer, texture, canvas);
+			}
 		}
 	}
 
@@ -129,6 +134,35 @@ export class PBRPanel {
 		const imgData = ctx.createImageData(w, h);
 
 		// Flip Y (WebGL reads bottom-up)
+		for (let y = 0; y < h; y++) {
+			for (let x = 0; x < w; x++) {
+				const srcIdx = ((h - 1 - y) * w + x) * 4;
+				const dstIdx = (y * w + x) * 4;
+				imgData.data[dstIdx] = pixels[srcIdx];
+				imgData.data[dstIdx + 1] = pixels[srcIdx + 1];
+				imgData.data[dstIdx + 2] = pixels[srcIdx + 2];
+				imgData.data[dstIdx + 3] = 255;
+			}
+		}
+
+		const tmpCanvas = document.createElement("canvas");
+		tmpCanvas.width = w;
+		tmpCanvas.height = h;
+		tmpCanvas.getContext("2d").putImageData(imgData, 0, 0);
+
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+		ctx.drawImage(tmpCanvas, 0, 0, canvas.width, canvas.height);
+	}
+
+	_readRTToCanvas(renderer, rt, canvas) {
+		const w = rt.width;
+		const h = rt.height;
+		const pixels = new Uint8Array(w * h * 4);
+		renderer.readRenderTargetPixels(rt, 0, 0, w, h, pixels);
+
+		const ctx = canvas.getContext("2d");
+		const imgData = ctx.createImageData(w, h);
+
 		for (let y = 0; y < h; y++) {
 			for (let x = 0; x < w; x++) {
 				const srcIdx = ((h - 1 - y) * w + x) * 4;

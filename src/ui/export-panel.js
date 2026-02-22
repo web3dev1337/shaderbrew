@@ -29,15 +29,15 @@ export class ExportPanel {
 		quickRow.style.cssText = "display:flex;gap:6px;margin-bottom:10px;justify-content:center";
 
 		this._addExportBtn(quickRow, "PNG", () => {
-			const rt = this.exportManager.app.pipeline.layers;
-			const lastRT = rt[rt.length - 2]?.renderTarget;
-			if (lastRT) this.exportManager.exportPNG(this.exportManager.app.effectController.type, lastRT.texture);
+			this.exportManager.app.render();
+			const colorRT = this.exportManager.getColorRenderTarget();
+			if (colorRT) this.exportManager.exportPNG(this.exportManager.app.effectController.type, colorRT);
 		});
 
 		this._addExportBtn(quickRow, "JPEG (92%)", () => {
-			const rt = this.exportManager.app.pipeline.layers;
-			const lastRT = rt[rt.length - 2]?.renderTarget;
-			if (lastRT) this.exportManager.exportJPEG(this.exportManager.app.effectController.type, lastRT.texture, 0.92);
+			this.exportManager.app.render();
+			const colorRT = this.exportManager.getColorRenderTarget();
+			if (colorRT) this.exportManager.exportJPEG(this.exportManager.app.effectController.type, colorRT, 0.92);
 		});
 
 		this._addExportBtn(quickRow, "ZIP Bundle", () => this.exportManager.exportZIP(), true);

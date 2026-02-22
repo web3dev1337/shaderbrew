@@ -14,8 +14,8 @@ export class ExportManager {
 	/**
 	 * Export a single map as PNG download.
 	 */
-	exportPNG(name, texture) {
-		const canvas = this._textureToCanvas(texture);
+	exportPNG(name, source) {
+		const canvas = this._sourceToCanvas(source);
 		if (!canvas) return;
 		const link = document.createElement("a");
 		link.download = `${name}.png`;
@@ -26,8 +26,8 @@ export class ExportManager {
 	/**
 	 * Export a single map as JPEG download with quality control.
 	 */
-	exportJPEG(name, texture, quality = 0.92) {
-		const canvas = this._textureToCanvas(texture);
+	exportJPEG(name, source, quality = 0.92) {
+		const canvas = this._sourceToCanvas(source);
 		if (!canvas) return;
 		const link = document.createElement("a");
 		link.download = `${name}.jpg`;
@@ -47,12 +47,12 @@ export class ExportManager {
 
 		const zip = new JSZip();
 		const renderer = this.app.renderer;
-		const pipeline = this.app.pipeline;
 		const pbr = this.app.pbrGenerator;
 		const effectType = this.app.effectController.type;
 
 		// Color map
-		const colorRT = pipeline.layers[pipeline.layers.length - 2]?.renderTarget;
+		this.app.render();
+		const colorRT = this._getColorRT();
 		if (colorRT) {
 			const colorPNG = this._rtToPNGBlob(renderer, colorRT);
 			if (colorPNG) zip.file(`${effectType}_color.png`, colorPNG);
@@ -95,13 +95,10 @@ export class ExportManager {
 
 		// Export
 		const name = `${this.app.effectController.type}_${resolution}`;
-		const colorRT = this.app.pipeline.layers[this.app.pipeline.layers.length - 2]?.renderTarget;
+		const colorRT = this._getColorRT();
 		if (colorRT) {
-			if (format === "jpeg") {
-				this.exportJPEG(name, colorRT.texture, quality);
-			} else {
-				this.exportPNG(name, colorRT.texture);
-			}
+			if (format === "jpeg") this.exportJPEG(name, colorRT, quality);
+			else this.exportPNG(name, colorRT);
 		}
 
 		// Restore
@@ -110,14 +107,46 @@ export class ExportManager {
 		this.app._onResize();
 	}
 
+	_sourceToCanvas(source) {
+		if (!source) return null;
+		if (source.isWebGLRenderTarget) return this._rtToCanvas(source);
+		if (source.isTexture) return this._textureToCanvas(source);
+		return null;
+	}
+
 	_textureToCanvas(texture) {
-		if (!texture) return null;
 		const renderer = this.app.renderer;
 
 		// Find the RT that owns this texture
 		const rt = this._findRT(texture);
 		if (!rt) return null;
+		return this._rtToCanvas(rt, renderer);
+	}
 
+	_findRT(texture) {
+		const finalRT = this._getColorRT();
+		if (finalRT && finalRT.texture === texture) return finalRT;
+
+		const pipeline = this.app.pipeline;
+		for (const pass of pipeline.layers) {
+			if (pass.renderTarget && pass.renderTarget.texture === texture) return pass.renderTarget;
+		}
+		const pbr = this.app.pbrGenerator;
+		for (const name of ["normalRT", "roughnessRT", "aoRT", "metallicRT"]) {
+			if (pbr[name] && pbr[name].texture === texture) return pbr[name];
+		}
+		return null;
+	}
+
+	_getColorRT() {
+		if (this.app.getFinalRenderTarget) {
+			const finalRT = this.app.getFinalRenderTarget();
+			if (finalRT) return finalRT;
+		}
+		return this.app.pipeline.layers[this.app.pipeline.layers.length - 2]?.renderTarget || null;
+	}
+
+	_rtToCanvas(rt, renderer = this.app.renderer) {
 		const w = rt.width;
 		const h = rt.height;
 		const pixels = new Uint8Array(w * h * 4);
@@ -129,7 +158,6 @@ export class ExportManager {
 		const ctx = canvas.getContext("2d");
 		const imgData = ctx.createImageData(w, h);
 
-		// Flip Y
 		for (let y = 0; y < h; y++) {
 			for (let x = 0; x < w; x++) {
 				const srcIdx = ((h - 1 - y) * w + x) * 4;
@@ -143,18 +171,6 @@ export class ExportManager {
 
 		ctx.putImageData(imgData, 0, 0);
 		return canvas;
-	}
-
-	_findRT(texture) {
-		const pipeline = this.app.pipeline;
-		for (const pass of pipeline.layers) {
-			if (pass.renderTarget && pass.renderTarget.texture === texture) return pass.renderTarget;
-		}
-		const pbr = this.app.pbrGenerator;
-		for (const name of ["normalRT", "roughnessRT", "aoRT", "metallicRT"]) {
-			if (pbr[name] && pbr[name].texture === texture) return pbr[name];
-		}
-		return null;
 	}
 
 	_rtToPNGBlob(renderer, rt) {
@@ -206,5 +222,9 @@ export class ExportManager {
 				document.head.appendChild(script);
 			});
 		}
+	}
+
+	getColorRenderTarget() {
+		return this._getColorRT();
 	}
 }

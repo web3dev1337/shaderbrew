@@ -9,6 +9,7 @@ export class Compositor {
 		this.renderer = renderer;
 		this.width = width;
 		this.height = height;
+		this.lastOutput = null;
 
 		this.scene = new THREE.Scene();
 		this.camera = new THREE.Camera();
@@ -35,7 +36,10 @@ export class Compositor {
 	 */
 	composite(layerResults, outputTarget) {
 		const visible = layerResults.filter(l => l.visible);
-		if (visible.length === 0) return null;
+		if (visible.length === 0) {
+			this.lastOutput = null;
+			return null;
+		}
 
 		// First layer: just copy to rtA
 		this._blit(visible[0].texture, this.rtA);
@@ -60,12 +64,14 @@ export class Compositor {
 			[readTarget, writeTarget] = [writeTarget, readTarget];
 		}
 
-		// If only 1 layer, blit to output
-		if (visible.length === 1 && outputTarget) {
-			this._blit(this.rtA.texture, outputTarget);
-			return outputTarget.texture;
+		// If only 1 layer, optionally blit to output
+		if (visible.length === 1) {
+			if (outputTarget) this._blit(this.rtA.texture, outputTarget);
+			this.lastOutput = this.rtA;
+			return this.rtA.texture;
 		}
 
+		this.lastOutput = readTarget;
 		return readTarget.texture;
 	}
 
