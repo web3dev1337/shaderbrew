@@ -45,7 +45,10 @@ body{background:radial-gradient(1200px 600px at 50% -200px,#16162a 0%,#07070c 55
 .pipeline-row .pipe-arrow{color:#e94560;font-family:monospace;font-size:22px;font-weight:bold;flex-shrink:0;padding:0 2px}
 .pipeline-row .card{flex:1;min-width:160px;max-width:260px}
 .build-section{padding-top:40px}
-.step-list{list-style:disc;padding-left:18px;margin:10px 0 16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+.build-rows{display:flex;flex-direction:column;gap:18px;margin:10px 0 18px}
+.build-row{background:#07070f;border:1px solid #121225;border-radius:10px;padding:12px}
+.build-title{font-family:monospace;font-size:12px;color:#e0e0ff;letter-spacing:1px;margin-bottom:8px}
+.step-list{list-style:disc;padding-left:18px;margin:6px 0 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
 .step-list li{background:#0a0a12;border:1px solid #1a1a2e;border-radius:8px;padding:10px;list-style-position:inside}
 .step-list li canvas{width:100%;aspect-ratio:1;display:block;background:#000;border-radius:6px;margin:6px 0 8px}
 .step-title{font-family:monospace;font-size:11px;color:#e0e0ff;letter-spacing:.4px}
@@ -120,8 +123,21 @@ Initializing WebGL + loading shaders...
 <section class="chapter build-section" id="ritual-build">
 <span class="chapter-num">FEATURED BUILD</span>
 <h2>Dark Ritual Portal — Sprite Build <span class="new">NEW</span></h2>
-<p>Step-by-step construction of the hero portal. Each tile below renders live from the same shader chain used to generate the sprite sheet: custom GLSL warp tunnel, circular mask, atlas sampling, alpha extraction, and alpha blend.</p>
-<ul class="step-list" id="ritual-steps"></ul>
+<p>Step-by-step construction of the hero portal. Each row groups the inputs that build the warp core, then the ritual ring, then the final alpha composite.</p>
+<div class="build-rows" id="ritual-build-rows">
+<div class="build-row">
+<div class="build-title">Warp Tunnel Build</div>
+<ul class="step-list" id="ritual-steps-core"></ul>
+</div>
+<div class="build-row">
+<div class="build-title">Dark Ritual Ring Build</div>
+<ul class="step-list" id="ritual-steps-ring"></ul>
+</div>
+<div class="build-row">
+<div class="build-title">Composite</div>
+<ul class="step-list" id="ritual-steps-comp"></ul>
+</div>
+</div>
 <div class="section-note">Pipeline overview</div>
 <div id="grid-ritual"></div>
 <div class="preview-wrap" id="grid-ritual-3d"></div>
@@ -669,14 +685,18 @@ const cvF=card(row,c.grad+" Gradient",c.desc,"highlight");toCanvas(rt[3],cvF);
 // ===================================================================
 function ch5b(){
 const g=document.getElementById("grid-ritual");
-const steps=document.getElementById("ritual-steps");
-if(steps)steps.innerHTML="";
+const coreList=document.getElementById("ritual-steps-core");
+const ringList=document.getElementById("ritual-steps-ring");
+const compList=document.getElementById("ritual-steps-comp");
+if(coreList)coreList.innerHTML="";
+if(ringList)ringList.innerHTML="";
+if(compList)compList.innerHTML="";
 
-const cvWarp=steps?stepItem(steps,"Warp Tunnel — custom GLSL warp_tunnel","Raymarched tunnel core + streak noise"):null;
-const cvMask=steps?stepItem(steps,"Circle Mask — smoothstep radial","Keeps the tunnel inside the ring"):null;
-const cvRing=steps?stepItem(steps,"Dark Ritual Ring — atlas sampler #029","Sprite sheet frame with alpha"):null;
-const cvRingAlpha=steps?stepItem(steps,"Ring Alpha — extracted from atlas","Alpha channel used for the blend"):null;
-const cvComp=steps?stepItem(steps,"Alpha Composite — alphaBlend shader","Ring over tunnel using atlas alpha"):null;
+const cvWarp=coreList?stepItem(coreList,"Warp Tunnel — custom GLSL warp_tunnel","Raymarched tunnel core + streak noise"):null;
+const cvMask=coreList?stepItem(coreList,"Circular Mask — smoothstep radial","Keeps the tunnel inside the ring"):null;
+const cvRing=ringList?stepItem(ringList,"Dark Ritual Ring — atlas sampler #029","Sprite sheet frame with alpha"):null;
+const cvRingAlpha=ringList?stepItem(ringList,"Ring Alpha — extracted from atlas","Alpha channel used for the blend"):null;
+const cvComp=compList?stepItem(compList,"Alpha Composite — premultiplied alpha-over","Ring over tunnel using atlas alpha"):null;
 
 const row=document.createElement("div");row.className="pipeline-row";g.appendChild(row);
 const cvA=card(row,"Warp Tunnel + Mask","Custom GLSL + radial mask");
