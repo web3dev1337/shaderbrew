@@ -12,10 +12,12 @@ export class ExportPanel {
 		this.container = document.createElement("div");
 		this.container.id = "export-panel";
 		this.container.style.cssText = `
-			position: fixed; bottom: 55px; left: 50%; transform: translateX(-50%);
-			background: rgba(10, 10, 20, 0.95); border: 1px solid #333; border-radius: 6px;
-			padding: 12px; z-index: 9997; display: none; width: 360px;
+			position: fixed; bottom: 44px; left: 50%; transform: translateX(-50%);
+			background: rgba(8, 8, 16, 0.97); border: 1px solid #1f1f2f; border-radius: 8px 8px 0 0;
+			padding: 12px 14px; z-index: 9998; display: none; width: min(380px, calc(100vw - 2rem));
 			font-family: monospace; font-size: 12px; color: #ccc;
+			box-shadow: 0 -4px 30px rgba(0,0,0,0.4);
+			border-bottom: none;
 		`;
 
 		// Title
@@ -113,12 +115,12 @@ export class ExportPanel {
 		const btn = document.createElement("button");
 		btn.textContent = label;
 		btn.style.cssText = `
-			padding: 6px 12px; border: 1px solid ${highlight ? "#e94560" : "#444"}; border-radius: 4px;
-			background: ${highlight ? "#2a1030" : "#1a1a2e"}; color: ${highlight ? "#ff6b8a" : "#ccc"};
+			padding: 6px 12px; border: 1px solid ${highlight ? "#e94560" : "#2a2a3a"}; border-radius: 4px;
+			background: ${highlight ? "rgba(233, 69, 96, 0.1)" : "#111122"}; color: ${highlight ? "#ff6b8a" : "#ccc"};
 			font-family: monospace; font-size: 11px; cursor: pointer; transition: all 0.15s;
 		`;
-		btn.addEventListener("mouseenter", () => { btn.style.background = "#0f3460"; btn.style.borderColor = "#e94560"; btn.style.color = "#fff"; });
-		btn.addEventListener("mouseleave", () => { btn.style.background = highlight ? "#2a1030" : "#1a1a2e"; btn.style.borderColor = highlight ? "#e94560" : "#444"; btn.style.color = highlight ? "#ff6b8a" : "#ccc"; });
+		btn.addEventListener("mouseenter", () => { btn.style.background = "#1a1a3e"; btn.style.borderColor = "#e94560"; btn.style.color = "#fff"; });
+		btn.addEventListener("mouseleave", () => { btn.style.background = highlight ? "rgba(233, 69, 96, 0.1)" : "#111122"; btn.style.borderColor = highlight ? "#e94560" : "#2a2a3a"; btn.style.color = highlight ? "#ff6b8a" : "#ccc"; });
 		btn.addEventListener("click", onClick);
 		parent.appendChild(btn);
 	}

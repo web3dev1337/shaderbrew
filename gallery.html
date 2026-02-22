@@ -5,30 +5,36 @@
 <meta charset="utf-8"/>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#050508;color:#fff;font-family:'Segoe UI',system-ui,monospace;padding:20px}
-h1{text-align:center;margin-bottom:4px;font-size:28px;color:#e0e0ff;letter-spacing:2px}
-.subtitle{text-align:center;color:#555;margin-bottom:20px;font-size:13px}
+body{background:#050508;color:#fff;font-family:'Segoe UI',system-ui,sans-serif;padding:1.25rem}
+h1{text-align:center;margin-bottom:0.25rem;font-size:1.5rem;color:#e0e0ff;letter-spacing:2px;font-family:monospace}
+.subtitle{text-align:center;color:#555;margin-bottom:1.25rem;font-size:0.8rem;font-family:monospace}
 .subtitle a{color:#e94560;text-decoration:none}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:14px;max-width:1900px;margin:0 auto 30px}
-.card{background:#0a0a12;border:2px solid #1a1a2e;border-radius:10px;overflow:hidden;cursor:pointer;transition:all 0.3s;position:relative}
-.card:hover{border-color:#e94560;box-shadow:0 0 30px rgba(233,69,96,0.3);transform:translateY(-2px)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(280px, 100%),1fr));gap:0.875rem;max-width:1900px;margin:0 auto 1.875rem}
+.card{background:#0a0a12;border:1px solid #1a1a2e;border-radius:8px;overflow:hidden;cursor:pointer;transition:all 0.25s;position:relative}
+.card:hover{border-color:#e94560;box-shadow:0 0 24px rgba(233,69,96,0.2);transform:translateY(-1px)}
 .card canvas{width:100%;aspect-ratio:1;display:block;background:#000}
-.card .label{padding:10px 14px;font-size:13px;color:#ccc;text-align:center;border-top:1px solid #1a1a2e;letter-spacing:1px;display:flex;justify-content:space-between;align-items:center}
+.card .label{padding:0.5rem 0.75rem;font-size:0.75rem;color:#ccc;text-align:center;border-top:1px solid #1a1a2e;letter-spacing:0.5px;display:flex;justify-content:space-between;align-items:center;font-family:monospace}
 .card .label .name{font-weight:bold;color:#e0e0ff}
-.card .label .tag{font-size:10px;padding:2px 8px;border-radius:10px;background:#1a1a2e;color:#888}
+.card .label .tag{font-size:0.6rem;padding:0.125rem 0.5rem;border-radius:0.625rem;background:#1a1a2e;color:#888}
 .card .label .tag.custom{background:#2a1030;color:#e94560}
-.card .badges{position:absolute;top:8px;right:8px;display:flex;gap:4px}
-.card .badge{font-size:9px;padding:2px 6px;border-radius:8px;background:rgba(10,10,20,0.85);border:1px solid #333}
+.card .badges{position:absolute;top:0.5rem;right:0.5rem;display:flex;gap:0.25rem}
+.card .badge{font-size:0.5625rem;padding:0.125rem 0.375rem;border-radius:0.5rem;background:rgba(10,10,20,0.85);border:1px solid #333;font-family:monospace}
 .card .badge.polar{color:#ff6b8a;border-color:#e94560}
 .card .badge.tiling{color:#6bffb8;border-color:#4ae94a}
 .card .badge.toon{color:#6bb8ff;border-color:#4a94e9}
 .card .badge.gradient{color:#ffb86b;border-color:#ff8c00}
-#status{text-align:center;color:#666;margin:16px 0;font-size:14px;font-family:monospace}
-.controls{text-align:center;margin-bottom:20px;display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
-.controls button{padding:8px 18px;border:1px solid #222;border-radius:20px;background:#0a0a12;color:#888;font-family:monospace;font-size:12px;cursor:pointer;transition:all 0.2s;letter-spacing:0.5px}
+#status{text-align:center;color:#666;margin:1rem 0;font-size:0.8rem;font-family:monospace}
+.controls{text-align:center;margin-bottom:1.25rem;display:flex;justify-content:center;gap:0.5rem;flex-wrap:wrap;padding:0 0.5rem}
+.controls button{padding:0.5rem 1rem;border:1px solid #222;border-radius:1.25rem;background:#0a0a12;color:#888;font-family:monospace;font-size:0.75rem;cursor:pointer;transition:all 0.2s;letter-spacing:0.3px}
 .controls button:hover{background:#1a1a2e;border-color:#555;color:#ccc}
 .controls button.on{background:#1a1030;border-color:#e94560;color:#e94560}
-.stats{text-align:center;padding:10px;font-family:monospace;font-size:11px;color:#333;margin-top:20px;border-top:1px solid #111}
+.stats{text-align:center;padding:0.625rem;font-family:monospace;font-size:0.6875rem;color:#333;margin-top:1.25rem;border-top:1px solid #111}
+@media(max-width:600px){
+body{padding:0.75rem}
+h1{font-size:1.25rem}
+.grid{grid-template-columns:repeat(auto-fill,minmax(min(200px,100%),1fr));gap:0.5rem}
+.controls button{padding:0.375rem 0.75rem;font-size:0.6875rem}
+}
 </style>
 </head>
 <body>

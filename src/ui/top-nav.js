@@ -31,40 +31,45 @@ const NAV_GROUPS = [
 function initTopNav() {
 	if (document.getElementById("top-nav")) return;
 
+	const isEditor = !!document.getElementById("toolbar") || !!document.getElementById("layer-panel")
+		|| document.querySelector('script[src="src/app.js"]');
+
 	const style = document.createElement("style");
 	style.textContent = `
-		:root { --top-nav-height: 44px; }
+		:root { --top-nav-height: 36px; }
 		body.has-top-nav { padding-top: var(--top-nav-height); }
 		#top-nav {
 			position: fixed; top: 0; left: 0; right: 0; height: var(--top-nav-height);
-			display: flex; align-items: center; gap: 14px; padding: 0 16px;
-			background: linear-gradient(180deg, rgba(8, 8, 14, 0.98), rgba(8, 8, 14, 0.92));
+			display: flex; align-items: center; gap: 10px; padding: 0 12px;
+			background: rgba(5, 5, 10, 0.98);
 			border-bottom: 1px solid #1f1f2f;
-			font-family: monospace; font-size: 12px; color: #bbb; z-index: 10000;
+			font-family: monospace; font-size: 11px; color: #bbb; z-index: 10000;
 			backdrop-filter: blur(8px);
 			overflow-x: auto;
 			scrollbar-width: none;
 		}
 		#top-nav::-webkit-scrollbar { display: none; }
 		#top-nav .nav-title {
-			color: #e0e0ff; font-weight: 700; margin-right: 4px;
-			letter-spacing: 0.12em; font-size: 11px;
+			color: #e0e0ff; font-weight: 700; margin-right: 2px;
+			letter-spacing: 0.1em; font-size: 10px; white-space: nowrap;
+			opacity: 0.7;
 		}
 		#top-nav .nav-group {
-			display: flex; align-items: center; gap: 6px; padding-right: 12px; margin-right: 4px;
-			border-right: 1px solid #1c1c2a;
+			display: flex; align-items: center; gap: 4px; padding-right: 10px; margin-right: 2px;
+			border-right: 1px solid #1a1a2a;
 		}
 		#top-nav .nav-group:last-of-type { border-right: none; }
 		#top-nav .nav-group-label {
-			font-size: 9px; color: #666; text-transform: uppercase; letter-spacing: 0.12em;
+			font-size: 9px; color: #555; text-transform: uppercase; letter-spacing: 0.1em;
 		}
 		#top-nav a {
-			color: #aaa; text-decoration: none; padding: 4px 8px;
-			border: 1px solid transparent; border-radius: 4px; transition: all 0.15s;
+			color: #888; text-decoration: none; padding: 3px 7px;
+			border: 1px solid transparent; border-radius: 3px; transition: all 0.15s;
+			white-space: nowrap;
 		}
-		#top-nav a:hover { color: #fff; border-color: #444; background: #16162a; }
-		#top-nav a.primary { border-color: #e94560; color: #fff; background: #1a1a3e; }
-		#top-nav a.active { color: #fff; border-color: #e94560; background: #1a1a3e; box-shadow: 0 0 0 1px rgba(233,69,96,0.25) inset; }
+		#top-nav a:hover { color: #ddd; border-color: #333; background: rgba(255,255,255,0.03); }
+		#top-nav a.primary { border-color: #e94560; color: #e0e0ff; background: rgba(233, 69, 96, 0.08); }
+		#top-nav a.active { color: #fff; border-color: #e94560; background: rgba(233, 69, 96, 0.12); }
 		#top-nav .nav-group.active-group .nav-group-label { color: #e94560; }
 		#top-nav .nav-spacer { flex: 1; }
 	`;
@@ -75,7 +80,7 @@ function initTopNav() {
 
 	const title = document.createElement("div");
 	title.className = "nav-title";
-	title.textContent = "EffectTextureMaker";
+	title.textContent = "FX";
 	nav.appendChild(title);
 
 	const path = window.location.pathname.split("/").pop() || "index.html";
@@ -110,17 +115,18 @@ function initTopNav() {
 	spacer.className = "nav-spacer";
 	nav.appendChild(spacer);
 
-	const editorLayout = document.getElementById("toolbar") || document.getElementById("layer-panel");
-	if (!editorLayout) document.body.classList.add("has-top-nav");
+	if (!isEditor) document.body.classList.add("has-top-nav");
 	document.body.appendChild(nav);
 
-	const toolbar = document.getElementById("toolbar");
-	if (toolbar) toolbar.style.top = "var(--top-nav-height)";
-	const layerPanel = document.getElementById("layer-panel");
-	if (layerPanel) layerPanel.style.top = "var(--top-nav-height)";
-	const canvas = document.querySelector("canvas");
-	if (canvas && toolbar) {
-		canvas.style.top = "calc(var(--top-nav-height) + 36px)";
+	if (isEditor) {
+		const toolbar = document.getElementById("toolbar");
+		if (toolbar) toolbar.style.top = "var(--top-nav-height)";
+		const layerPanel = document.getElementById("layer-panel");
+		if (layerPanel) layerPanel.style.top = "var(--top-nav-height)";
+		const canvas = document.querySelector("canvas");
+		if (canvas && toolbar) {
+			canvas.style.top = "calc(var(--top-nav-height) + 36px)";
+		}
 	}
 }
 

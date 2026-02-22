@@ -31,22 +31,16 @@ export class PresetLoader {
 	}
 
 	_buildToggle() {
-		this.toggleBtn = document.createElement("button");
-		this.toggleBtn.textContent = "Presets";
-		this.toggleBtn.style.cssText = "padding:8px 16px;border:1px solid #555;border-radius:4px;background:#1a1a2e;color:#e0e0ff;font-family:monospace;font-size:13px;cursor:pointer;transition:all 0.2s;position:fixed;bottom:55px;left:270px;z-index:9999";
-		this.toggleBtn.addEventListener("click", () => this.toggle());
-		this.toggleBtn.addEventListener("mouseenter", () => { this.toggleBtn.style.background = "#0f3460"; this.toggleBtn.style.borderColor = "#e94560"; });
-		this.toggleBtn.addEventListener("mouseleave", () => { this.toggleBtn.style.background = "#1a1a2e"; this.toggleBtn.style.borderColor = "#555"; });
-		document.body.appendChild(this.toggleBtn);
+		// Toggle handled by ActionDock — no standalone button needed
 	}
 
 	_buildPanel() {
 		this.panel = document.createElement("div");
 		this.panel.id = "preset-browser";
-		this.panel.style.cssText = "position:fixed;bottom:55px;left:50%;transform:translateX(-50%);width:760px;max-width:calc(100vw - 40px);background:rgba(10,10,20,0.95);border:1px solid #333;border-radius:8px;z-index:9998;display:none;font-family:monospace;color:#ccc;";
+		this.panel.style.cssText = "position:fixed;bottom:44px;left:50%;transform:translateX(-50%);width:min(760px, calc(100vw - 2rem));background:rgba(8,8,16,0.97);border:1px solid #1f1f2f;border-radius:8px 8px 0 0;z-index:9998;display:none;font-family:monospace;color:#ccc;box-shadow:0 -4px 30px rgba(0,0,0,0.4);border-bottom:none";
 
 		const header = document.createElement("div");
-		header.style.cssText = "display:flex;align-items:center;gap:10px;padding:10px;border-bottom:1px solid #333";
+		header.style.cssText = "display:flex;align-items:center;gap:10px;padding:10px;border-bottom:1px solid #1f1f2f";
 
 		const title = document.createElement("div");
 		title.textContent = "Preset Browser";
@@ -56,7 +50,7 @@ export class PresetLoader {
 		this.searchInput = document.createElement("input");
 		this.searchInput.type = "text";
 		this.searchInput.placeholder = "Search presets or tags";
-		this.searchInput.style.cssText = "flex:1;min-width:180px;background:#111;color:#ddd;border:1px solid #333;border-radius:4px;padding:6px 8px;font-family:monospace;font-size:12px";
+		this.searchInput.style.cssText = "flex:1;min-width:180px;background:#0a0a14;color:#ddd;border:1px solid #2a2a3a;border-radius:4px;padding:6px 8px;font-family:monospace;font-size:12px";
 		this.searchInput.addEventListener("input", () => {
 			this.searchTerm = this.searchInput.value.trim().toLowerCase();
 			this._renderGrid();
@@ -65,18 +59,18 @@ export class PresetLoader {
 
 		const closeBtn = document.createElement("button");
 		closeBtn.textContent = "Close";
-		closeBtn.style.cssText = "padding:6px 10px;border:1px solid #444;border-radius:4px;background:#1a1a2e;color:#aaa;font-family:monospace;font-size:11px;cursor:pointer";
+		closeBtn.style.cssText = "padding:6px 10px;border:1px solid #2a2a3a;border-radius:4px;background:#111122;color:#aaa;font-family:monospace;font-size:11px;cursor:pointer;transition:all 0.15s";
 		closeBtn.addEventListener("click", () => this.hide());
 		header.appendChild(closeBtn);
 
 		this.panel.appendChild(header);
 
 		this.kindRow = document.createElement("div");
-		this.kindRow.style.cssText = "display:flex;gap:6px;flex-wrap:wrap;padding:8px 10px;border-bottom:1px solid #222";
+		this.kindRow.style.cssText = "display:flex;gap:6px;flex-wrap:wrap;padding:8px 10px;border-bottom:1px solid #1a1a2a";
 		this.panel.appendChild(this.kindRow);
 
 		this.categoryRow = document.createElement("div");
-		this.categoryRow.style.cssText = "display:flex;gap:6px;flex-wrap:wrap;padding:8px 10px;border-bottom:1px solid #222";
+		this.categoryRow.style.cssText = "display:flex;gap:6px;flex-wrap:wrap;padding:8px 10px;border-bottom:1px solid #1a1a2a";
 		this.panel.appendChild(this.categoryRow);
 
 		this.countEl = document.createElement("div");
@@ -149,10 +143,10 @@ export class PresetLoader {
 			const btn = document.createElement("button");
 			btn.textContent = value === "all" ? "All" : value.replace(/-/g, " ");
 			btn.dataset.value = value;
-			btn.style.cssText = "padding:4px 8px;border:1px solid #333;border-radius:4px;background:#141424;color:#aaa;font-family:monospace;font-size:10px;cursor:pointer";
+			btn.style.cssText = "padding:4px 8px;border:1px solid #2a2a3a;border-radius:4px;background:#0c0c18;color:#aaa;font-family:monospace;font-size:10px;cursor:pointer;transition:all 0.15s";
 			btn.addEventListener("click", () => {
-				container.querySelectorAll("button").forEach(b => { b.style.background = "#141424"; b.style.borderColor = "#333"; b.style.color = "#aaa"; });
-				btn.style.background = "#0f3460";
+				container.querySelectorAll("button").forEach(b => { b.style.background = "#0c0c18"; b.style.borderColor = "#2a2a3a"; b.style.color = "#aaa"; });
+				btn.style.background = "rgba(233, 69, 96, 0.12)";
 				btn.style.borderColor = "#e94560";
 				btn.style.color = "#fff";
 				onChange(value);
@@ -162,7 +156,7 @@ export class PresetLoader {
 
 		const first = container.querySelector("button");
 		if (first) {
-			first.style.background = "#0f3460";
+			first.style.background = "rgba(233, 69, 96, 0.12)";
 			first.style.borderColor = "#e94560";
 			first.style.color = "#fff";
 		}
@@ -189,17 +183,17 @@ export class PresetLoader {
 			const card = document.createElement("button");
 			card.dataset.id = item.id;
 			card.className = "preset-card";
-			card.style.cssText = "text-align:left;padding:10px;border:1px solid #222;border-radius:6px;background:#0f0f1a;color:#ddd;font-family:monospace;cursor:pointer;transition:all 0.15s;display:flex;flex-direction:column;gap:6px";
-			card.addEventListener("mouseenter", () => { card.style.borderColor = "#e94560"; card.style.background = "#15152a"; });
+			card.style.cssText = "text-align:left;padding:10px;border:1px solid #1a1a2a;border-radius:6px;background:#0a0a14;color:#ddd;font-family:monospace;cursor:pointer;transition:all 0.15s;display:flex;flex-direction:column;gap:6px";
+			card.addEventListener("mouseenter", () => { card.style.borderColor = "#e94560"; card.style.background = "#111122"; });
 			card.addEventListener("mouseleave", () => {
-				card.style.borderColor = this.selectedId === item.id ? "#e94560" : "#222";
-				card.style.background = this.selectedId === item.id ? "#1a1a3e" : "#0f0f1a";
+				card.style.borderColor = this.selectedId === item.id ? "#e94560" : "#1a1a2a";
+				card.style.background = this.selectedId === item.id ? "rgba(233, 69, 96, 0.08)" : "#0a0a14";
 			});
 			card.addEventListener("click", () => this.load(item));
 
 			const thumbWrap = document.createElement("div");
 			thumbWrap.className = "preset-thumb-wrap";
-			thumbWrap.style.cssText = "width:100%;height:96px;border:1px solid #222;border-radius:4px;background:#0b0b14;display:flex;align-items:center;justify-content:center;overflow:hidden";
+			thumbWrap.style.cssText = "width:100%;height:96px;border:1px solid #1a1a2a;border-radius:4px;background:#060610;display:flex;align-items:center;justify-content:center;overflow:hidden";
 			const thumbUrl = this.thumbCache[item.id];
 			if (thumbUrl) {
 				const img = document.createElement("img");
@@ -243,7 +237,7 @@ export class PresetLoader {
 
 			if (this.selectedId === item.id) {
 				card.style.borderColor = "#e94560";
-				card.style.background = "#1a1a3e";
+				card.style.background = "rgba(233, 69, 96, 0.08)";
 			}
 
 			this.grid.appendChild(card);

@@ -36,10 +36,12 @@ export class GradientEditor {
 		this.container = document.createElement("div");
 		this.container.id = "gradient-editor";
 		this.container.style.cssText = `
-			position: fixed; bottom: 55px; left: 50%; transform: translateX(-50%);
-			background: rgba(10, 10, 20, 0.95); border: 1px solid #333; border-radius: 6px;
-			padding: 10px; z-index: 9997; display: none; width: 400px;
+			position: fixed; bottom: 44px; left: 50%; transform: translateX(-50%);
+			background: rgba(8, 8, 16, 0.97); border: 1px solid #1f1f2f; border-radius: 8px 8px 0 0;
+			padding: 12px 14px; z-index: 9998; display: none; width: min(420px, calc(100vw - 2rem));
 			font-family: monospace; font-size: 12px; color: #ccc;
+			box-shadow: 0 -4px 30px rgba(0,0,0,0.4);
+			border-bottom: none;
 		`;
 
 		// Title row
@@ -72,7 +74,7 @@ export class GradientEditor {
 		this.barCanvas = document.createElement("canvas");
 		this.barCanvas.width = 380;
 		this.barCanvas.height = 30;
-		this.barCanvas.style.cssText = "cursor:crosshair;border:1px solid #444;border-radius:3px;display:block;margin-bottom:8px";
+		this.barCanvas.style.cssText = "cursor:crosshair;border:1px solid #2a2a3a;border-radius:4px;display:block;margin-bottom:8px";
 
 		this.barCanvas.addEventListener("mousedown", e => this._onBarMouseDown(e));
 		this.barCanvas.addEventListener("mousemove", e => this._onBarMouseMove(e));
@@ -133,7 +135,9 @@ export class GradientEditor {
 		for (const [name, stops] of Object.entries(GRADIENT_PRESETS)) {
 			const btn = document.createElement("button");
 			btn.textContent = name;
-			btn.style.cssText = "padding:2px 8px;border:1px solid #444;border-radius:3px;background:#1a1a2e;color:#ccc;font-size:10px;font-family:monospace;cursor:pointer";
+			btn.style.cssText = "padding:2px 8px;border:1px solid #2a2a3a;border-radius:3px;background:#111122;color:#ccc;font-size:10px;font-family:monospace;cursor:pointer;transition:all 0.15s";
+			btn.addEventListener("mouseenter", () => { btn.style.borderColor = "#e94560"; btn.style.color = "#fff"; });
+			btn.addEventListener("mouseleave", () => { btn.style.borderColor = "#2a2a3a"; btn.style.color = "#ccc"; });
 			btn.addEventListener("click", () => {
 				this.stops = stops.map(s => ({ ...s }));
 				this.selectedStop = -1;

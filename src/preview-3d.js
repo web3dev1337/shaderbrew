@@ -31,13 +31,14 @@ export class Preview3D {
 		this.container.id = "preview-3d";
 		this.container.style.cssText = `
 			position: fixed; top: 36px; right: 300px; width: 300px; height: 300px;
-			background: #111; border: 1px solid #333; border-radius: 0 0 0 6px;
+			background: #0a0a14; border: 1px solid #1f1f2f; border-radius: 0 0 0 8px;
 			z-index: 9996; display: none; overflow: hidden;
+			box-shadow: -4px 4px 20px rgba(0,0,0,0.3);
 		`;
 
 		// Toolbar
 		const toolbar = document.createElement("div");
-		toolbar.style.cssText = "position:absolute;top:0;left:0;right:0;height:28px;background:rgba(10,10,20,0.9);display:flex;align-items:center;gap:4px;padding:0 6px;z-index:1;border-bottom:1px solid #333";
+		toolbar.style.cssText = "position:absolute;top:0;left:0;right:0;height:28px;background:rgba(5,5,10,0.95);display:flex;align-items:center;gap:4px;padding:0 6px;z-index:1;border-bottom:1px solid #1f1f2f";
 
 		const title = document.createElement("span");
 		title.textContent = "3D Preview";
@@ -46,7 +47,7 @@ export class Preview3D {
 
 		// Mesh type selector
 		const meshSelect = document.createElement("select");
-		meshSelect.style.cssText = "background:#222;color:#ccc;border:1px solid #444;border-radius:3px;font-size:10px;padding:1px 4px;font-family:monospace";
+		meshSelect.style.cssText = "background:#111122;color:#ccc;border:1px solid #2a2a3a;border-radius:3px;font-size:10px;padding:1px 4px;font-family:monospace";
 		for (const t of MESH_TYPES) {
 			const opt = document.createElement("option");
 			opt.value = t;
@@ -74,7 +75,9 @@ export class Preview3D {
 		// Close button
 		const closeBtn = document.createElement("button");
 		closeBtn.textContent = "x";
-		closeBtn.style.cssText = "width:18px;height:18px;border:1px solid #444;border-radius:3px;background:#1a1a2e;color:#ccc;cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;font-family:monospace";
+		closeBtn.style.cssText = "width:18px;height:18px;border:1px solid #2a2a3a;border-radius:3px;background:#111122;color:#ccc;cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;font-family:monospace;transition:all 0.15s";
+		closeBtn.addEventListener("mouseenter", () => { closeBtn.style.borderColor = "#e94560"; closeBtn.style.color = "#fff"; });
+		closeBtn.addEventListener("mouseleave", () => { closeBtn.style.borderColor = "#2a2a3a"; closeBtn.style.color = "#ccc"; });
 		closeBtn.addEventListener("click", () => this.hide());
 		toolbar.appendChild(closeBtn);
 
@@ -84,9 +87,9 @@ export class Preview3D {
 		this.statusEl = document.createElement("div");
 		this.statusEl.style.cssText = `
 			position:absolute;left:0;right:0;bottom:0;height:18px;
-			background:rgba(10,10,20,0.85);border-top:1px solid #222;
+			background:rgba(5,5,10,0.9);border-top:1px solid #1f1f2f;
 			display:flex;align-items:center;justify-content:center;
-			font-family:monospace;font-size:10px;color:#666;letter-spacing:0.3px;
+			font-family:monospace;font-size:10px;color:#555;letter-spacing:0.3px;
 			pointer-events:none;z-index:1;
 		`;
 		this.statusEl.textContent = "Color: Base • Gradient: Off • Balance: Off";

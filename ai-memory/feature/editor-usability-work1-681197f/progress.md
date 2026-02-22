@@ -1,0 +1,12 @@
+- [ ] Fix panel mutual exclusion in editor
+- [ ] Fix PBR panel positioning
+- [ ] Remove duplicate preset toggle button
+- [ ] Fix time display overlap with action dock
+- [ ] Fix z-index hierarchy
+- [ ] Fix 3D preview positioning with nav
+- [ ] Fix shortcut keys to use panel exclusion
+- [ ] Add responsive viewport meta to editor.html
+- [ ] Fix gallery.html grid sizing for mobile
+- [ ] Fix particle-gallery responsive grid
+- [ ] Improve editor responsive layout
+- [ ] Design consistency across pages

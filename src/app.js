@@ -248,24 +248,22 @@ class App {
 	}
 
 	_initShortcuts() {
+		const SHORTCUT_MAP = {
+			b: "presets", g: "gradient", p: "pbr",
+			e: "export", "3": "preview3d", l: "layout", c: "customglsl"
+		};
+
 		document.addEventListener("keydown", e => {
 			if (e.repeat) return;
 			if (e.metaKey || e.ctrlKey || e.altKey) return;
 			const tag = e.target && e.target.tagName ? e.target.tagName.toUpperCase() : "";
 			if (tag === "INPUT" || tag === "TEXTAREA" || e.target.isContentEditable) return;
 
-			const key = e.key.toLowerCase();
-			if (key === "b") this.presetLoader?.toggle();
-			else if (key === "g") this.gradientEditor?.toggle();
-			else if (key === "p") this.pbrPanel?.toggle();
-			else if (key === "e") this.exportPanel?.toggle();
-			else if (key === "3") this.preview3D?.toggle();
-			else if (key === "l") this.layoutPanel?.toggle();
-			else if (key === "c") this.customShaderPanel?.toggle();
-			else return;
+			const panelId = SHORTCUT_MAP[e.key.toLowerCase()];
+			if (!panelId) return;
 
 			e.preventDefault();
-			if (this.actionDock) this.actionDock.refreshActive();
+			if (this.actionDock) this.actionDock.togglePanel(panelId);
 		});
 	}
 
@@ -605,7 +603,7 @@ class App {
 			this.canvas.style.left = `${left}px`;
 			this.canvas.style.right = `${right}px`;
 			this.canvas.style.top = `${navHeight + toolbarHeight}px`;
-			this.canvas.style.bottom = "50px";
+			this.canvas.style.bottom = "40px";
 		}
 
 		if (this.toolbar && this.toolbar.container) {

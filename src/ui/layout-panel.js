@@ -8,10 +8,12 @@ export class LayoutPanel {
 		this.container = document.createElement("div");
 		this.container.id = "layout-panel";
 		this.container.style.cssText = `
-			position: fixed; bottom: 55px; left: 50%; transform: translateX(-50%);
-			background: rgba(10, 10, 20, 0.95); border: 1px solid #333; border-radius: 6px;
-			padding: 12px; z-index: 9997; display: none; width: 360px;
+			position: fixed; bottom: 44px; left: 50%; transform: translateX(-50%);
+			background: rgba(8, 8, 16, 0.97); border: 1px solid #1f1f2f; border-radius: 8px 8px 0 0;
+			padding: 12px 14px; z-index: 9998; display: none; width: min(380px, calc(100vw - 2rem));
 			font-family: monospace; font-size: 12px; color: #ccc;
+			box-shadow: 0 -4px 30px rgba(0,0,0,0.4);
+			border-bottom: none;
 		`;
 
 		const title = document.createElement("div");
@@ -55,7 +57,7 @@ export class LayoutPanel {
 		dockLabel.style.cssText = "color:#888;font-size:11px";
 		dockRow.appendChild(dockLabel);
 		this.dockSelect = document.createElement("select");
-		this.dockSelect.style.cssText = "background:#222;color:#ccc;border:1px solid #444;border-radius:3px;font-size:11px;padding:2px;font-family:monospace";
+		this.dockSelect.style.cssText = "background:#111122;color:#ccc;border:1px solid #2a2a3a;border-radius:3px;font-size:11px;padding:2px;font-family:monospace";
 		for (const optVal of ["left", "center", "right"]) {
 			const opt = document.createElement("option");
 			opt.value = optVal;
@@ -86,9 +88,9 @@ export class LayoutPanel {
 
 		const renderBtn = document.createElement("button");
 		renderBtn.textContent = "Render Once";
-		renderBtn.style.cssText = "padding:6px 10px;border:1px solid #444;border-radius:4px;background:#1a1a2e;color:#ccc;font-family:monospace;font-size:11px;cursor:pointer;transition:all 0.15s";
-		renderBtn.addEventListener("mouseenter", () => { renderBtn.style.background = "#0f3460"; renderBtn.style.borderColor = "#e94560"; renderBtn.style.color = "#fff"; });
-		renderBtn.addEventListener("mouseleave", () => { renderBtn.style.background = "#1a1a2e"; renderBtn.style.borderColor = "#444"; renderBtn.style.color = "#ccc"; });
+		renderBtn.style.cssText = "padding:6px 10px;border:1px solid #2a2a3a;border-radius:4px;background:#111122;color:#ccc;font-family:monospace;font-size:11px;cursor:pointer;transition:all 0.15s";
+		renderBtn.addEventListener("mouseenter", () => { renderBtn.style.background = "#1a1a3e"; renderBtn.style.borderColor = "#e94560"; renderBtn.style.color = "#fff"; });
+		renderBtn.addEventListener("mouseleave", () => { renderBtn.style.background = "#111122"; renderBtn.style.borderColor = "#2a2a3a"; renderBtn.style.color = "#ccc"; });
 		renderBtn.addEventListener("click", () => this.app.requestRender());
 		perfRow.appendChild(renderBtn);
 
@@ -98,9 +100,9 @@ export class LayoutPanel {
 		resetRow.style.cssText = "margin-top:10px;text-align:center";
 		const resetBtn = document.createElement("button");
 		resetBtn.textContent = "Reset Layout";
-		resetBtn.style.cssText = "padding:6px 12px;border:1px solid #e94560;border-radius:4px;background:#2a1030;color:#ff6b8a;font-family:monospace;font-size:11px;cursor:pointer;transition:all 0.15s";
-		resetBtn.addEventListener("mouseenter", () => { resetBtn.style.background = "#0f3460"; resetBtn.style.color = "#fff"; });
-		resetBtn.addEventListener("mouseleave", () => { resetBtn.style.background = "#2a1030"; resetBtn.style.color = "#ff6b8a"; });
+		resetBtn.style.cssText = "padding:6px 12px;border:1px solid #e94560;border-radius:4px;background:rgba(233,69,96,0.1);color:#ff6b8a;font-family:monospace;font-size:11px;cursor:pointer;transition:all 0.15s";
+		resetBtn.addEventListener("mouseenter", () => { resetBtn.style.background = "#1a1a3e"; resetBtn.style.color = "#fff"; });
+		resetBtn.addEventListener("mouseleave", () => { resetBtn.style.background = "rgba(233,69,96,0.1)"; resetBtn.style.color = "#ff6b8a"; });
 		resetBtn.addEventListener("click", () => {
 			this.app.layout.showLayers = true;
 			this.app.layout.showParams = true;
@@ -116,9 +118,9 @@ export class LayoutPanel {
 		helpRow.style.cssText = "margin-top:8px;text-align:center";
 		const helpBtn = document.createElement("button");
 		helpBtn.textContent = "Quick Start";
-		helpBtn.style.cssText = "padding:6px 12px;border:1px solid #444;border-radius:4px;background:#1a1a2e;color:#ccc;font-family:monospace;font-size:11px;cursor:pointer;transition:all 0.15s";
-		helpBtn.addEventListener("mouseenter", () => { helpBtn.style.background = "#0f3460"; helpBtn.style.borderColor = "#e94560"; helpBtn.style.color = "#fff"; });
-		helpBtn.addEventListener("mouseleave", () => { helpBtn.style.background = "#1a1a2e"; helpBtn.style.borderColor = "#444"; helpBtn.style.color = "#ccc"; });
+		helpBtn.style.cssText = "padding:6px 12px;border:1px solid #2a2a3a;border-radius:4px;background:#111122;color:#ccc;font-family:monospace;font-size:11px;cursor:pointer;transition:all 0.15s";
+		helpBtn.addEventListener("mouseenter", () => { helpBtn.style.background = "#1a1a3e"; helpBtn.style.borderColor = "#e94560"; helpBtn.style.color = "#fff"; });
+		helpBtn.addEventListener("mouseleave", () => { helpBtn.style.background = "#111122"; helpBtn.style.borderColor = "#2a2a3a"; helpBtn.style.color = "#ccc"; });
 		helpBtn.addEventListener("click", () => this.app.quickStart?.show(true));
 		helpRow.appendChild(helpBtn);
 		this.container.appendChild(helpRow);

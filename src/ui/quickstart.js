@@ -12,13 +12,13 @@ export class QuickStart {
 		style.textContent = `
 			#quickstart {
 				position: fixed; inset: 0; z-index: 10050; display: none;
-				background: rgba(2, 2, 6, 0.82); backdrop-filter: blur(2px);
+				background: rgba(2, 2, 6, 0.85); backdrop-filter: blur(6px);
 				font-family: monospace; color: #ccc;
 			}
 			#quickstart .qs-card {
-				width: min(560px, calc(100vw - 40px));
-				margin: 8vh auto 0; background: #0a0a14; border: 1px solid #222;
-				border-radius: 10px; padding: 16px 18px 14px; box-shadow: 0 20px 60px rgba(0,0,0,0.55);
+				width: min(520px, calc(100vw - 2rem));
+				margin: 12vh auto 0; background: rgba(8, 8, 16, 0.98); border: 1px solid #1f1f2f;
+				border-radius: 10px; padding: 20px 22px 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.6);
 			}
 			#quickstart h2 { color: #e0e0ff; font-size: 18px; margin: 0 0 6px; letter-spacing: 1px; }
 			#quickstart p { color: #777; font-size: 12px; margin: 0 0 12px; }

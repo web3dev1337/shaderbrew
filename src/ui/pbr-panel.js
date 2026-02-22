@@ -15,10 +15,12 @@ export class PBRPanel {
 		this.container = document.createElement("div");
 		this.container.id = "pbr-panel";
 		this.container.style.cssText = `
-			position: fixed; bottom: 55px; left: 265px;
-			background: rgba(10, 10, 20, 0.95); border: 1px solid #333; border-radius: 6px;
-			padding: 10px; z-index: 9997; display: none; width: 520px;
+			position: fixed; bottom: 44px; left: 50%; transform: translateX(-50%);
+			background: rgba(8, 8, 16, 0.97); border: 1px solid #1f1f2f; border-radius: 8px 8px 0 0;
+			padding: 12px 14px; z-index: 9998; display: none; width: min(540px, calc(100vw - 2rem));
 			font-family: monospace; font-size: 12px; color: #ccc;
+			box-shadow: 0 -4px 30px rgba(0,0,0,0.4);
+			border-bottom: none;
 		`;
 
 		// Title row
@@ -62,7 +64,7 @@ export class PBRPanel {
 			const canvas = document.createElement("canvas");
 			canvas.width = 90;
 			canvas.height = 90;
-			canvas.style.cssText = "border:1px solid #444;border-radius:3px;background:#111;image-rendering:pixelated";
+			canvas.style.cssText = "border:1px solid #1f1f2f;border-radius:4px;background:#0a0a14;image-rendering:pixelated";
 
 			wrap.appendChild(label);
 			wrap.appendChild(canvas);

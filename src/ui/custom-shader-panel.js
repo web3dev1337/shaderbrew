@@ -10,11 +10,12 @@ export class CustomShaderPanel {
 		this.container = document.createElement("div");
 		this.container.id = "custom-shader-panel";
 		this.container.style.cssText = `
-			position: fixed; bottom: 55px; left: 50%; transform: translateX(-50%);
-			background: rgba(10, 10, 20, 0.96); border: 1px solid #333; border-radius: 8px;
-			padding: 12px; z-index: 9997; display: none; width: min(960px, 94vw);
+			position: fixed; bottom: 44px; left: 50%; transform: translateX(-50%);
+			background: rgba(8, 8, 16, 0.97); border: 1px solid #1f1f2f; border-radius: 8px 8px 0 0;
+			padding: 12px 14px; z-index: 9998; display: none; width: min(960px, calc(100vw - 2rem));
 			font-family: monospace; font-size: 12px; color: #ccc;
-			box-shadow: 0 10px 40px rgba(0,0,0,0.45);
+			box-shadow: 0 -4px 30px rgba(0,0,0,0.4);
+			border-bottom: none;
 		`;
 
 		const header = document.createElement("div");
@@ -36,9 +37,9 @@ export class CustomShaderPanel {
 
 		const close = document.createElement("button");
 		close.textContent = "Close";
-		close.style.cssText = "padding:4px 8px;border:1px solid #444;border-radius:4px;background:#1a1a2e;color:#ccc;font-family:monospace;font-size:11px;cursor:pointer";
-		close.addEventListener("mouseenter", () => { close.style.background = "#0f3460"; close.style.borderColor = "#e94560"; close.style.color = "#fff"; });
-		close.addEventListener("mouseleave", () => { close.style.background = "#1a1a2e"; close.style.borderColor = "#444"; close.style.color = "#ccc"; });
+		close.style.cssText = "padding:4px 8px;border:1px solid #2a2a3a;border-radius:4px;background:#111122;color:#ccc;font-family:monospace;font-size:11px;cursor:pointer;transition:all 0.15s";
+		close.addEventListener("mouseenter", () => { close.style.background = "#1a1a3e"; close.style.borderColor = "#e94560"; close.style.color = "#fff"; });
+		close.addEventListener("mouseleave", () => { close.style.background = "#111122"; close.style.borderColor = "#2a2a3a"; close.style.color = "#ccc"; });
 		close.addEventListener("click", () => this.hide());
 		actions.appendChild(close);
 

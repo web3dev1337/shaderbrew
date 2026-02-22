@@ -6,29 +6,36 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#030306;color:#ccc;font-family:'Segoe UI',system-ui,sans-serif}
-.header{text-align:center;padding:30px 20px 15px}
-.header h1{font-size:28px;color:#e0e0ff;letter-spacing:3px;font-family:monospace;
+.header{text-align:center;padding:1.875rem 1.25rem 0.9375rem}
+.header h1{font-size:1.5rem;color:#e0e0ff;letter-spacing:3px;font-family:monospace;
 background:linear-gradient(90deg,#ff6622,#ff44ff,#44aaff,#ff6622);background-size:300% 100%;
 -webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:shine 4s linear infinite}
 @keyframes shine{0%{background-position:0% 50%}100%{background-position:300% 50%}}
-.header p{color:#555;font-size:13px;margin-top:4px}
+.header p{color:#555;font-size:0.8rem;margin-top:0.25rem;font-family:monospace}
 .header a{color:#e94560;text-decoration:none}
-.filters{max-width:1400px;margin:10px auto 20px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:0 20px}
-.filters button{font-family:monospace;font-size:12px;padding:7px 16px;border:1px solid #333;border-radius:6px;
+.filters{max-width:1400px;margin:0.625rem auto 1.25rem;display:flex;gap:0.375rem;justify-content:center;flex-wrap:wrap;padding:0 1.25rem}
+.filters button{font-family:monospace;font-size:0.6875rem;padding:0.4375rem 0.875rem;border:1px solid #333;border-radius:0.375rem;
 background:#111;color:#aaa;cursor:pointer;transition:all .2s}
 .filters button.active{background:#1a1a2e;color:#fff;border-color:#e94560}
 .filters button:hover{border-color:#666}
-.grid{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;padding:0 20px 40px}
-.card{background:#0a0a14;border:1px solid #1a1a2e;border-radius:8px;overflow:hidden;transition:border-color .2s,box-shadow .2s}
+.grid{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(160px, calc(50% - 0.5rem)),1fr));gap:0.75rem;padding:0 1.25rem 2.5rem}
+.card{background:#0a0a14;border:1px solid #1a1a2e;border-radius:0.5rem;overflow:hidden;transition:border-color .2s,box-shadow .2s}
 .card:hover{border-color:#e94560;box-shadow:0 0 20px rgba(233,69,96,.15)}
 .card canvas{width:100%;aspect-ratio:1;display:block;background:#000}
-.card .info{padding:8px 10px}
-.card .name{font-family:monospace;font-size:12px;color:#e0e0ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.card .meta{font-size:10px;color:#555;font-family:monospace;margin-top:2px}
-.card .tag-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:3px}
-.card .cat-tag{display:inline-block;font-size:9px;padding:1px 6px;border-radius:3px;color:#888;border:1px solid #222}
+.card .info{padding:0.5rem 0.625rem}
+.card .name{font-family:monospace;font-size:0.75rem;color:#e0e0ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .meta{font-size:0.625rem;color:#555;font-family:monospace;margin-top:0.125rem}
+.card .tag-row{display:flex;gap:0.375rem;flex-wrap:wrap;margin-top:0.1875rem}
+.card .cat-tag{display:inline-block;font-size:0.5625rem;padding:0.0625rem 0.375rem;border-radius:0.1875rem;color:#888;border:1px solid #222}
 .card .source-tag{text-transform:uppercase;letter-spacing:0.08em}
-.count{text-align:center;font-family:monospace;font-size:12px;color:#444;padding:10px;margin-bottom:10px}
+.count{text-align:center;font-family:monospace;font-size:0.75rem;color:#444;padding:0.625rem;margin-bottom:0.625rem}
+@media(max-width:600px){
+.header{padding:1rem 0.75rem 0.5rem}
+.header h1{font-size:1.125rem}
+.grid{grid-template-columns:repeat(auto-fill,minmax(min(130px, calc(50% - 0.375rem)),1fr));gap:0.5rem;padding:0 0.75rem 1.5rem}
+.filters{gap:0.25rem;padding:0 0.75rem}
+.filters button{padding:0.3125rem 0.5rem;font-size:0.625rem}
+}
 </style>
 </head>
 <body>

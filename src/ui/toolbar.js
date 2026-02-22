@@ -13,7 +13,7 @@ export class Toolbar {
 		this.container.id = "toolbar";
 		this.container.style.cssText = `
 			position: fixed; top: 0; left: 260px; right: 300px; height: 36px;
-			background: rgba(10, 10, 20, 0.95); border-bottom: 1px solid #333;
+			background: rgba(8, 8, 16, 0.97); border-bottom: 1px solid #1f1f2f;
 			display: flex; align-items: center; gap: 6px; padding: 0 10px;
 			font-family: monospace; font-size: 12px; color: #ccc; z-index: 9998;
 		`;
@@ -81,12 +81,12 @@ export class Toolbar {
 		const btn = document.createElement("button");
 		btn.textContent = label;
 		btn.style.cssText = `
-			padding: 3px 8px; border: 1px solid #444; border-radius: 3px;
-			background: #1a1a2e; color: #aaa; font-family: monospace;
+			padding: 3px 8px; border: 1px solid #2a2a3a; border-radius: 3px;
+			background: #111122; color: #888; font-family: monospace;
 			font-size: 11px; cursor: pointer; transition: all 0.15s;
 		`;
-		btn.addEventListener("mouseenter", () => { btn.style.background = "#0f3460"; btn.style.borderColor = "#e94560"; btn.style.color = "#fff"; });
-		btn.addEventListener("mouseleave", () => { btn.style.background = "#1a1a2e"; btn.style.borderColor = "#444"; btn.style.color = "#aaa"; });
+		btn.addEventListener("mouseenter", () => { btn.style.background = "#1a1a3e"; btn.style.borderColor = "#e94560"; btn.style.color = "#fff"; });
+		btn.addEventListener("mouseleave", () => { btn.style.background = "#111122"; btn.style.borderColor = "#2a2a3a"; btn.style.color = "#888"; });
 		btn.addEventListener("click", onClick);
 		this.container.appendChild(btn);
 	}

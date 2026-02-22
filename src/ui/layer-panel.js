@@ -17,8 +17,8 @@ export class LayerPanel {
 		this.container = document.createElement("div");
 		this.container.id = "layer-panel";
 		this.container.style.cssText = `
-			position: fixed; left: 0; top: 0; bottom: 50px; width: 260px;
-			background: rgba(10, 10, 20, 0.95); border-right: 1px solid #333;
+			position: fixed; left: 0; top: 0; bottom: 40px; width: 260px;
+			background: rgba(8, 8, 16, 0.97); border-right: 1px solid #1f1f2f;
 			font-family: monospace; font-size: 12px; color: #ccc;
 			display: flex; flex-direction: column; z-index: 9998;
 			overflow: hidden;
@@ -26,7 +26,7 @@ export class LayerPanel {
 
 		// Header
 		const header = document.createElement("div");
-		header.style.cssText = "padding:10px;border-bottom:1px solid #333;display:flex;justify-content:space-between;align-items:center";
+		header.style.cssText = "padding:10px;border-bottom:1px solid #1f1f2f;display:flex;justify-content:space-between;align-items:center";
 		header.innerHTML = '<span style="font-size:14px;color:#e0e0ff">Layers</span>';
 
 		const btnGroup = document.createElement("div");
@@ -85,9 +85,9 @@ export class LayerPanel {
 			row.dataset.index = i;
 			row.style.cssText = `
 				padding:6px 8px; margin:2px 0; border-radius:4px; cursor:pointer;
-				border: 1px solid ${isActive ? "#e94560" : "#222"};
-				background: ${isActive ? "#1a1a3e" : "#111"};
-				transition: border-color 0.15s;
+				border: 1px solid ${isActive ? "#e94560" : "#1a1a2a"};
+				background: ${isActive ? "rgba(233, 69, 96, 0.08)" : "#0c0c18"};
+				transition: all 0.15s;
 			`;
 
 			// Drag events for reorder
@@ -98,10 +98,10 @@ export class LayerPanel {
 			row.addEventListener("dragover", e => {
 				e.preventDefault();
 				e.dataTransfer.dropEffect = "move";
-				row.style.borderColor = "#0f3460";
+				row.style.borderColor = "#4488cc";
 			});
 			row.addEventListener("dragleave", () => {
-				row.style.borderColor = isActive ? "#e94560" : "#222";
+				row.style.borderColor = isActive ? "#e94560" : "#1a1a2a";
 			});
 			row.addEventListener("drop", e => {
 				e.preventDefault();
@@ -149,7 +149,7 @@ export class LayerPanel {
 				ctrlRow.style.cssText = "display:flex;align-items:center;gap:6px;margin-top:4px";
 
 				const blendSelect = document.createElement("select");
-				blendSelect.style.cssText = "background:#222;color:#ccc;border:1px solid #444;border-radius:3px;font-size:11px;padding:2px;font-family:monospace";
+				blendSelect.style.cssText = "background:#111122;color:#ccc;border:1px solid #2a2a3a;border-radius:3px;font-size:11px;padding:2px;font-family:monospace";
 				for (const mode of BLEND_MODES) {
 					const opt = document.createElement("option");
 					opt.value = mode;
@@ -187,7 +187,7 @@ export class LayerPanel {
 				const typeRow = document.createElement("div");
 				typeRow.style.cssText = "margin-top:4px";
 				const typeSelect = document.createElement("select");
-				typeSelect.style.cssText = "width:100%;background:#222;color:#ccc;border:1px solid #444;border-radius:3px;font-size:11px;padding:2px;font-family:monospace";
+				typeSelect.style.cssText = "width:100%;background:#111122;color:#ccc;border:1px solid #2a2a3a;border-radius:3px;font-size:11px;padding:2px;font-family:monospace";
 				for (const t of EFFECT_TYPES) {
 					const opt = document.createElement("option");
 					opt.value = t;
@@ -214,9 +214,9 @@ export class LayerPanel {
 		const btn = document.createElement("button");
 		btn.textContent = text;
 		btn.title = title;
-		btn.style.cssText = "width:24px;height:24px;border:1px solid #444;border-radius:3px;background:#1a1a2e;color:#ccc;cursor:pointer;font-family:monospace;font-size:14px;display:flex;align-items:center;justify-content:center";
-		btn.addEventListener("mouseenter", () => { btn.style.background = "#0f3460"; btn.style.borderColor = "#e94560"; });
-		btn.addEventListener("mouseleave", () => { btn.style.background = "#1a1a2e"; btn.style.borderColor = "#444"; });
+		btn.style.cssText = "width:24px;height:24px;border:1px solid #2a2a3a;border-radius:4px;background:#111122;color:#ccc;cursor:pointer;font-family:monospace;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all 0.15s";
+		btn.addEventListener("mouseenter", () => { btn.style.background = "#1a1a3e"; btn.style.borderColor = "#e94560"; btn.style.color = "#fff"; });
+		btn.addEventListener("mouseleave", () => { btn.style.background = "#111122"; btn.style.borderColor = "#2a2a3a"; btn.style.color = "#ccc"; });
 		return btn;
 	}
 }
