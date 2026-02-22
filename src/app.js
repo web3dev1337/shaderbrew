@@ -40,6 +40,8 @@ class App {
 		this.preventSave = false;
 		this.colorTarget = null;
 		this.finalTarget = null;
+		this.liveRender = true;
+		this.needsRender = true;
 	}
 
 	init() {
@@ -84,7 +86,7 @@ class App {
 
 		this.controls = new OrbitControls(this.camera, this.canvas);
 		this.controls.target.set(0, 0, 0);
-		this.controls.addEventListener("change", () => this.render());
+		this.controls.addEventListener("change", () => this.requestRender());
 
 		this.grungeTexture = new THREE.TextureLoader().load("images/grunge.png");
 		this.grungeTexture.wrapS = this.grungeTexture.wrapT = THREE.RepeatWrapping;
@@ -118,7 +120,7 @@ class App {
 	_initGradient() {
 		this.gradientEditor = new GradientEditor();
 		this.gradientEditor.buildUI();
-		this.gradientEditor.onChange = () => this.render();
+		this.gradientEditor.onChange = () => this.requestRender();
 		this.gradientPass = new GradientPass(this.renderer, this.canvas.width, this.canvas.height);
 	}
 
@@ -128,7 +130,7 @@ class App {
 
 	_initPBR() {
 		this.pbrGenerator = new PBRGenerator(this.renderer, this.canvas.width, this.canvas.height);
-		this.pbrPanel = new PBRPanel(this.pbrGenerator, () => this.render());
+		this.pbrPanel = new PBRPanel(this.pbrGenerator, () => this.requestRender());
 		this.pbrPanel.build();
 	}
 
@@ -159,7 +161,7 @@ class App {
 				this.baseDefaultUniforms = basePass.defaultUniforms;
 				this.gui.rebuildParameters(type, this.effectController, this.baseDefaultUniforms);
 				this.gui.refreshAllDisplays();
-				this.render();
+				this.requestRender();
 			}
 		);
 	}
@@ -178,7 +180,7 @@ class App {
 			this.gui.rebuildParameters(this.effectController.type, this.effectController, this.baseDefaultUniforms);
 			this.gui.refreshAllDisplays();
 		}
-		this.render();
+		this.requestRender();
 		if (this.history) this.history.recordImmediate();
 	}
 
@@ -230,6 +232,7 @@ class App {
 			active.name = type + " " + active.id;
 			if (this.layerPanel) this.layerPanel.refresh();
 		}
+		this.requestRender();
 		if (this.history) this.history.recordImmediate();
 	}
 
@@ -237,6 +240,7 @@ class App {
 		const defaults = getDefaultEffectParameters();
 		Object.assign(this.effectController, defaults);
 		this.gui.rebuildParameters(this.effectController.type, this.effectController, this.baseDefaultUniforms);
+		this.requestRender();
 		if (this.history) this.history.recordImmediate();
 	}
 
@@ -251,6 +255,7 @@ class App {
 		this.effectController.cColorBalanceHighlightsG = 0;
 		this.effectController.cColorBalanceHighlightsB = 0;
 		for (const k in this.gui.cb.controllers) this.gui.cb.controllers[k].updateDisplay();
+		this.requestRender();
 		if (this.history) this.history.recordImmediate();
 	}
 
@@ -263,6 +268,7 @@ class App {
 			this.canvas.style.display = null;
 			this.alphaExport.alphaCanvas.style.display = "none";
 		}
+		this.requestRender();
 	}
 
 	load() { this.gui.fileInput.click(); }
@@ -294,6 +300,7 @@ class App {
 			this.effectController[key] = preset[key];
 		}
 		this.gui.refreshAllDisplays();
+		this.requestRender();
 		if (this.history) this.history.recordImmediate();
 	}
 
@@ -322,6 +329,7 @@ class App {
 		if (this.layerPanel) this.layerPanel.refresh();
 
 		this._onResize();
+		this.requestRender();
 		if (this.history) this.history.recordImmediate();
 	}
 
@@ -400,7 +408,8 @@ class App {
 	// --- Core loop ---
 
 	animate() {
-		if (this.effectController.animate) {
+		const isAnimating = this.effectController.animate;
+		if (isAnimating) {
 			this.effectController.time += this.clock.getDelta();
 		}
 
@@ -409,15 +418,25 @@ class App {
 		if (timeEl) timeEl.innerHTML = this.effectController.time === 0 ? "0.00000000" : timeStr.slice(0, 8);
 
 		requestAnimationFrame(() => this.animate());
-		this.render();
 
-		if (this.alphaExport.visible && (this.effectController.animate || this.alphaExport.needsUpdate)) {
-			this.alphaExport.updateAlphaPreview(this.canvas, this.effectController.type);
-			this.alphaExport.needsUpdate = false;
+		if (isAnimating) {
+			this.render();
+			return;
+		}
+
+		if (this.liveRender) {
+			this.render();
+			return;
+		}
+
+		if (this.needsRender) {
+			this.needsRender = false;
+			this.render();
 		}
 	}
 
 	render() {
+		this.needsRender = false;
 		this.stats.update();
 
 		let baseTexture = null;
@@ -472,6 +491,11 @@ class App {
 			this.preview3D.updateMaps(finalTexture);
 			this.preview3D.render();
 		}
+
+		if (this.alphaExport.visible && (this.effectController.animate || this.alphaExport.needsUpdate)) {
+			this.alphaExport.updateAlphaPreview(this.canvas, this.effectController.type);
+			this.alphaExport.needsUpdate = false;
+		}
 	}
 
 	_onResize() {
@@ -487,7 +511,14 @@ class App {
 			this.colorTarget = this._createColorTarget(this.canvas.width, this.canvas.height);
 		}
 		if (this.toolbar) this.toolbar.updateResolution(this.canvas.width, this.canvas.height);
-		this.render();
+		this.requestRender();
+	}
+
+	requestRender() {
+		this.needsRender = true;
+		if (this.effectController.animate || this.liveRender) {
+			this.render();
+		}
 	}
 
 	getFinalRenderTarget() {

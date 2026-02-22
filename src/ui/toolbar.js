@@ -21,7 +21,7 @@ export class Toolbar {
 		// 2x2 tiling preview toggle
 		this._addToggle("2x2 Tile", false, checked => {
 			this.app.tilePreviewPass.enabled = checked;
-			this.app.render();
+			this.app.requestRender();
 		});
 
 		this._addSep();
@@ -37,7 +37,7 @@ export class Toolbar {
 		// Noise sphere toggle
 		this._addToggle("3D Sphere", this.app.effectController.cNoiseSphereEnable, checked => {
 			this.app.effectController.cNoiseSphereEnable = checked;
-			this.app.render();
+			this.app.requestRender();
 		});
 
 		this._addSep();
