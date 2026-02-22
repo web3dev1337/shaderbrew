@@ -22,6 +22,7 @@ export class Preview3D {
 		this.mesh = null;
 		this.material = null;
 		this.envMap = null;
+		this.statusEl = null;
 	}
 
 	build() {
@@ -78,6 +79,18 @@ export class Preview3D {
 		toolbar.appendChild(closeBtn);
 
 		this.container.appendChild(toolbar);
+
+		// Status bar
+		this.statusEl = document.createElement("div");
+		this.statusEl.style.cssText = `
+			position:absolute;left:0;right:0;bottom:0;height:18px;
+			background:rgba(10,10,20,0.85);border-top:1px solid #222;
+			display:flex;align-items:center;justify-content:center;
+			font-family:monospace;font-size:10px;color:#666;letter-spacing:0.3px;
+			pointer-events:none;z-index:1;
+		`;
+		this.statusEl.textContent = "Color: Base • Gradient: Off • Balance: Off";
+		this.container.appendChild(this.statusEl);
 
 		// WebGL renderer for 3D preview
 		this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -167,6 +180,15 @@ export class Preview3D {
 		}
 
 		this.material.needsUpdate = true;
+	}
+
+	setStatus({ gradientEnabled, gradientIntensity, colorBalanceActive }) {
+		if (!this.statusEl) return;
+		const gradActive = !!gradientEnabled && (gradientIntensity ?? 1) > 0.001;
+		const gradText = gradActive ? `Gradient: On (${(gradientIntensity ?? 1).toFixed(2)})` : "Gradient: Off";
+		const balanceText = colorBalanceActive ? "Balance: On" : "Balance: Off";
+		const sourceText = gradActive ? "Color: Gradient" : "Color: Base";
+		this.statusEl.textContent = `${sourceText} • ${gradText} • ${balanceText}`;
 	}
 
 	render() {

@@ -558,6 +558,11 @@ class App {
 
 		if (this.preview3D.visible && finalTexture) {
 			this.preview3D.updateMaps(finalTexture);
+			this.preview3D.setStatus?.({
+				gradientEnabled: this.gradientEditor.enabled,
+				gradientIntensity: this.gradientEditor.intensity,
+				colorBalanceActive: this._isColorBalanceActive()
+			});
 			this.preview3D.render();
 		}
 
@@ -681,6 +686,16 @@ class App {
 			magFilter: THREE.LinearFilter,
 			stencilBuffer: false
 		});
+	}
+
+	_isColorBalanceActive() {
+		const ec = this.effectController || {};
+		const values = [
+			ec.cColorBalanceShadowsR, ec.cColorBalanceShadowsG, ec.cColorBalanceShadowsB,
+			ec.cColorBalanceMidtonesR, ec.cColorBalanceMidtonesG, ec.cColorBalanceMidtonesB,
+			ec.cColorBalanceHighlightsR, ec.cColorBalanceHighlightsG, ec.cColorBalanceHighlightsB
+		];
+		return values.some(v => Math.abs(v || 0) > 0.001);
 	}
 }
 
