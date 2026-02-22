@@ -114,6 +114,7 @@ export class PresetLoader {
 			this._buildFilters();
 			this._renderGrid();
 			this._loadFromURL();
+			this._generateAllThumbs();
 		} catch (err) {
 			console.error("[fxgen] preset manifest load failed:", err);
 		}
@@ -265,38 +266,78 @@ export class PresetLoader {
 		}
 	}
 
-	_captureThumb(id) {
+	async _captureThumb(id) {
 		if (!this.app || !this.app.canvas || !id) return;
 		this.app.requestRender();
-		requestAnimationFrame(() => {
-			requestAnimationFrame(() => {
-				const src = this.app.canvas;
-				const cv = document.createElement("canvas");
-				cv.width = this.thumbSize;
-				cv.height = this.thumbSize;
-				const ctx = cv.getContext("2d");
-				ctx.drawImage(src, 0, 0, cv.width, cv.height);
-				const url = cv.toDataURL("image/png");
-				this.thumbCache[id] = url;
-				this._saveThumbCache();
-				const card = this.grid && this.grid.querySelector(`.preset-card[data-id="${id}"]`);
-				if (card) {
-					const wrap = card.querySelector(".preset-thumb");
-					if (wrap) {
-						wrap.src = url;
-					} else {
-						const holder = card.querySelector(".preset-thumb-wrap");
-						if (holder) holder.innerHTML = "";
-						const img = document.createElement("img");
-						img.className = "preset-thumb";
-						img.src = url;
-						img.alt = `${id} preview`;
-						img.style.cssText = "width:100%;height:100%;object-fit:cover;display:block";
-						holder && holder.appendChild(img);
-					}
-				}
-			});
-		});
+		await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+		const src = this.app.canvas;
+		const cv = document.createElement("canvas");
+		cv.width = this.thumbSize;
+		cv.height = this.thumbSize;
+		const ctx = cv.getContext("2d");
+		ctx.drawImage(src, 0, 0, cv.width, cv.height);
+		const url = cv.toDataURL("image/png");
+		this.thumbCache[id] = url;
+		this._saveThumbCache();
+		const card = this.grid && this.grid.querySelector(`.preset-card[data-id="${id}"]`);
+		if (card) {
+			const wrap = card.querySelector(".preset-thumb");
+			if (wrap) {
+				wrap.src = url;
+			} else {
+				const holder = card.querySelector(".preset-thumb-wrap");
+				if (holder) holder.innerHTML = "";
+				const img = document.createElement("img");
+				img.className = "preset-thumb";
+				img.src = url;
+				img.alt = `${id} preview`;
+				img.style.cssText = "width:100%;height:100%;object-fit:cover;display:block";
+				holder && holder.appendChild(img);
+			}
+		}
+		return url;
+	}
+
+	async _generateAllThumbs() {
+		if (this.generatingThumbs || !this.app || !this.manifest.length) return;
+		const missing = this.manifest.filter(item => !this.thumbCache[item.id]);
+		if (!missing.length) return;
+		this.generatingThumbs = true;
+		if (this.countEl) this.countEl.textContent = `Generating ${missing.length} previews...`;
+
+		const app = this.app;
+		const snapshot = app.getProjectState ? app.getProjectState() : null;
+		const prevAnimate = app.effectController.animate;
+		const prevLive = app.liveRender;
+		const prevHistory = app.historySuspended;
+
+		app.historySuspended = true;
+		app.effectController.animate = false;
+		app.liveRender = false;
+		app.requestRender();
+
+		for (const item of missing) {
+			try {
+				const resp = await fetch(item.file);
+				const payload = await resp.json();
+				if (item.kind === "project") app.applyProject(payload);
+				else app.applyPreset(payload);
+				await this._captureThumb(item.id);
+			} catch (err) {
+				console.warn("[fxgen] thumbnail generation failed:", item.id, err);
+			}
+			await new Promise(r => setTimeout(r, 0));
+		}
+
+		if (snapshot) {
+			app.applyProject(snapshot);
+		}
+		app.effectController.animate = prevAnimate;
+		app.liveRender = prevLive;
+		app.historySuspended = prevHistory;
+		app.requestRender();
+		this.generatingThumbs = false;
+		this._renderGrid();
 	}
 
 	_loadFromURL() {

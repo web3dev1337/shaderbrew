@@ -44,6 +44,7 @@ class App {
 		this.finalTarget = null;
 		this.liveRender = true;
 		this.needsRender = true;
+		this.historySuspended = false;
 		this.layout = {
 			showLayers: true,
 			showParams: true,
@@ -197,7 +198,7 @@ class App {
 			this.gui.refreshAllDisplays();
 		}
 		this.requestRender();
-		if (this.history) this.history.recordImmediate();
+		if (this.history && !this.historySuspended) this.history.recordImmediate();
 	}
 
 	_initNoiseSphere() {
@@ -280,7 +281,7 @@ class App {
 			if (this.layerPanel) this.layerPanel.refresh();
 		}
 		this.requestRender();
-		if (this.history) this.history.recordImmediate();
+		if (this.history && !this.historySuspended) this.history.recordImmediate();
 	}
 
 	onResetEffectParameters() {
@@ -288,7 +289,7 @@ class App {
 		Object.assign(this.effectController, defaults);
 		this.gui.rebuildParameters(this.effectController.type, this.effectController, this.baseDefaultUniforms);
 		this.requestRender();
-		if (this.history) this.history.recordImmediate();
+		if (this.history && !this.historySuspended) this.history.recordImmediate();
 	}
 
 	onResetColorBalance() {
@@ -303,7 +304,7 @@ class App {
 		this.effectController.cColorBalanceHighlightsB = 0;
 		for (const k in this.gui.cb.controllers) this.gui.cb.controllers[k].updateDisplay();
 		this.requestRender();
-		if (this.history) this.history.recordImmediate();
+		if (this.history && !this.historySuspended) this.history.recordImmediate();
 	}
 
 	onAlphaVisibilityChange(visible) {
@@ -348,7 +349,7 @@ class App {
 		}
 		this.gui.refreshAllDisplays();
 		this.requestRender();
-		if (this.history) this.history.recordImmediate();
+		if (this.history && !this.historySuspended) this.history.recordImmediate();
 	}
 
 	applyProject(project) {
@@ -377,7 +378,7 @@ class App {
 
 		this._onResize();
 		this.requestRender();
-		if (this.history) this.history.recordImmediate();
+		if (this.history && !this.historySuspended) this.history.recordImmediate();
 	}
 
 	saveProject() {
@@ -398,6 +399,19 @@ class App {
 		a.href = URL.createObjectURL(blob);
 		a.download = "EffectTextureMaker_Project.json";
 		a.click();
+	}
+
+	getProjectState() {
+		return {
+			resolution: this.canvas.width,
+			layers: this.layerManager.toJSON(),
+			gradient: this.gradientEditor.getState()
+		};
+	}
+
+	restoreProjectState(state) {
+		if (!state || !Array.isArray(state.layers)) return;
+		this.applyProject(state);
 	}
 
 	save() {

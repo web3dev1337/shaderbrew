@@ -164,7 +164,7 @@ export class GuiSetup {
 		ctrl.onChange(value => {
 			if (onChange) onChange(value);
 			if (this.app && this.app.requestRender) this.app.requestRender();
-			if (!this.app.history) return;
+			if (!this.app.history || this.app.historySuspended) return;
 			if (immediate) this.app.history.recordImmediate();
 			else this.app.history.record();
 		});
