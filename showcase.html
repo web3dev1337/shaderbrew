@@ -833,6 +833,23 @@ for(const m of maps){const cv=card(g,m.name,m.desc);toCanvas(m.rt,cv);}
 function ch7(){
 const g=document.getElementById("grid-3d");
 
+const makeCanvasTexture=(rt,colorSpace)=>{
+	const cv=document.createElement("canvas");
+	cv.width=RES;cv.height=RES;
+	toCanvas(rt,cv);
+	const tex=new THREE.CanvasTexture(cv);
+	tex.colorSpace=colorSpace;
+	tex.flipY=false;
+	tex.needsUpdate=true;
+	return tex;
+};
+
+const colorTex=makeCanvasTexture(pbrRT.color,THREE.SRGBColorSpace);
+const normalTex=makeCanvasTexture(pbrRT.normal,THREE.NoColorSpace);
+const roughTex=makeCanvasTexture(pbrRT.rough,THREE.NoColorSpace);
+const aoTex=makeCanvasTexture(pbrRT.ao,THREE.NoColorSpace);
+const metalTex=makeCanvasTexture(pbrRT.metal,THREE.NoColorSpace);
+
 const r3=new THREE.WebGLRenderer({antialias:true,alpha:false});
 const W=580,H=500;
 r3.setSize(W,H);r3.setPixelRatio(Math.min(window.devicePixelRatio,2));
@@ -873,18 +890,18 @@ const accent=new THREE.PointLight(0x77bbff,1.0,10);accent.position.set(3,0,-3);s
 // Shared PBR material
 const mat3=new THREE.MeshStandardMaterial({
 color:0xffffff,roughness:.3,metalness:.35,
-map:pbrRT.color.texture,
-normalMap:pbrRT.normal.texture,
-roughnessMap:pbrRT.rough.texture,
-aoMap:pbrRT.ao.texture,
-metalnessMap:pbrRT.metal.texture,
+map:colorTex,
+normalMap:normalTex,
+roughnessMap:roughTex,
+aoMap:aoTex,
+metalnessMap:metalTex,
 envMapIntensity:1.8,
 emissive:new THREE.Color(0x220600),
-emissiveMap:pbrRT.color.texture,
+emissiveMap:colorTex,
 emissiveIntensity:.6
 });
 mat3.normalScale.set(1.5,1.5);
-pbrRT.color.texture.colorSpace=THREE.SRGBColorSpace;
+mat3.needsUpdate=true;
 mat3.aoMapIntensity=.5;
 
 const ensureUv2=geo=>{
