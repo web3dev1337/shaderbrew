@@ -63,6 +63,8 @@ body{background:radial-gradient(1200px 600px at 50% -200px,#16162a 0%,#07070c 55
 .preview-info .map-list{list-style:none;padding:0;margin:8px 0}
 .preview-info .map-list li{padding:2px 0;color:#555}
 .preview-info .map-list li::before{content:"▸ ";color:#e94560}
+.forge-frame{width:100%;max-width:1400px;margin:0 auto;border:1px solid #1a1a2e;border-radius:10px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.45)}
+.forge-frame iframe{width:100%;height:520px;border:0;display:block;background:#050508}
 .section-note{color:#e94560;font-size:12px;font-family:monospace;margin-bottom:12px;opacity:.8}
 .vs-label{background:#e94560;color:#fff;padding:2px 8px;border-radius:4px;font-family:monospace;font-size:10px;letter-spacing:1px;align-self:center;flex-shrink:0}
 .outro{text-align:center;padding:50px 20px;max-width:700px;margin:0 auto}
@@ -142,6 +144,16 @@ Initializing WebGL + loading shaders...
 <div class="section-note">Pipeline overview</div>
 <div id="grid-ritual"></div>
 <div class="preview-wrap" id="grid-ritual-3d"></div>
+</section>
+<div class="arrow">&#x25BC;</div>
+
+<section class="chapter" id="forge-preview">
+<span class="chapter-num">FEATURED 3D</span>
+<h2>Material Forge — Live Multi-Shape Preview</h2>
+<p>A live 3D window showing multiple geometries spinning with procedural materials, bloom, and PBR lighting. This is the same scene as the full Material Forge page, embedded here for quick access.</p>
+<div class="forge-frame">
+<iframe title="Material Forge" src="demos.html?embed=1"></iframe>
+</div>
 </section>
 <div class="arrow">&#x25BC;</div>
 
