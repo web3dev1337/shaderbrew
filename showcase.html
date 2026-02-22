@@ -5,11 +5,27 @@
 <title>EffectTextureMaker — Feature Showcase</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#030306;color:#ccc;font-family:'Segoe UI',system-ui,sans-serif;line-height:1.6}
-.hero{text-align:center;padding:70px 20px 50px;border-bottom:1px solid #0a0a15}
-.hero h1{font-size:38px;color:#e0e0ff;letter-spacing:3px;margin-bottom:6px;font-family:monospace}
-.hero .sub{color:#555;font-size:14px}
-.hero .sub a{color:#e94560;text-decoration:none}
+body{background:radial-gradient(1200px 600px at 50% -200px,#16162a 0%,#07070c 55%,#030306 100%);color:#ccc;font-family:'Segoe UI',system-ui,sans-serif;line-height:1.6}
+.hero{padding:70px 20px 50px;border-bottom:1px solid #0a0a15}
+.hero-inner{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:minmax(280px,1.1fr) minmax(260px,.9fr);gap:28px;align-items:center}
+.hero-kicker{font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:#666;font-family:monospace;margin-bottom:10px}
+.hero h1{font-size:44px;color:#e0e0ff;letter-spacing:2px;margin-bottom:10px;font-family:monospace}
+.hero .sub{color:#666;font-size:14px;max-width:520px}
+.hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.hero-actions a{display:inline-block;padding:8px 18px;border-radius:6px;border:1px solid #333;background:#111;color:#bbb;text-decoration:none;font-family:monospace;font-size:12px;letter-spacing:.5px;transition:all .2s}
+.hero-actions a.primary{background:#1a1a3e;border-color:#e94560;color:#fff}
+.hero-actions a:hover{border-color:#e94560;color:#fff}
+.hero-card{background:linear-gradient(180deg,#0a0a14,#08080f);border:1px solid #1a1a2e;border-radius:12px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.45)}
+.hero-card canvas{width:100%;aspect-ratio:1;display:block;background:#000}
+.hero-caption{padding:10px 12px;font-family:monospace;font-size:11px;color:#777;border-top:1px solid #1a1a2e}
+.hero-caption strong{color:#e0e0ff}
+.perf-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:16px}
+.perf-bar .label{font-size:10px;color:#777;text-transform:uppercase;letter-spacing:.2em;font-family:monospace}
+.perf-bar button{padding:4px 10px;border:1px solid #333;border-radius:12px;background:#111;color:#888;font-family:monospace;font-size:10px;cursor:pointer;transition:all .2s}
+.perf-bar button.on{background:#1a1a3e;border-color:#e94560;color:#fff}
+.perf-meta{font-size:10px;color:#555;font-family:monospace}
+.perf-toggle{margin-left:auto}
+.perf-toggle button{padding:4px 10px;border-radius:6px}
 .chapter{max-width:1400px;margin:0 auto;padding:50px 20px 40px;border-bottom:1px solid #08080f}
 .chapter-num{font-family:monospace;font-size:13px;color:#e94560;letter-spacing:2px;display:block;margin-bottom:2px}
 .chapter h2{font-size:26px;color:#e0e0ff;margin-bottom:6px;letter-spacing:1px}
@@ -48,6 +64,7 @@ body{background:#030306;color:#ccc;font-family:'Segoe UI',system-ui,sans-serif;l
 .progress{width:300px;height:3px;background:#111;margin:12px auto 0;border-radius:3px;overflow:hidden}
 .progress-bar{width:0;height:100%;background:#e94560;transition:width .3s}
 @media(max-width:700px){
+.hero-inner{grid-template-columns:1fr}
 .demo-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
 .pbr-strip{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
 .pipeline-row{flex-direction:column}.pipeline-row .card{max-width:100%}
@@ -58,8 +75,33 @@ body{background:#030306;color:#ccc;font-family:'Segoe UI',system-ui,sans-serif;l
 <body>
 
 <div class="hero">
+<div class="hero-inner">
+<div class="hero-content">
+<div class="hero-kicker">Procedural Texture Suite</div>
 <h1>Feature Showcase</h1>
-<p class="sub">A guided tour through every feature we built | <a href="editor.html">Editor</a> | <a href="gallery.html">Gallery</a></p>
+<p class="sub">A guided tour through the editor, layers, gradients, PBR maps, and the 3D preview. Each section below renders live from the same shader engine powering the editor.</p>
+<div class="hero-actions">
+<a class="primary" href="editor.html">Open Editor</a>
+<a href="gallery.html">Gallery</a>
+<a href="sprite-gallery.html">Sprite Gallery</a>
+<a href="particles.html">Particles</a>
+</div>
+<div class="perf-bar">
+<div class="label">Quality</div>
+<button data-quality="low">Low</button>
+<button data-quality="med">Med</button>
+<button data-quality="high">High</button>
+<div class="perf-meta" id="quality-meta"></div>
+<div class="perf-toggle"><button id="toggle-3d">Pause 3D</button></div>
+</div>
+</div>
+<div class="hero-visual">
+<div class="hero-card">
+<canvas id="hero-canvas"></canvas>
+<div class="hero-caption"><strong>Void Portal Fusion</strong> — Corona + FlameEye + Void gradient</div>
+</div>
+</div>
+</div>
 </div>
 
 <div id="loading">
@@ -121,7 +163,7 @@ Initializing WebGL + loading shaders...
 <section class="chapter" id="ch7">
 <span class="chapter-num">CHAPTER 07</span>
 <h2>3D Material Preview <span class="new">NEW</span></h2>
-<p>See your material in context. The PBR maps from Chapter 6 applied to 3D geometry with physically-based lighting, environment reflections, and ACES tone mapping.</p>
+<p>See your material in context. The 3D preview uses the exact color + PBR maps from Chapter 6, so you can see how each pipeline step translates into a lit, reflective surface.</p>
 <div class="preview-wrap" id="grid-3d"></div>
 </section>
 
@@ -142,9 +184,38 @@ import*as THREE from"three";
 import*as PIXY from"pixy";
 import{OrbitControls}from"three/addons/controls/OrbitControls.js";
 
-const RES=512;
+const QUALITY_PRESETS={low:256,med:384,high:512};
+const url=new URL(window.location.href);
+const qParam=url.searchParams.get("q");
+const autoQuality=(window.innerWidth<900||((navigator.hardwareConcurrency||8)<=4))?"low":"med";
+const QUALITY=QUALITY_PRESETS[qParam]?qParam:autoQuality;
+const RES=QUALITY_PRESETS[QUALITY];
 const pixelBuf=new Uint8Array(RES*RES*4);
 const pbar=document.getElementById("pbar");
+
+const qualityMeta=document.getElementById("quality-meta");
+if(qualityMeta)qualityMeta.textContent=`Rendering at ${RES}px (${QUALITY.toUpperCase()})`;
+document.querySelectorAll("[data-quality]").forEach(btn=>{
+const q=btn.getAttribute("data-quality");
+if(q===QUALITY)btn.classList.add("on");
+btn.onclick=()=>{
+if(q===QUALITY)return;
+const next=new URL(window.location.href);
+next.searchParams.set("q",q);
+window.location.href=next.toString();
+};
+});
+
+let previewPaused=false;
+const toggle3dBtn=document.getElementById("toggle-3d");
+if(toggle3dBtn){
+toggle3dBtn.onclick=()=>{
+previewPaused=!previewPaused;
+toggle3dBtn.classList.toggle("on",previewPaused);
+toggle3dBtn.textContent=previewPaused?"Resume 3D":"Pause 3D";
+if(window.__previewControl)window.__previewControl.setPaused(previewPaused);
+};
+}
 
 const renderer=new THREE.WebGLRenderer({alpha:true,antialias:false});
 renderer.setSize(RES,RES);renderer.autoClear=true;
@@ -315,6 +386,17 @@ c.appendChild(l);container.appendChild(c);return cv;
 function prog(p){pbar.style.width=p+"%";}
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
+function renderHero(){
+const cv=document.getElementById("hero-canvas");
+if(!cv)return;
+cv.width=RES;cv.height=RES;
+renderFx("Corona",{time:2.5,cIntensity:.8,cRadius:.4},rt[0]);
+renderFx("FlameEye",{time:4,cFlameEyeInnerFade:1.1,cFlameEyeOuterFade:.6,cFlameEyeBorder:.75},rt[1]);
+doBlend(rt[0],rt[1],4,rt[2]);
+doGrad(rt[2],"Void",rt[3]);
+toCanvas(rt[3],cv);
+}
+
 // ===================================================================
 // CHAPTER 1: RAW EFFECTS — dramatic effect choices
 // ===================================================================
@@ -410,6 +492,9 @@ const combos=[
 {a:{type:"Electric",p:{time:1.5}},
  b:{type:"MagicCircle",p:{time:2,cSpeed:.15}},
  mode:4,modeName:"Add",grad:"Neon",desc:"Arcane lightning ritual"},
+{a:{type:"Corona",p:{time:2.2,cIntensity:.7,cRadius:.45}},
+ b:{type:"FlameEye",p:{time:3.8,cFlameEyeInnerFade:1.1,cFlameEyeOuterFade:.6,cFlameEyeBorder:.8}},
+ mode:4,modeName:"Add",grad:"Void",desc:"Void portal fusion — corona + flame eye + void gradient"},
 {a:{type:"Caustics",p:{time:3,tiling:true}},
  b:{type:"Trabeculum",p:{time:1,cTrabeculumVariation:3}},
  mode:3,modeName:"Overlay",grad:"Ocean",desc:"Deep sea bioluminescent coral"},
@@ -538,12 +623,29 @@ new THREE.MeshStandardMaterial({color:0x0a0a12,roughness:.95,metalness:0})
 ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;
 scene3.add(ground);
 
-function animate(){
-requestAnimationFrame(animate);
+let previewInView=true;
+let previewRunning=false;
+
+function renderFrame(){
+if(!previewRunning)return;
 sphere.rotation.y+=.004;torus.rotation.y+=.006;torus.rotation.x+=.002;cube.rotation.y+=.003;
 ctrl.update();r3.render(scene3,cam3);
+requestAnimationFrame(renderFrame);
 }
-animate();
+
+function updatePreviewState(){
+const shouldRun=!previewPaused&&!document.hidden&&previewInView;
+if(shouldRun&&!previewRunning){previewRunning=true;requestAnimationFrame(renderFrame);}
+if(!shouldRun&&previewRunning){previewRunning=false;}
+}
+
+const previewObserver=new IntersectionObserver(entries=>{
+entries.forEach(e=>{previewInView=e.isIntersecting;updatePreviewState();});
+},{threshold:.2});
+previewObserver.observe(r3.domElement);
+document.addEventListener("visibilitychange",updatePreviewState);
+window.__previewControl={setPaused:(paused)=>{previewPaused=paused;updatePreviewState();}};
+updatePreviewState();
 
 // Info panel
 const info=document.createElement("div");info.className="preview-info";
@@ -570,6 +672,7 @@ g.appendChild(info);
 // ===================================================================
 async function init(){
 prog(5);await sleep(50);
+renderHero();prog(8);await sleep(30);
 ch1();prog(12);await sleep(20);
 ch2();prog(25);await sleep(20);
 ch3();prog(40);await sleep(20);
