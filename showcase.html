@@ -98,7 +98,7 @@ body{background:radial-gradient(1200px 600px at 50% -200px,#16162a 0%,#07070c 55
 <div class="hero-visual">
 <div class="hero-card">
 <canvas id="hero-canvas"></canvas>
-<div class="hero-caption"><strong>Dark Ritual Portal</strong> — Sprite sheet playback (5 fps)</div>
+<div class="hero-caption"><strong>Dark Ritual Portal</strong> — Sprite sheet playback (<span id="hero-fps">5</span> fps)</div>
 </div>
 </div>
 </div>
@@ -116,6 +116,15 @@ Initializing WebGL + loading shaders...
 <h2>The Raw Canvas</h2>
 <p>The original tool generates 70+ procedural textures from pure math — explosions, energy fields, fluid simulations, geometric mandalas. Visually striking patterns, but locked to grayscale or basic tinting.</p>
 <div class="demo-grid wide" id="grid-raw"></div>
+</section>
+<div class="arrow">&#x25BC;</div>
+
+<section class="chapter" id="ch5b">
+<span class="chapter-num">CHAPTER 05B</span>
+<h2>Dark Ritual Portal — Sprite Build <span class="new">NEW</span></h2>
+<p>The sprite-gallery version: Warp Tunnel fills the portal core, then the Dark Ritual ring (atlas #029) overlays it. A circular mask keeps the tunnel contained.</p>
+<div id="grid-ritual"></div>
+<div class="preview-wrap" id="grid-ritual-3d"></div>
 </section>
 <div class="arrow">&#x25BC;</div>
 
@@ -148,15 +157,6 @@ Initializing WebGL + loading shaders...
 <h2>The Power of Combination</h2>
 <p>The full pipeline: pick two effects, blend them, then apply a gradient color ramp. Each row shows the complete journey from two inputs to a final texture that no single effect could produce.</p>
 <div id="grid-combined"></div>
-</section>
-<div class="arrow">&#x25BC;</div>
-
-<section class="chapter" id="ch5b">
-<span class="chapter-num">CHAPTER 05B</span>
-<h2>Dark Ritual Portal — Sprite Build <span class="new">NEW</span></h2>
-<p>The sprite-gallery version: Warp Tunnel fills the portal core, then the Dark Ritual ring (atlas #029) overlays it. A circular mask keeps the tunnel contained.</p>
-<div id="grid-ritual"></div>
-<div class="preview-wrap" id="grid-ritual-3d"></div>
 </section>
 <div class="arrow">&#x25BC;</div>
 
@@ -195,16 +195,22 @@ import{OrbitControls}from"three/addons/controls/OrbitControls.js";
 import{SHADERS}from"./shader-defs.js";
 
 const QUALITY_PRESETS={low:256,med:384,high:512};
+const FPS_PRESETS={low:6,med:10,high:12};
+const GRID=6;
+const FRAMES=GRID*GRID;
 const url=new URL(window.location.href);
 const qParam=url.searchParams.get("q");
 const autoQuality=(window.innerWidth<900||((navigator.hardwareConcurrency||8)<=4))?"low":"med";
 const QUALITY=QUALITY_PRESETS[qParam]?qParam:autoQuality;
 const RES=QUALITY_PRESETS[QUALITY];
+const ANIM_FPS=FPS_PRESETS[QUALITY]||8;
 const pixelBuf=new Uint8Array(RES*RES*4);
 const pbar=document.getElementById("pbar");
 
 const qualityMeta=document.getElementById("quality-meta");
 if(qualityMeta)qualityMeta.textContent=`Rendering at ${RES}px (${QUALITY.toUpperCase()})`;
+const heroFps=document.getElementById("hero-fps");
+if(heroFps)heroFps.textContent=String(ANIM_FPS);
 document.querySelectorAll("[data-quality]").forEach(btn=>{
 const q=btn.getAttribute("data-quality");
 if(q===QUALITY)btn.classList.add("on");
@@ -498,8 +504,8 @@ if(!cv)return;
 cv.width=RES;cv.height=RES;
 renderAtlasFrame(ritualPortalAtlas,0,rt[0]);
 toCanvas(rt[0],cv);
-addAnimator(cv,5,(t)=>{
-	const frame=Math.floor((t/1000)*5)%FRAMES;
+addAnimator(cv,ANIM_FPS,(t)=>{
+	const frame=Math.floor((t/1000)*ANIM_FPS)%FRAMES;
 	renderAtlasFrame(ritualPortalAtlas,frame,rt[0]);
 	toCanvas(rt[0],cv);
 });
@@ -634,8 +640,8 @@ renderCustom(SHADERS.warp_tunnel,1.6,ritualRT.core);
 doMask(ritualRT.core,0.45,0.1,ritualRT.masked);
 const cvA=card(row,"Warp Tunnel","Masked core (circle)");
 toCanvas(ritualRT.masked,cvA);
-addAnimator(cvA,5,(t)=>{
-	const frame=Math.floor((t/1000)*5)%FRAMES;
+addAnimator(cvA,ANIM_FPS,(t)=>{
+	const frame=Math.floor((t/1000)*ANIM_FPS)%FRAMES;
 	const time=0+(frame/(FRAMES-1))*15;
 	renderCustom(SHADERS.warp_tunnel,time,ritualRT.core);
 	doMask(ritualRT.core,0.45,0.1,ritualRT.masked);
@@ -648,8 +654,8 @@ row.appendChild(a1);
 renderAtlasFrame(ritualAtlas,12,ritualRT.ring);
 const cvB=card(row,"Dark Ritual Ring","Atlas #029");
 toCanvas(ritualRT.ring,cvB);
-addAnimator(cvB,5,(t)=>{
-	const frame=Math.floor((t/1000)*5)%FRAMES;
+addAnimator(cvB,ANIM_FPS,(t)=>{
+	const frame=Math.floor((t/1000)*ANIM_FPS)%FRAMES;
 	renderAtlasFrame(ritualAtlas,frame,ritualRT.ring);
 	toCanvas(ritualRT.ring,cvB);
 });
@@ -660,8 +666,8 @@ row.appendChild(a2);
 doAlphaBlend(ritualRT.masked,ritualRT.ring,1.0,ritualRT.blend);
 const cvF=card(row,"Alpha Composite","Dark Ritual Portal","highlight");
 toCanvas(ritualRT.blend,cvF);
-addAnimator(cvF,5,(t)=>{
-	const frame=Math.floor((t/1000)*5)%FRAMES;
+addAnimator(cvF,ANIM_FPS,(t)=>{
+	const frame=Math.floor((t/1000)*ANIM_FPS)%FRAMES;
 	const time=0+(frame/(FRAMES-1))*15;
 	renderCustom(SHADERS.warp_tunnel,time,ritualRT.core);
 	doMask(ritualRT.core,0.45,0.1,ritualRT.masked);
@@ -877,11 +883,11 @@ async function init(){
 prog(5);await sleep(50);
 renderHero();prog(8);await sleep(30);
 ch1();prog(12);await sleep(20);
-ch2();prog(25);await sleep(20);
-ch3();prog(40);await sleep(20);
-ch4();prog(55);await sleep(20);
-ch5();prog(70);await sleep(20);
-ch5b();prog(80);await sleep(20);
+ch5b();prog(20);await sleep(20);
+ch2();prog(32);await sleep(20);
+ch3();prog(48);await sleep(20);
+ch4();prog(62);await sleep(20);
+ch5();prog(76);await sleep(20);
 ch6();prog(90);await sleep(20);
 ch7();prog(100);await sleep(200);
 document.getElementById("loading").style.display="none";

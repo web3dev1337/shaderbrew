@@ -7,6 +7,7 @@ Updated: 2026-02-22
 - [x] Record parameter changes for undo/redo (slider drags, toggles, selects) with debounced history.
 - [x] Replace the hard-coded preset bar with a manifest-driven preset browser (search, categories, example projects).
 - [x] Add a global top navigation bar to move between major pages.
+- [x] Showcase: move Chapter 05B near the top and scale sprite playback FPS by quality setting.
 
 ## Additional Findings (Backlog)
 - Save/load only covers a single `effectController`, not layer stacks, gradient, or PBR state.
