@@ -75,6 +75,10 @@ DATA:
 SCRIPTS:
   save-sprites.mjs     Puppeteer: renders gen-sprites.html → 100 PNGs to sprites/
   save-custom.mjs      Puppeteer: renders gen-custom.html → 19 PNGs to sprites/
+
+TOOLING:
+  eslint.config.mjs   ESLint config (run `npm run lint`)
+  package.json        npm scripts + dev dependencies
 ```
 
 ## Architecture
