@@ -1,0 +1,126 @@
+{
+  "version": 1,
+  "resolution": 512,
+  "layers": [
+    {
+      "name": "Inferno Vortex",
+      "effectController": {
+        "type": "Explosion",
+        "animate": true,
+        "time": 35,
+        "resolution": "1024",
+        "polarConversion": true,
+        "tiling": false,
+        "normalMap": false,
+        "cHeightScale": 2,
+        "cRadialMask": 0.15,
+        "cColorBalanceShadowsR": 0.85,
+        "cColorBalanceShadowsG": -0.4,
+        "cColorBalanceShadowsB": -0.9,
+        "cColorBalanceMidtonesR": 0.95,
+        "cColorBalanceMidtonesG": 0.3,
+        "cColorBalanceMidtonesB": -0.7,
+        "cColorBalanceHighlightsR": 1.0,
+        "cColorBalanceHighlightsG": 0.85,
+        "cColorBalanceHighlightsB": -0.2,
+        "cToonEnable": false,
+        "cToonDark": 0.8,
+        "cToonLight": 0.95,
+        "cCameraTilt": 0.12,
+        "cCameraPan": 0.35,
+        "cExplosionRadius": 1.95,
+        "cExplosionDownScale": 1.15,
+        "cExplosionGrain": 3.8,
+        "cExplosionSpeed": 0.45,
+        "cExplosionBallness": 5,
+        "cExplosionGrowth": 2.8,
+        "cExplosionFade": 2.2,
+        "cExplosionDensity": 2.8,
+        "cExplosionContrast": 2.5,
+        "cExplosionRollingInitDamp": 0.6,
+        "cExplosionRollingSpeed": 3.5,
+        "cExplosionDelayRange": 0.4,
+        "cExplosionBallSpread": 3.2
+      },
+      "opacity": 1.0,
+      "blendMode": "Normal",
+      "visible": true
+    },
+    {
+      "name": "Electric Storm",
+      "effectController": {
+        "type": "Electric",
+        "animate": true,
+        "time": 0.5,
+        "resolution": "512",
+        "polarConversion": false,
+        "tiling": false,
+        "normalMap": false,
+        "cFrequency": 15,
+        "cIntensity": 0.8,
+        "cSpeed": 1.5,
+        "cColorBalanceShadowsR": -0.6,
+        "cColorBalanceShadowsG": -0.9,
+        "cColorBalanceShadowsB": 1.0,
+        "cColorBalanceMidtonesR": 0.5,
+        "cColorBalanceMidtonesG": -0.3,
+        "cColorBalanceMidtonesB": 1.0,
+        "cColorBalanceHighlightsR": 1.0,
+        "cColorBalanceHighlightsG": 0.8,
+        "cColorBalanceHighlightsB": 1.0
+      },
+      "opacity": 0.7,
+      "blendMode": "Add",
+      "visible": true
+    },
+    {
+      "name": "Smoke Vortex",
+      "effectController": {
+        "type": "Smoke",
+        "animate": true,
+        "time": 0.0,
+        "resolution": "512",
+        "polarConversion": true,
+        "tiling": false,
+        "normalMap": false,
+        "cRadialMask": 0.7,
+        "cDensity": 1.5,
+        "cSpeed": 0.6,
+        "cColorBalanceShadowsR": -0.3,
+        "cColorBalanceShadowsG": 0.8,
+        "cColorBalanceShadowsB": 1.0,
+        "cColorBalanceMidtonesR": 0.1,
+        "cColorBalanceMidtonesG": 0.5,
+        "cColorBalanceMidtonesB": 0.7,
+        "cColorBalanceHighlightsR": 0.6,
+        "cColorBalanceHighlightsG": 0.9,
+        "cColorBalanceHighlightsB": 1.0
+      },
+      "opacity": 0.35,
+      "blendMode": "Multiply",
+      "visible": true
+    }
+  ],
+  "gradient": {
+    "enabled": true,
+    "intensity": 0.9,
+    "stops": [
+      {
+        "position": 0.0,
+        "color": "#140000"
+      },
+      {
+        "position": 0.3,
+        "color": "#6a0f00"
+      },
+      {
+        "position": 0.65,
+        "color": "#ff4a00"
+      },
+      {
+        "position": 1.0,
+        "color": "#ffd07a"
+      }
+    ]
+  }
+}

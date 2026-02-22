@@ -5,7 +5,7 @@ Updated: 2026-02-22
 ## Checklist
 - [x] Use the final composited output for export, PBR, 3D preview, and tile preview (not the active layer only).
 - [x] Record parameter changes for undo/redo (slider drags, toggles, selects) with debounced history.
-- [ ] Replace the hard-coded preset bar with a manifest-driven preset browser (search, categories, example projects).
+- [x] Replace the hard-coded preset bar with a manifest-driven preset browser (search, categories, example projects).
 
 ## Additional Findings (Backlog)
 - Save/load only covers a single `effectController`, not layer stacks, gradient, or PBR state.

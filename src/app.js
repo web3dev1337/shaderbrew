@@ -322,6 +322,34 @@ class App {
 		if (this.history) this.history.recordImmediate();
 	}
 
+	applyProject(project) {
+		if (!project || !Array.isArray(project.layers) || project.layers.length === 0) return;
+
+		const resolution = project.resolution || this.canvas.width;
+		this.canvas.width = resolution;
+		this.canvas.height = resolution;
+
+		this.layerManager.fromJSON(project.layers, resolution, resolution);
+		for (const layer of this.layerManager.layers) {
+			layer.effectController.resolution = resolution;
+		}
+
+		const active = this.layerManager.getActiveLayer();
+		if (active) {
+			this.effectController = active.effectController;
+			this.pipeline = active.pipeline;
+			this.baseDefaultUniforms = active.pipeline.layers[0]?.defaultUniforms || {};
+			this.gui.rebuildParameters(this.effectController.type, this.effectController, this.baseDefaultUniforms);
+			this.gui.refreshAllDisplays();
+		}
+
+		if (project.gradient) this.gradientEditor.setState(project.gradient);
+		if (this.layerPanel) this.layerPanel.refresh();
+
+		this._onResize();
+		if (this.history) this.history.recordImmediate();
+	}
+
 	save() {
 		let json;
 		try {

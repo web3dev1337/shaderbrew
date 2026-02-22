@@ -66,6 +66,8 @@ LIBRARY (DO NOT MODIFY):
 
 DATA:
   presets/              38 JSON preset files (13 custom + 25 built-in)
+  presets/manifest.json Manifest for the preset browser (labels, categories, file paths)
+  presets/projects/     Example multi-layer project JSONs
   sprites/              118 pre-rendered sprite sheet PNGs (6×6 grid, 192px frames)
   images/grunge.png     Texture used by shader effects
 

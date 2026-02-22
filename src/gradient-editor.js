@@ -28,6 +28,8 @@ export class GradientEditor {
 
 		this.container = null;
 		this.barCanvas = null;
+		this.enableCheck = null;
+		this.intensitySlider = null;
 	}
 
 	buildUI(parentContainer) {
@@ -55,6 +57,7 @@ export class GradientEditor {
 			this.enabled = enableCheck.checked;
 			this._onUpdate();
 		});
+		this.enableCheck = enableCheck;
 
 		const enableLabel = document.createElement("label");
 		enableLabel.style.cssText = "display:flex;align-items:center;gap:4px;cursor:pointer";
@@ -99,6 +102,7 @@ export class GradientEditor {
 			this.intensity = parseFloat(intensitySlider.value);
 			this._onUpdate();
 		});
+		this.intensitySlider = intensitySlider;
 		intensityRow.appendChild(intensityLabel);
 		intensityRow.appendChild(intensitySlider);
 		this.container.appendChild(intensityRow);
@@ -160,6 +164,25 @@ export class GradientEditor {
 	}
 
 	getTexture() { return this.texture; }
+
+	setState(state) {
+		if (!state) return;
+		if (Array.isArray(state.stops) && state.stops.length >= 2) {
+			this.stops = state.stops.map(s => ({ position: s.position, color: s.color }));
+			this.selectedStop = -1;
+		}
+		if (typeof state.intensity === "number") {
+			this.intensity = state.intensity;
+			if (this.intensitySlider) this.intensitySlider.value = String(this.intensity);
+		}
+		if (typeof state.enabled === "boolean") {
+			this.enabled = state.enabled;
+			if (this.enableCheck) this.enableCheck.checked = this.enabled;
+		}
+		this._renderBar();
+		this._updateTexture();
+		this._onUpdate();
+	}
 
 	// --- Internal ---
 
