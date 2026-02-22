@@ -13,7 +13,7 @@ const puppeteer = require("/home/ab/.nvm/versions/node/v25.2.1/lib/node_modules/
 import fs from 'fs';
 import path from 'path';
 
-const SRES = 192, GRID = 6, FRAMES = 36;
+const GRID = 6, FRAMES = 36;
 const SPRITES_DIR = path.resolve('sprites');
 const OUTPUT_DIR = path.resolve('game-sprites');
 
@@ -95,14 +95,15 @@ function getEffectList() {
 
 async function main() {
   const effects = getEffectList();
-  console.log(`Splitting ${effects.length} sprite atlases → individual ${SRES}px frames\n`);
+  console.log(`Splitting ${effects.length} sprite atlases → individual frames (auto-detect size)\n`);
 
   const browser = await puppeteer.launch({
     headless: 'new',
     executablePath: '/home/ab/.cache/puppeteer/chrome/linux-140.0.7339.207/chrome-linux64/chrome',
   });
   const page = await browser.newPage();
-  await page.setContent(`<!DOCTYPE html><html><body><canvas id="c" width="${SRES}" height="${SRES}"></canvas></body></html>`);
+  // Canvas size set dynamically per atlas
+  await page.setContent(`<!DOCTYPE html><html><body><canvas id="c"></canvas></body></html>`);
 
   // Build lookup: number → filename
   const spriteFiles = fs.readdirSync(SPRITES_DIR).filter(f => /^\d{3}-.*\.png$/.test(f));
@@ -124,14 +125,16 @@ async function main() {
 
     const atlasBase64 = fs.readFileSync(spritePath, 'base64');
 
-    const frames = await page.evaluate(async (base64, sres, grid, numFrames) => {
+    const frames = await page.evaluate(async (base64, grid, numFrames) => {
       const img = new Image();
       await new Promise((resolve, reject) => {
         img.onload = resolve;
         img.onerror = reject;
         img.src = `data:image/png;base64,${base64}`;
       });
+      const sres = Math.round(img.width / grid); // auto-detect frame size
       const canvas = document.getElementById('c');
+      canvas.width = sres; canvas.height = sres;
       const ctx = canvas.getContext('2d');
       const results = [];
       for (let f = 0; f < numFrames; f++) {
@@ -140,16 +143,16 @@ async function main() {
         ctx.drawImage(img, col * sres, row * sres, sres, sres, 0, 0, sres, sres);
         results.push(canvas.toDataURL('image/png'));
       }
-      return results;
-    }, atlasBase64, SRES, GRID, FRAMES);
+      return { frames: results, sres };
+    }, atlasBase64, GRID, FRAMES);
 
-    for (let f = 0; f < frames.length; f++) {
-      const data = frames[f].replace(/^data:image\/png;base64,/, '');
+    for (let f = 0; f < frames.frames.length; f++) {
+      const data = frames.frames[f].replace(/^data:image\/png;base64,/, '');
       fs.writeFileSync(path.join(outDir, `${String(f).padStart(4, '0')}.png`), Buffer.from(data, 'base64'));
     }
 
     done++;
-    console.log(`  ✓ ${effect.name}: ${frames.length} frames → ${outDir}/`);
+    console.log(`  ✓ ${effect.name}: ${frames.frames.length} frames (${frames.sres}px) → ${outDir}/`);
   }
 
   await browser.close();

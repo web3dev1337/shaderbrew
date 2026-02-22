@@ -9,7 +9,9 @@
 import * as THREE from "three";
 import { NOISE_LIB, SHADERS } from "./shader-defs.js";
 
-const SRES=192,GRID=6,FRAMES=GRID*GRID,SHEET=SRES*GRID;
+const params=new URLSearchParams(location.search);
+const SRES=parseInt(params.get("res"))||192,GRID=6,FRAMES=GRID*GRID,SHEET=SRES*GRID;
+const ONLY=params.get("only"); // comma-separated recipe nums: "201,202"
 const status=document.getElementById("status");
 
 const cv=document.createElement("canvas");cv.width=SRES;cv.height=SRES;
@@ -387,9 +389,12 @@ window.__sprites=[];
 window.__done=false;
 
 async function generateAll(){
+  const onlySet=ONLY?new Set(ONLY.split(",").map(n=>parseInt(n))):null;
   for(let i=0;i<COMPOSITE_CATALOG.length;i++){
+    const num=i+201;
+    if(onlySet&&!onlySet.has(num)) continue;
     const recipe=COMPOSITE_CATALOG[i];
-    status.textContent=`Compositing ${i+1}/${COMPOSITE_CATALOG.length}: ${recipe.name}`;
+    status.textContent=`Compositing ${num}/${COMPOSITE_CATALOG.length}: ${recipe.name} (${SRES}px)`;
 
     // Validate layers — each must have either a shader or atlas source
     let valid=true;
@@ -403,9 +408,9 @@ async function generateAll(){
     if(!valid) continue;
 
     const canvas=await makeCompositeSpriteSheet(recipe);
-    const num=String(i+201).padStart(3,"0");
+    const numStr=String(num).padStart(3,"0");
     const slug=recipe.name.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/-$/,"");
-    window.__sprites.push({name:`${num}-${slug}`,data:canvas.toDataURL("image/png")});
+    window.__sprites.push({name:`${numStr}-${slug}`,data:canvas.toDataURL("image/png")});
     await new Promise(r=>setTimeout(r,0));
   }
   status.textContent=`Done! ${COMPOSITE_CATALOG.length} composite sprites generated.`;
