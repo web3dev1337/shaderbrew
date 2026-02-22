@@ -27,6 +27,7 @@ import { Preview3D } from "./preview-3d.js";
 import { History } from "./history.js";
 import { ExportManager } from "./export.js";
 import { ExportPanel } from "./ui/export-panel.js";
+import { ActionDock } from "./ui/action-dock.js";
 
 if (!WebGL.isWebGL2Available()) {
 	document.body.appendChild(WebGL.getWebGLErrorMessage());
@@ -59,6 +60,7 @@ class App {
 		this._initHistory();
 		this._initExport();
 		this._initPresets();
+		this._initActionDock();
 		console.log("[fxgen] initialized");
 	}
 
@@ -165,42 +167,6 @@ class App {
 	_initLayerPanel() {
 		this.layerPanel = new LayerPanel(this.layerManager, () => this._onLayerChange());
 		this.layerPanel.build();
-
-		// Add gradient toggle button to preset bar area
-		const gradBtn = document.createElement("button");
-		gradBtn.textContent = "Gradient";
-		gradBtn.style.cssText = "padding:8px 16px;border:1px solid #555;border-radius:4px;background:#1a1a2e;color:#e0e0ff;font-family:monospace;font-size:13px;cursor:pointer;transition:all 0.2s;position:fixed;bottom:55px;right:10px;z-index:9999";
-		gradBtn.addEventListener("click", () => this.gradientEditor.toggle());
-		gradBtn.addEventListener("mouseenter", () => { gradBtn.style.background = "#0f3460"; gradBtn.style.borderColor = "#e94560"; });
-		gradBtn.addEventListener("mouseleave", () => { gradBtn.style.background = "#1a1a2e"; gradBtn.style.borderColor = "#555"; });
-		document.body.appendChild(gradBtn);
-
-		// PBR toggle button
-		const pbrBtn = document.createElement("button");
-		pbrBtn.textContent = "PBR Maps";
-		pbrBtn.style.cssText = "padding:8px 16px;border:1px solid #555;border-radius:4px;background:#1a1a2e;color:#e0e0ff;font-family:monospace;font-size:13px;cursor:pointer;transition:all 0.2s;position:fixed;bottom:55px;right:110px;z-index:9999";
-		pbrBtn.addEventListener("click", () => this.pbrPanel.toggle());
-		pbrBtn.addEventListener("mouseenter", () => { pbrBtn.style.background = "#0f3460"; pbrBtn.style.borderColor = "#e94560"; });
-		pbrBtn.addEventListener("mouseleave", () => { pbrBtn.style.background = "#1a1a2e"; pbrBtn.style.borderColor = "#555"; });
-		document.body.appendChild(pbrBtn);
-
-		// 3D preview toggle button
-		const previewBtn = document.createElement("button");
-		previewBtn.textContent = "3D Preview";
-		previewBtn.style.cssText = "padding:8px 16px;border:1px solid #555;border-radius:4px;background:#1a1a2e;color:#e0e0ff;font-family:monospace;font-size:13px;cursor:pointer;transition:all 0.2s;position:fixed;bottom:55px;right:220px;z-index:9999";
-		previewBtn.addEventListener("click", () => this.preview3D.toggle());
-		previewBtn.addEventListener("mouseenter", () => { previewBtn.style.background = "#0f3460"; previewBtn.style.borderColor = "#e94560"; });
-		previewBtn.addEventListener("mouseleave", () => { previewBtn.style.background = "#1a1a2e"; previewBtn.style.borderColor = "#555"; });
-		document.body.appendChild(previewBtn);
-
-		// Export toggle button
-		const exportBtn = document.createElement("button");
-		exportBtn.textContent = "Export";
-		exportBtn.style.cssText = "padding:8px 16px;border:1px solid #e94560;border-radius:4px;background:#2a1030;color:#ff6b8a;font-family:monospace;font-size:13px;cursor:pointer;transition:all 0.2s;position:fixed;bottom:55px;right:340px;z-index:9999";
-		exportBtn.addEventListener("click", () => this.exportPanel.toggle());
-		exportBtn.addEventListener("mouseenter", () => { exportBtn.style.background = "#0f3460"; exportBtn.style.borderColor = "#e94560"; exportBtn.style.color = "#fff"; });
-		exportBtn.addEventListener("mouseleave", () => { exportBtn.style.background = "#2a1030"; exportBtn.style.borderColor = "#e94560"; exportBtn.style.color = "#ff6b8a"; });
-		document.body.appendChild(exportBtn);
 	}
 
 	_onLayerChange() {
@@ -237,7 +203,12 @@ class App {
 
 	_initPresets() {
 		this.presetLoader = new PresetLoader(this);
-		this.presetLoader.buildUI();
+		this.presetLoader.buildUI({ showToggle: false });
+	}
+
+	_initActionDock() {
+		this.actionDock = new ActionDock(this);
+		this.actionDock.build();
 	}
 
 	// --- Event handlers called from GUI ---

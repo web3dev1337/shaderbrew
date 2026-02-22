@@ -10,6 +10,7 @@ Updated: 2026-02-22
 - [x] Showcase: move Chapter 05B near the top and scale sprite playback FPS by quality setting.
 - [x] Showcase: add step-by-step visual build breakdown for Dark Ritual Portal (warp tunnel, mask, atlas ring, alpha map, alpha composite).
 - [x] Editor: allow saving/loading full projects (layers + gradient) and expose in UI.
+- [x] Editor: replace scattered bottom buttons with a single action dock (presets, gradient, PBR, 3D, export).
 
 ## Additional Findings (Backlog)
 - Save/load only covers a single `effectController`, not layer stacks, gradient, or PBR state.

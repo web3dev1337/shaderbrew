@@ -21,8 +21,8 @@ export class PresetLoader {
 		this.selectedId = null;
 	}
 
-	buildUI() {
-		this._buildToggle();
+	buildUI({ showToggle = true } = {}) {
+		if (showToggle) this._buildToggle();
 		this._buildPanel();
 		this._loadManifest();
 	}
