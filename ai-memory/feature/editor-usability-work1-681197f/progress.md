@@ -13,3 +13,9 @@
 - [x] Add viewport meta to showcase + demos
 - [x] Design consistency across all UI modules
 - [x] Improve editor responsive layout
+- [x] Redesign action dock — bigger buttons, keyboard key badges, gradient background
+- [x] Show layer controls (effect type, blend mode, opacity) on ALL layers always
+- [x] Replace raw effect type dropdown with categorized grid picker + search + keyboard nav
+- [x] Fix z-index: sidebar/toolbar 9990, popups 9998, dock 9999, picker 10000
+- [x] Constrain all popup panels between sidebars (left:260px, right:300px)
+- [x] Fix custom GLSL panel overflowing onto sidebars

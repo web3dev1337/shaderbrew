@@ -603,7 +603,7 @@ class App {
 			this.canvas.style.left = `${left}px`;
 			this.canvas.style.right = `${right}px`;
 			this.canvas.style.top = `${navHeight + toolbarHeight}px`;
-			this.canvas.style.bottom = "40px";
+			this.canvas.style.bottom = "44px";
 		}
 
 		if (this.toolbar && this.toolbar.container) {

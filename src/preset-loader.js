@@ -37,7 +37,7 @@ export class PresetLoader {
 	_buildPanel() {
 		this.panel = document.createElement("div");
 		this.panel.id = "preset-browser";
-		this.panel.style.cssText = "position:fixed;bottom:44px;left:50%;transform:translateX(-50%);width:min(760px, calc(100vw - 2rem));background:rgba(8,8,16,0.97);border:1px solid #1f1f2f;border-radius:8px 8px 0 0;z-index:9998;display:none;font-family:monospace;color:#ccc;box-shadow:0 -4px 30px rgba(0,0,0,0.4);border-bottom:none";
+		this.panel.style.cssText = "position:fixed;bottom:48px;left:260px;right:300px;background:rgba(8,8,16,0.97);border:1px solid #1f1f2f;border-radius:8px 8px 0 0;z-index:9998;display:none;font-family:monospace;color:#ccc;box-shadow:0 -4px 30px rgba(0,0,0,0.4);border-bottom:none";
 
 		const header = document.createElement("div");
 		header.style.cssText = "display:flex;align-items:center;gap:10px;padding:10px;border-bottom:1px solid #1f1f2f";

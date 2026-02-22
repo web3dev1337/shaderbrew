@@ -15,7 +15,7 @@ export class Toolbar {
 			position: fixed; top: 0; left: 260px; right: 300px; height: 36px;
 			background: rgba(8, 8, 16, 0.97); border-bottom: 1px solid #1f1f2f;
 			display: flex; align-items: center; gap: 6px; padding: 0 10px;
-			font-family: monospace; font-size: 12px; color: #ccc; z-index: 9998;
+			font-family: monospace; font-size: 12px; color: #ccc; z-index: 9990;
 		`;
 
 		// 2x2 tiling preview toggle

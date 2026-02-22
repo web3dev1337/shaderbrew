@@ -12,31 +12,47 @@ export class ActionDock {
 		style.textContent = `
 			#action-dock {
 				position: fixed; bottom: 0; left: 0; right: 0;
-				display: flex; gap: 0; padding: 0;
-				background: rgba(8, 8, 16, 0.97);
-				border-top: 1px solid #1f1f2f;
-				z-index: 9999; font-family: monospace; font-size: 11px; color: #ccc;
-				justify-content: center;
-				height: 40px;
+				display: flex; gap: 2px; padding: 4px 8px;
+				background: linear-gradient(to top, rgba(6,6,14,0.98), rgba(12,12,24,0.95));
+				border-top: 1px solid #2a2a4a;
+				z-index: 9999; font-family: monospace;
+				justify-content: center; align-items: center;
+				height: 44px;
+				box-shadow: 0 -2px 12px rgba(0,0,0,0.5);
 			}
 			#action-dock button {
-				padding: 0 14px; border: none; border-right: 1px solid #1a1a2a;
-				background: transparent; color: #777; cursor: pointer; transition: all 0.15s;
-				font-family: monospace; font-size: 11px; letter-spacing: 0.3px;
-				height: 100%; display: flex; align-items: center; gap: 5px;
-				position: relative;
+				padding: 6px 16px; border: 1px solid transparent; border-radius: 6px;
+				background: rgba(255,255,255,0.04); color: #aab;
+				cursor: pointer; transition: all 0.15s ease;
+				font-family: monospace; font-size: 12px; font-weight: 500; letter-spacing: 0.4px;
+				display: flex; align-items: center; gap: 6px;
+				position: relative; white-space: nowrap;
 			}
-			#action-dock button:last-child { border-right: none; }
-			#action-dock button:hover { background: rgba(233, 69, 96, 0.08); color: #ccc; }
+			#action-dock button:hover {
+				background: rgba(233, 69, 96, 0.15); color: #fff;
+				border-color: rgba(233, 69, 96, 0.3);
+			}
 			#action-dock button.active {
-				color: #fff; background: rgba(233, 69, 96, 0.12);
+				color: #fff; background: rgba(233, 69, 96, 0.2);
+				border-color: #e94560;
+				box-shadow: 0 0 8px rgba(233,69,96,0.25);
 			}
-			#action-dock button.active::after {
-				content: ''; position: absolute; bottom: 0; left: 25%; right: 25%;
-				height: 2px; background: #e94560; border-radius: 1px 1px 0 0;
+			#action-dock button.active .dock-key {
+				background: #e94560; color: #fff; border-color: #e94560;
+			}
+			#action-dock .dock-key {
+				display: inline-flex; align-items: center; justify-content: center;
+				min-width: 18px; height: 18px; padding: 0 4px;
+				font-size: 10px; font-weight: 700; line-height: 1;
+				background: rgba(255,255,255,0.06); color: #888;
+				border: 1px solid rgba(255,255,255,0.12); border-radius: 3px;
+			}
+			#action-dock button:hover .dock-key {
+				background: rgba(233,69,96,0.3); color: #ddd;
+				border-color: rgba(233,69,96,0.4);
 			}
 			#action-dock .dock-sep {
-				width: 1px; background: #1a1a2a; margin: 8px 0; flex-shrink: 0;
+				width: 1px; height: 20px; background: #2a2a4a; margin: 0 4px; flex-shrink: 0;
 			}
 		`;
 		document.head.appendChild(style);
@@ -60,7 +76,7 @@ export class ActionDock {
 
 	_addButton(label, panelId, shortcut) {
 		const btn = document.createElement("button");
-		btn.innerHTML = `${label} <span style="font-size:9px;color:#555;margin-left:2px">${shortcut}</span>`;
+		btn.innerHTML = `${label}<span class="dock-key">${shortcut}</span>`;
 		btn.dataset.panel = panelId;
 		btn.addEventListener("click", () => {
 			this.togglePanel(panelId);

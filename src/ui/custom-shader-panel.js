@@ -10,12 +10,12 @@ export class CustomShaderPanel {
 		this.container = document.createElement("div");
 		this.container.id = "custom-shader-panel";
 		this.container.style.cssText = `
-			position: fixed; bottom: 44px; left: 50%; transform: translateX(-50%);
+			position: fixed; bottom: 48px; left: 260px; right: 300px;
 			background: rgba(8, 8, 16, 0.97); border: 1px solid #1f1f2f; border-radius: 8px 8px 0 0;
-			padding: 12px 14px; z-index: 9998; display: none; width: min(960px, calc(100vw - 2rem));
+			padding: 12px 14px; z-index: 9998; display: none;
 			font-family: monospace; font-size: 12px; color: #ccc;
 			box-shadow: 0 -4px 30px rgba(0,0,0,0.4);
-			border-bottom: none;
+			border-bottom: none; overflow: hidden;
 		`;
 
 		const header = document.createElement("div");
@@ -52,7 +52,7 @@ export class CustomShaderPanel {
 		this.container.appendChild(sub);
 
 		const grid = document.createElement("div");
-		grid.style.cssText = "display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;max-height:52vh;overflow:auto;padding-right:4px";
+		grid.style.cssText = "display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;max-height:min(52vh, 400px);overflow-y:auto;overflow-x:hidden;padding-right:4px";
 		this.container.appendChild(grid);
 
 		const items = [

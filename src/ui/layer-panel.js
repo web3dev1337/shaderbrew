@@ -1,8 +1,20 @@
 /**
  * Layer panel UI: shows layers list with controls for visibility, opacity, blend mode, reorder.
+ * Effect picker: categorized grid popup with keyboard navigation replaces raw <select>.
  */
 import { BLEND_MODES } from "../shaders/blend.js";
 import { EFFECT_TYPES } from "../defaults.js";
+
+const EFFECT_CATEGORIES = {
+	"Fire & Heat": ["Flame", "FlameEye", "Fire", "FlameLance", "Bonfire", "Explosion", "Explosion2"],
+	"Light & Glow": ["Flash", "Flare", "Flare2", "Flare3", "LensFlare", "Sun", "Solar", "Corona", "Spark", "Light", "Energy", "Electric"],
+	"Shapes": ["Circle", "Ring", "Cross", "Cone", "Flower", "FlowerFun", "WaveRing", "Pentagon", "DiamondGear", "MagicCircle", "Mandara", "Checker"],
+	"Nature": ["Cloud", "Cloud2", "Smoke", "Snow", "Bubbles", "Caustics", "WaterTurbulence", "Wood"],
+	"Noise": ["CoherentNoise", "PerlinNoise", "SeamlessNoise", "BooleanNoise", "CellNoise", "TurbulentNoise", "FbmNoise", "FbmNoise2", "FbmNoise3", "RandomNoise", "VoronoiNoise", "SparkNoise", "MarbleNoise", "TessNoise", "GradientNoise"],
+	"Beams & Lines": ["Laser", "Laser2", "Gradation", "GradationLine", "Lightning"],
+	"Organic": ["Cell", "Speckle", "Grunge", "InkSplat", "BrushStroke", "Squiggles", "Trabeculum"],
+	"Particle & FX": ["Particle", "BinaryMatrix"],
+};
 
 export class LayerPanel {
 	constructor(layerManager, onLayerChange) {
@@ -11,20 +23,23 @@ export class LayerPanel {
 		this.container = null;
 		this.listEl = null;
 		this.dragSrcIndex = null;
+		this._pickerEl = null;
+		this._pickerLayerIdx = -1;
+		this._pickerFocusIdx = -1;
+		this._pickerItems = [];
 	}
 
 	build() {
 		this.container = document.createElement("div");
 		this.container.id = "layer-panel";
 		this.container.style.cssText = `
-			position: fixed; left: 0; top: 0; bottom: 40px; width: 260px;
+			position: fixed; left: 0; top: 0; bottom: 44px; width: 260px;
 			background: rgba(8, 8, 16, 0.97); border-right: 1px solid #1f1f2f;
 			font-family: monospace; font-size: 12px; color: #ccc;
-			display: flex; flex-direction: column; z-index: 9998;
+			display: flex; flex-direction: column; z-index: 9990;
 			overflow: hidden;
 		`;
 
-		// Header
 		const header = document.createElement("div");
 		header.style.cssText = "padding:10px;border-bottom:1px solid #1f1f2f;display:flex;justify-content:space-between;align-items:center";
 		header.innerHTML = '<span style="font-size:14px;color:#e0e0ff">Layers</span>';
@@ -62,12 +77,12 @@ export class LayerPanel {
 		header.appendChild(btnGroup);
 		this.container.appendChild(header);
 
-		// Layer list (scrollable)
 		this.listEl = document.createElement("div");
 		this.listEl.style.cssText = "flex:1;overflow-y:auto;padding:4px";
 		this.container.appendChild(this.listEl);
 
 		document.body.appendChild(this.container);
+		this._injectPickerStyles();
 		this.refresh();
 	}
 
@@ -75,7 +90,6 @@ export class LayerPanel {
 		this.listEl.innerHTML = "";
 		const layers = this.layerManager.layers;
 
-		// Render bottom-to-top (bottom layer = first in array, displayed at bottom)
 		for (let i = layers.length - 1; i >= 0; i--) {
 			const layer = layers[i];
 			const isActive = i === this.layerManager.activeLayerIndex;
@@ -90,7 +104,6 @@ export class LayerPanel {
 				transition: all 0.15s;
 			`;
 
-			// Drag events for reorder
 			row.addEventListener("dragstart", e => {
 				this.dragSrcIndex = parseInt(e.target.dataset.index);
 				e.dataTransfer.effectAllowed = "move";
@@ -114,9 +127,8 @@ export class LayerPanel {
 				this.dragSrcIndex = null;
 			});
 
-			// Click to select
 			row.addEventListener("click", e => {
-				if (e.target.tagName === "INPUT" || e.target.tagName === "SELECT") return;
+				if (e.target.tagName === "INPUT" || e.target.tagName === "SELECT" || e.target.closest(".fx-picker-trigger")) return;
 				this.layerManager.setActiveLayer(i);
 				this.refresh();
 				this.onLayerChange();
@@ -143,71 +155,311 @@ export class LayerPanel {
 			topRow.appendChild(nameSpan);
 			row.appendChild(topRow);
 
-			// Bottom row: blend mode + opacity (only show for active layer to save space)
-			if (isActive) {
-				const ctrlRow = document.createElement("div");
-				ctrlRow.style.cssText = "display:flex;align-items:center;gap:6px;margin-top:4px";
+			// Effect type picker button (always visible)
+			const typeRow = document.createElement("div");
+			typeRow.style.cssText = "margin-top:4px";
+			const typeBtn = document.createElement("button");
+			typeBtn.className = "fx-picker-trigger";
+			typeBtn.textContent = layer.effectController.type;
+			typeBtn.style.cssText = `
+				width:100%; text-align:left; padding:4px 8px;
+				background:#111122; color:${isActive ? "#e0e0ff" : "#999"};
+				border:1px solid #2a2a3a; border-radius:4px;
+				font-size:11px; font-family:monospace; cursor:pointer;
+				transition: all 0.15s; position: relative;
+			`;
+			typeBtn.addEventListener("mouseenter", () => {
+				typeBtn.style.borderColor = "#e94560";
+				typeBtn.style.color = "#fff";
+			});
+			typeBtn.addEventListener("mouseleave", () => {
+				typeBtn.style.borderColor = "#2a2a3a";
+				typeBtn.style.color = isActive ? "#e0e0ff" : "#999";
+			});
+			typeBtn.addEventListener("click", (e) => {
+				e.stopPropagation();
+				this.layerManager.setActiveLayer(i);
+				this._openPicker(i, layer, typeBtn);
+			});
+			typeRow.appendChild(typeBtn);
+			row.appendChild(typeRow);
 
-				const blendSelect = document.createElement("select");
-				blendSelect.style.cssText = "background:#111122;color:#ccc;border:1px solid #2a2a3a;border-radius:3px;font-size:11px;padding:2px;font-family:monospace";
-				for (const mode of BLEND_MODES) {
-					const opt = document.createElement("option");
-					opt.value = mode;
-					opt.textContent = mode;
-					opt.selected = mode === layer.blendMode;
-					blendSelect.appendChild(opt);
-				}
-				blendSelect.addEventListener("change", () => {
-					layer.blendMode = blendSelect.value;
-					this.onLayerChange();
-				});
+			// Blend mode + opacity (always visible)
+			const ctrlRow = document.createElement("div");
+			ctrlRow.style.cssText = "display:flex;align-items:center;gap:6px;margin-top:4px";
 
-				const opacityLabel = document.createElement("span");
-				opacityLabel.textContent = "Op:";
-				opacityLabel.style.cssText = "color:#666;font-size:10px";
-
-				const opacityInput = document.createElement("input");
-				opacityInput.type = "range";
-				opacityInput.min = 0;
-				opacityInput.max = 1;
-				opacityInput.step = 0.01;
-				opacityInput.value = layer.opacity;
-				opacityInput.style.cssText = "flex:1;height:14px;cursor:pointer";
-				opacityInput.addEventListener("input", () => {
-					layer.opacity = parseFloat(opacityInput.value);
-					this.onLayerChange();
-				});
-
-				ctrlRow.appendChild(blendSelect);
-				ctrlRow.appendChild(opacityLabel);
-				ctrlRow.appendChild(opacityInput);
-				row.appendChild(ctrlRow);
-
-				// Effect type selector
-				const typeRow = document.createElement("div");
-				typeRow.style.cssText = "margin-top:4px";
-				const typeSelect = document.createElement("select");
-				typeSelect.style.cssText = "width:100%;background:#111122;color:#ccc;border:1px solid #2a2a3a;border-radius:3px;font-size:11px;padding:2px;font-family:monospace";
-				for (const t of EFFECT_TYPES) {
-					const opt = document.createElement("option");
-					opt.value = t;
-					opt.textContent = t;
-					opt.selected = t === layer.effectController.type;
-					typeSelect.appendChild(opt);
-				}
-				typeSelect.addEventListener("change", () => {
-					layer.effectController.type = typeSelect.value;
-					layer.name = typeSelect.value + " " + layer.id;
-					layer.pipeline.buildPasses(typeSelect.value);
-					this.refresh();
-					this.onLayerChange();
-				});
-				typeRow.appendChild(typeSelect);
-				row.appendChild(typeRow);
+			const blendSelect = document.createElement("select");
+			blendSelect.style.cssText = `background:#111122;color:${isActive ? "#ddd" : "#999"};border:1px solid #2a2a3a;border-radius:3px;font-size:11px;padding:2px;font-family:monospace`;
+			for (const mode of BLEND_MODES) {
+				const opt = document.createElement("option");
+				opt.value = mode;
+				opt.textContent = mode;
+				opt.selected = mode === layer.blendMode;
+				blendSelect.appendChild(opt);
 			}
+			blendSelect.addEventListener("change", () => {
+				layer.blendMode = blendSelect.value;
+				this.onLayerChange();
+			});
+
+			const opacityVal = document.createElement("span");
+			opacityVal.textContent = Math.round(layer.opacity * 100) + "%";
+			opacityVal.style.cssText = "color:#666;font-size:10px;min-width:28px;text-align:right";
+
+			const opacityInput = document.createElement("input");
+			opacityInput.type = "range";
+			opacityInput.min = 0;
+			opacityInput.max = 1;
+			opacityInput.step = 0.01;
+			opacityInput.value = layer.opacity;
+			opacityInput.style.cssText = "flex:1;height:14px;cursor:pointer;accent-color:#e94560";
+			opacityInput.addEventListener("input", () => {
+				layer.opacity = parseFloat(opacityInput.value);
+				opacityVal.textContent = Math.round(layer.opacity * 100) + "%";
+				this.onLayerChange();
+			});
+
+			ctrlRow.appendChild(blendSelect);
+			ctrlRow.appendChild(opacityInput);
+			ctrlRow.appendChild(opacityVal);
+			row.appendChild(ctrlRow);
 
 			this.listEl.appendChild(row);
 		}
+	}
+
+	_openPicker(layerIdx, layer, triggerBtn) {
+		this._closePicker();
+		this._pickerLayerIdx = layerIdx;
+		this._pickerItems = [];
+		this._pickerFocusIdx = -1;
+
+		const picker = document.createElement("div");
+		picker.className = "fx-picker";
+		this._pickerEl = picker;
+
+		// Search bar
+		const search = document.createElement("input");
+		search.type = "text";
+		search.placeholder = "Search effects...";
+		search.className = "fx-picker-search";
+		picker.appendChild(search);
+
+		// Grid area
+		const grid = document.createElement("div");
+		grid.className = "fx-picker-grid";
+
+		const currentType = layer.effectController.type;
+		const renderItems = (filter) => {
+			grid.innerHTML = "";
+			this._pickerItems = [];
+			let idx = 0;
+
+			for (const [cat, effects] of Object.entries(EFFECT_CATEGORIES)) {
+				const filtered = effects.filter(e => !filter || e.toLowerCase().includes(filter));
+				if (!filtered.length) continue;
+
+				const catLabel = document.createElement("div");
+				catLabel.className = "fx-picker-cat";
+				catLabel.textContent = cat;
+				grid.appendChild(catLabel);
+
+				const catGrid = document.createElement("div");
+				catGrid.className = "fx-picker-cat-grid";
+
+				for (const fx of filtered) {
+					const item = document.createElement("button");
+					item.className = "fx-picker-item" + (fx === currentType ? " selected" : "");
+					item.textContent = fx;
+					item.dataset.fx = fx;
+					item.dataset.idx = idx;
+					item.addEventListener("click", () => this._selectEffect(fx, layer));
+					item.addEventListener("mouseenter", () => {
+						this._pickerFocusIdx = parseInt(item.dataset.idx);
+						this._updatePickerFocus();
+					});
+					catGrid.appendChild(item);
+					this._pickerItems.push(item);
+					if (fx === currentType) this._pickerFocusIdx = idx;
+					idx++;
+				}
+				grid.appendChild(catGrid);
+			}
+
+			// Uncategorized effects
+			const categorized = new Set(Object.values(EFFECT_CATEGORIES).flat());
+			const uncategorized = EFFECT_TYPES.filter(e => !categorized.has(e) && (!filter || e.toLowerCase().includes(filter)));
+			if (uncategorized.length) {
+				const catLabel = document.createElement("div");
+				catLabel.className = "fx-picker-cat";
+				catLabel.textContent = "Other";
+				grid.appendChild(catLabel);
+
+				const catGrid = document.createElement("div");
+				catGrid.className = "fx-picker-cat-grid";
+				for (const fx of uncategorized) {
+					const item = document.createElement("button");
+					item.className = "fx-picker-item" + (fx === currentType ? " selected" : "");
+					item.textContent = fx;
+					item.dataset.fx = fx;
+					item.dataset.idx = idx;
+					item.addEventListener("click", () => this._selectEffect(fx, layer));
+					item.addEventListener("mouseenter", () => {
+						this._pickerFocusIdx = parseInt(item.dataset.idx);
+						this._updatePickerFocus();
+					});
+					catGrid.appendChild(item);
+					this._pickerItems.push(item);
+					if (fx === currentType) this._pickerFocusIdx = idx;
+					idx++;
+				}
+				grid.appendChild(catGrid);
+			}
+		};
+
+		renderItems("");
+		picker.appendChild(grid);
+
+		// Keyboard handling
+		const onKey = (e) => {
+			const len = this._pickerItems.length;
+			if (!len) return;
+			if (e.key === "ArrowDown" || e.key === "ArrowRight") {
+				e.preventDefault();
+				this._pickerFocusIdx = (this._pickerFocusIdx + 1) % len;
+				this._updatePickerFocus();
+				this._scrollPickerItem();
+			} else if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
+				e.preventDefault();
+				this._pickerFocusIdx = (this._pickerFocusIdx - 1 + len) % len;
+				this._updatePickerFocus();
+				this._scrollPickerItem();
+			} else if (e.key === "Enter") {
+				e.preventDefault();
+				if (this._pickerFocusIdx >= 0 && this._pickerFocusIdx < len) {
+					this._selectEffect(this._pickerItems[this._pickerFocusIdx].dataset.fx, layer);
+				}
+			} else if (e.key === "Escape") {
+				e.preventDefault();
+				this._closePicker();
+			}
+		};
+
+		search.addEventListener("input", () => {
+			const f = search.value.trim().toLowerCase();
+			renderItems(f);
+			this._pickerFocusIdx = this._pickerItems.length ? 0 : -1;
+			this._updatePickerFocus();
+		});
+
+		search.addEventListener("keydown", onKey);
+
+		// Click outside to close
+		const onClickOutside = (e) => {
+			if (!picker.contains(e.target) && e.target !== triggerBtn) {
+				this._closePicker();
+				document.removeEventListener("mousedown", onClickOutside);
+			}
+		};
+		setTimeout(() => document.addEventListener("mousedown", onClickOutside), 0);
+
+		picker._cleanup = () => {
+			document.removeEventListener("mousedown", onClickOutside);
+		};
+
+		// Position: to the right of the layer panel
+		document.body.appendChild(picker);
+		search.focus();
+
+		// Scroll to current selection
+		if (this._pickerFocusIdx >= 0) {
+			this._updatePickerFocus();
+			this._scrollPickerItem();
+		}
+	}
+
+	_selectEffect(fx, layer) {
+		layer.effectController.type = fx;
+		layer.name = fx + " " + layer.id;
+		layer.pipeline.buildPasses(fx);
+		this._closePicker();
+		this.refresh();
+		this.onLayerChange();
+	}
+
+	_updatePickerFocus() {
+		for (const item of this._pickerItems) {
+			item.classList.remove("focused");
+		}
+		if (this._pickerFocusIdx >= 0 && this._pickerFocusIdx < this._pickerItems.length) {
+			this._pickerItems[this._pickerFocusIdx].classList.add("focused");
+		}
+	}
+
+	_scrollPickerItem() {
+		if (this._pickerFocusIdx >= 0 && this._pickerFocusIdx < this._pickerItems.length) {
+			this._pickerItems[this._pickerFocusIdx].scrollIntoView({ block: "nearest" });
+		}
+	}
+
+	_closePicker() {
+		if (this._pickerEl) {
+			if (this._pickerEl._cleanup) this._pickerEl._cleanup();
+			this._pickerEl.remove();
+			this._pickerEl = null;
+		}
+		this._pickerItems = [];
+		this._pickerFocusIdx = -1;
+	}
+
+	_injectPickerStyles() {
+		const style = document.createElement("style");
+		style.textContent = `
+			.fx-picker {
+				position: fixed; left: 264px; top: 40px;
+				width: 340px; max-height: calc(100vh - 100px);
+				background: rgba(10,10,20,0.98); border: 1px solid #2a2a4a;
+				border-radius: 8px; z-index: 10000;
+				display: flex; flex-direction: column;
+				box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+				font-family: monospace;
+			}
+			.fx-picker-search {
+				margin: 8px; padding: 6px 10px;
+				background: #0c0c18; color: #ddd; border: 1px solid #2a2a3a;
+				border-radius: 4px; font-family: monospace; font-size: 12px;
+				outline: none;
+			}
+			.fx-picker-search:focus { border-color: #e94560; }
+			.fx-picker-grid {
+				flex: 1; overflow-y: auto; padding: 0 8px 8px;
+			}
+			.fx-picker-cat {
+				font-size: 10px; color: #e94560; text-transform: uppercase;
+				letter-spacing: 1px; padding: 8px 4px 4px; font-weight: 700;
+			}
+			.fx-picker-cat-grid {
+				display: flex; flex-wrap: wrap; gap: 4px;
+			}
+			.fx-picker-item {
+				padding: 5px 8px; border: 1px solid #1a1a2a; border-radius: 4px;
+				background: #0c0c18; color: #aab; cursor: pointer;
+				font-family: monospace; font-size: 11px;
+				transition: all 0.1s; white-space: nowrap;
+			}
+			.fx-picker-item:hover, .fx-picker-item.focused {
+				background: rgba(233,69,96,0.15); color: #fff;
+				border-color: rgba(233,69,96,0.4);
+			}
+			.fx-picker-item.selected {
+				background: rgba(233,69,96,0.2); color: #fff;
+				border-color: #e94560;
+			}
+			.fx-picker-item.focused.selected {
+				box-shadow: 0 0 6px rgba(233,69,96,0.4);
+			}
+		`;
+		document.head.appendChild(style);
 	}
 
 	_makeBtn(text, title) {

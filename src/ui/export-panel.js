@@ -12,9 +12,10 @@ export class ExportPanel {
 		this.container = document.createElement("div");
 		this.container.id = "export-panel";
 		this.container.style.cssText = `
-			position: fixed; bottom: 44px; left: 50%; transform: translateX(-50%);
+			position: fixed; bottom: 48px;
+			left: max(264px, calc(50% - 190px)); width: min(380px, calc(100vw - 564px));
 			background: rgba(8, 8, 16, 0.97); border: 1px solid #1f1f2f; border-radius: 8px 8px 0 0;
-			padding: 12px 14px; z-index: 9998; display: none; width: min(380px, calc(100vw - 2rem));
+			padding: 12px 14px; z-index: 9998; display: none;
 			font-family: monospace; font-size: 12px; color: #ccc;
 			box-shadow: 0 -4px 30px rgba(0,0,0,0.4);
 			border-bottom: none;
