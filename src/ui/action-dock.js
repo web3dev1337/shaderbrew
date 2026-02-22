@@ -62,6 +62,10 @@ export class ActionDock {
 		}
 	}
 
+	refreshActive() {
+		this._updateActive();
+	}
+
 	_isPanelOpen(panel) {
 		return !!(panel && panel.container && panel.container.style.display !== "none");
 	}

@@ -71,6 +71,7 @@ class App {
 		this._initPresets();
 		this._initLayoutPanel();
 		this._initActionDock();
+		this._initShortcuts();
 		this.updateLayout();
 		setTimeout(() => this.updateLayout(), 0);
 		console.log("[fxgen] initialized");
@@ -227,6 +228,27 @@ class App {
 	_initActionDock() {
 		this.actionDock = new ActionDock(this);
 		this.actionDock.build();
+	}
+
+	_initShortcuts() {
+		document.addEventListener("keydown", e => {
+			if (e.repeat) return;
+			if (e.metaKey || e.ctrlKey || e.altKey) return;
+			const tag = e.target && e.target.tagName ? e.target.tagName.toUpperCase() : "";
+			if (tag === "INPUT" || tag === "TEXTAREA" || e.target.isContentEditable) return;
+
+			const key = e.key.toLowerCase();
+			if (key === "b") this.presetLoader?.toggle();
+			else if (key === "g") this.gradientEditor?.toggle();
+			else if (key === "p") this.pbrPanel?.toggle();
+			else if (key === "e") this.exportPanel?.toggle();
+			else if (key === "3") this.preview3D?.toggle();
+			else if (key === "l") this.layoutPanel?.toggle();
+			else return;
+
+			e.preventDefault();
+			if (this.actionDock) this.actionDock.refreshActive();
+		});
 	}
 
 	// --- Event handlers called from GUI ---
