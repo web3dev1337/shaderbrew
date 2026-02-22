@@ -98,7 +98,7 @@ body{background:radial-gradient(1200px 600px at 50% -200px,#16162a 0%,#07070c 55
 <div class="hero-visual">
 <div class="hero-card">
 <canvas id="hero-canvas"></canvas>
-<div class="hero-caption"><strong>Dark Ritual Portal</strong> — Dark Ritual ring + Warp Tunnel core</div>
+<div class="hero-caption"><strong>Dark Ritual Portal</strong> — Sprite sheet playback (5 fps)</div>
 </div>
 </div>
 </div>
@@ -243,6 +243,10 @@ t.wrapS=t.wrapT=THREE.RepeatWrapping;t.minFilter=THREE.LinearFilter;t.magFilter=
 });});
 const ritualAtlas=await new Promise(ok=>{
 new THREE.TextureLoader().load("sprites/029-dark-ritual.png",t=>{
+t.wrapS=t.wrapT=THREE.ClampToEdgeWrapping;t.minFilter=THREE.LinearFilter;t.magFilter=THREE.LinearFilter;ok(t);
+});});
+const ritualPortalAtlas=await new Promise(ok=>{
+new THREE.TextureLoader().load("sprites/201-dark-ritual-portal.png",t=>{
 t.wrapS=t.wrapT=THREE.ClampToEdgeWrapping;t.minFilter=THREE.LinearFilter;t.magFilter=THREE.LinearFilter;ok(t);
 });});
 
@@ -492,20 +496,13 @@ function renderHero(){
 const cv=document.getElementById("hero-canvas");
 if(!cv)return;
 cv.width=RES;cv.height=RES;
-renderCustom(SHADERS.warp_tunnel,1.6,rt[0]);
-doMask(rt[0],0.45,0.1,rt[1]);
-renderAtlasFrame(ritualAtlas,12,rt[2]);
-doAlphaBlend(rt[1],rt[2],1.0,rt[3]);
-toCanvas(rt[3],cv);
-	addAnimator(cv,5,(t)=>{
-		const frame=Math.floor((t/1000)*5)%FRAMES;
-		const time=0+(frame/(FRAMES-1))*15;
-		renderCustom(SHADERS.warp_tunnel,time,rt[0]);
-		doMask(rt[0],0.45,0.1,rt[1]);
-		renderAtlasFrame(ritualAtlas,frame,rt[2]);
-		doAlphaBlend(rt[1],rt[2],1.0,rt[3]);
-		toCanvas(rt[3],cv);
-	});
+renderAtlasFrame(ritualPortalAtlas,0,rt[0]);
+toCanvas(rt[0],cv);
+addAnimator(cv,5,(t)=>{
+	const frame=Math.floor((t/1000)*5)%FRAMES;
+	renderAtlasFrame(ritualPortalAtlas,frame,rt[0]);
+	toCanvas(rt[0],cv);
+});
 }
 
 // ===================================================================
