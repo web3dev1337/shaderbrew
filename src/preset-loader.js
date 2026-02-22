@@ -19,11 +19,14 @@ export class PresetLoader {
 		this.activeKind = "all";
 		this.searchTerm = "";
 		this.selectedId = null;
+		this.thumbCache = {};
+		this.thumbSize = 96;
 	}
 
 	buildUI({ showToggle = true } = {}) {
 		if (showToggle) this._buildToggle();
 		this._buildPanel();
+		this._loadThumbCache();
 		this._loadManifest();
 	}
 
@@ -85,6 +88,23 @@ export class PresetLoader {
 		this.panel.appendChild(this.grid);
 
 		document.body.appendChild(this.panel);
+	}
+
+	_loadThumbCache() {
+		try {
+			const raw = localStorage.getItem("fxgen_preset_thumbs");
+			if (raw) this.thumbCache = JSON.parse(raw);
+		} catch (err) {
+			console.warn("[fxgen] failed to load preset thumbs", err);
+		}
+	}
+
+	_saveThumbCache() {
+		try {
+			localStorage.setItem("fxgen_preset_thumbs", JSON.stringify(this.thumbCache));
+		} catch (err) {
+			console.warn("[fxgen] failed to save preset thumbs", err);
+		}
 	}
 
 	async _loadManifest() {
@@ -166,6 +186,7 @@ export class PresetLoader {
 
 		filtered.forEach(item => {
 			const card = document.createElement("button");
+			card.dataset.id = item.id;
 			card.className = "preset-card";
 			card.style.cssText = "text-align:left;padding:10px;border:1px solid #222;border-radius:6px;background:#0f0f1a;color:#ddd;font-family:monospace;cursor:pointer;transition:all 0.15s;display:flex;flex-direction:column;gap:6px";
 			card.addEventListener("mouseenter", () => { card.style.borderColor = "#e94560"; card.style.background = "#15152a"; });
@@ -174,6 +195,25 @@ export class PresetLoader {
 				card.style.background = this.selectedId === item.id ? "#1a1a3e" : "#0f0f1a";
 			});
 			card.addEventListener("click", () => this.load(item));
+
+			const thumbWrap = document.createElement("div");
+			thumbWrap.className = "preset-thumb-wrap";
+			thumbWrap.style.cssText = "width:100%;height:96px;border:1px solid #222;border-radius:4px;background:#0b0b14;display:flex;align-items:center;justify-content:center;overflow:hidden";
+			const thumbUrl = this.thumbCache[item.id];
+			if (thumbUrl) {
+				const img = document.createElement("img");
+				img.className = "preset-thumb";
+				img.src = thumbUrl;
+				img.alt = `${item.name || item.id} preview`;
+				img.style.cssText = "width:100%;height:100%;object-fit:cover;display:block";
+				thumbWrap.appendChild(img);
+			} else {
+				const ph = document.createElement("div");
+				ph.textContent = "Preview";
+				ph.style.cssText = "font-size:10px;color:#444;letter-spacing:1px";
+				thumbWrap.appendChild(ph);
+			}
+			card.appendChild(thumbWrap);
 
 			const name = document.createElement("div");
 			name.textContent = item.name || item.id;
@@ -218,10 +258,45 @@ export class PresetLoader {
 			else this.app.applyPreset(payload);
 			this.selectedId = item.id;
 			this._renderGrid();
+			this._captureThumb(item.id);
 			console.log("[fxgen] loaded", item.kind || "preset", item.id);
 		} catch (err) {
 			console.error("[fxgen] preset load failed:", err);
 		}
+	}
+
+	_captureThumb(id) {
+		if (!this.app || !this.app.canvas || !id) return;
+		this.app.requestRender();
+		requestAnimationFrame(() => {
+			requestAnimationFrame(() => {
+				const src = this.app.canvas;
+				const cv = document.createElement("canvas");
+				cv.width = this.thumbSize;
+				cv.height = this.thumbSize;
+				const ctx = cv.getContext("2d");
+				ctx.drawImage(src, 0, 0, cv.width, cv.height);
+				const url = cv.toDataURL("image/png");
+				this.thumbCache[id] = url;
+				this._saveThumbCache();
+				const card = this.grid && this.grid.querySelector(`.preset-card[data-id="${id}"]`);
+				if (card) {
+					const wrap = card.querySelector(".preset-thumb");
+					if (wrap) {
+						wrap.src = url;
+					} else {
+						const holder = card.querySelector(".preset-thumb-wrap");
+						if (holder) holder.innerHTML = "";
+						const img = document.createElement("img");
+						img.className = "preset-thumb";
+						img.src = url;
+						img.alt = `${id} preview`;
+						img.style.cssText = "width:100%;height:100%;object-fit:cover;display:block";
+						holder && holder.appendChild(img);
+					}
+				}
+			});
+		});
 	}
 
 	_loadFromURL() {

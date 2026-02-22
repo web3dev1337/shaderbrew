@@ -14,6 +14,7 @@ Updated: 2026-02-22
 - [x] Editor: add workspace layout + performance panel (toggle layers/params/toolbar/stats, live render, dock panels, auto layout).
 - [x] Editor: add keyboard shortcuts for key panels (B, G, P, 3, E, L).
 - [x] Editor: add Quick Start overlay with guided actions and reopen from Layout panel.
+- [x] Editor: add preset thumbnails (auto-captured on load with local cache).
 
 ## Additional Findings (Backlog)
 - Save/load only covers a single `effectController`, not layer stacks, gradient, or PBR state.
