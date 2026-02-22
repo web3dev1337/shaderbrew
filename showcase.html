@@ -304,6 +304,7 @@ Toxic:[{p:0,c:"#000000"},{p:.2,c:"#001a00"},{p:.4,c:"#006600"},{p:.6,c:"#33cc00"
 Plasma:[{p:0,c:"#050005"},{p:.15,c:"#2a0055"},{p:.3,c:"#7700aa"},{p:.45,c:"#cc00cc"},{p:.6,c:"#ff2255"},{p:.75,c:"#ff7700"},{p:.9,c:"#ffcc00"},{p:1,c:"#ffff88"}],
 Ocean:[{p:0,c:"#000208"},{p:.2,c:"#001133"},{p:.4,c:"#003366"},{p:.6,c:"#0077aa"},{p:.8,c:"#22bbcc"},{p:1,c:"#88ffee"}],
 Ember:[{p:0,c:"#000000"},{p:.2,c:"#1a0000"},{p:.35,c:"#550000"},{p:.5,c:"#aa2200"},{p:.65,c:"#ee5500"},{p:.8,c:"#ffaa22"},{p:.95,c:"#ffdd88"},{p:1,c:"#fff8ee"}],
+ Aether:[{p:0,c:"#070615"},{p:.18,c:"#12204a"},{p:.36,c:"#1b6fa5"},{p:.55,c:"#43c6d6"},{p:.7,c:"#f2c14e"},{p:.85,c:"#ff6fb1"},{p:1,c:"#fff1d6"}],
 Frost:[{p:0,c:"#020210"},{p:.2,c:"#0a1133"},{p:.4,c:"#224488"},{p:.6,c:"#5599cc"},{p:.8,c:"#99ccee"},{p:1,c:"#eef8ff"}],
 Void:[{p:0,c:"#000000"},{p:.2,c:"#0a0022"},{p:.4,c:"#220055"},{p:.6,c:"#5500aa"},{p:.8,c:"#9933dd"},{p:1,c:"#dd88ff"}]
 };
@@ -808,8 +809,8 @@ const structP={time:8,tiling:true,cNoiseOctave:5,cNoiseFrequency:4,cNoiseAmplitu
 cNoiseLacunarity:2,cNoisePersistence:.5,cRidge:.6,cRidgeOffset:.5,cVoronoiNoise:.3,cVoronoiCell:.2};
 renderFx("CoherentNoise",structP,pbrRT.struct);
 
-// Apply Plasma gradient for a rich colored version
-doGrad(pbrRT.struct,"Plasma",pbrRT.color);
+// Apply Aether gradient for a rich colored version
+doGrad(pbrRT.struct,"Aether",pbrRT.color);
 
 // Generate PBR maps from the structural (pre-gradient) texture
 doPBR(pbrRT.struct,normalM,pbrRT.normal);
@@ -818,7 +819,7 @@ doPBR(pbrRT.struct,aoM,pbrRT.ao);
 doPBR(pbrRT.struct,metalM,pbrRT.metal);
 
 const maps=[
-{rt:pbrRT.color,name:"Color (Plasma Gradient)",desc:"Gradient-mapped color — what you see"},
+{rt:pbrRT.color,name:"Color (Aether Gradient)",desc:"Gradient-mapped color — what you see"},
 {rt:pbrRT.normal,name:"Normal Map",desc:"Sobel filter — surface bumps and ridges"},
 {rt:pbrRT.rough,name:"Roughness",desc:"Inverted luminance — shiny peaks, rough valleys"},
 {rt:pbrRT.ao,name:"Ambient Occlusion",desc:"Height analysis — darkened crevices"},
@@ -854,7 +855,7 @@ const r3=new THREE.WebGLRenderer({antialias:true,alpha:false});
 const W=580,H=500;
 r3.setSize(W,H);r3.setPixelRatio(Math.min(window.devicePixelRatio,2));
 r3.outputColorSpace=THREE.SRGBColorSpace;
-r3.toneMapping=THREE.ACESFilmicToneMapping;r3.toneMappingExposure=2.2;
+r3.toneMapping=THREE.ACESFilmicToneMapping;r3.toneMappingExposure=2.6;
 r3.shadowMap.enabled=true;r3.shadowMap.type=THREE.PCFSoftShadowMap;
 r3.domElement.style.cssText="border-radius:10px;border:1px solid #222;cursor:grab";
 g.appendChild(r3.domElement);
@@ -889,16 +890,16 @@ const accent=new THREE.PointLight(0x77bbff,1.0,10);accent.position.set(3,0,-3);s
 
 // Shared PBR material
 const mat3=new THREE.MeshStandardMaterial({
-color:0xffffff,roughness:.22,metalness:.5,
+color:0xffffff,roughness:.2,metalness:.55,
 map:colorTex,
 normalMap:normalTex,
 roughnessMap:roughTex,
 aoMap:aoTex,
 metalnessMap:metalTex,
-envMapIntensity:2.4,
-emissive:new THREE.Color(0x330011),
+envMapIntensity:2.8,
+emissive:new THREE.Color(0x2a0938),
 emissiveMap:colorTex,
-emissiveIntensity:.9
+emissiveIntensity:1.05
 });
 mat3.normalScale.set(1.5,1.5);
 mat3.needsUpdate=true;
@@ -960,9 +961,9 @@ updatePreviewState();
 const info=document.createElement("div");info.className="preview-info";
 info.innerHTML=`
 <h3>Interactive 3D Preview</h3>
-<p>The Plasma-gradient texture from Chapter 6 applied as a full PBR material across three geometries.</p>
+<p>The Aether-gradient texture from Chapter 6 applied as a full PBR material across three geometries.</p>
 <ul class="map-list">
-<li>Color map (Plasma gradient-mapped)</li>
+<li>Color map (Aether gradient-mapped)</li>
 <li>Normal map (Sobel, strength 1.5)</li>
 <li>Roughness map (inverted luminance)</li>
 <li>Ambient Occlusion (height-based)</li>
