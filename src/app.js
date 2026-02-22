@@ -178,7 +178,16 @@ class App {
 			snapshot => {
 				Object.assign(this.effectController, snapshot);
 				const type = this.effectController.type;
-				const basePass = this.pipeline.buildPasses(type);
+				const al = this.layerManager.getActiveLayer();
+				const p = al ? al.pipeline : this.pipeline;
+				let basePass;
+				if (isCustomEffect(type)) {
+					const k = getCustomShaderKey(type);
+					const s = k && SHADERS[k];
+					basePass = s ? p.buildCustomPass(s) : p.buildPasses("Wood");
+				} else {
+					basePass = p.buildPasses(type);
+				}
 				this.baseDefaultUniforms = basePass.defaultUniforms;
 				this.gui.rebuildParameters(type, this.effectController, this.baseDefaultUniforms);
 				this.gui.refreshAllDisplays();
@@ -278,25 +287,27 @@ class App {
 	}
 
 	onTypeChange(type) {
+		const active = this.layerManager.getActiveLayer();
+		const pipe = active ? active.pipeline : this.pipeline;
 		let basePass;
 		if (isCustomEffect(type)) {
 			const key = getCustomShaderKey(type);
 			const src = key && SHADERS[key];
 			if (src) {
-				basePass = this.pipeline.buildCustomPass(src);
+				basePass = pipe.buildCustomPass(src);
 			} else {
-				basePass = this.pipeline.buildPasses("Wood");
+				basePass = pipe.buildPasses("Wood");
 			}
 		} else {
-			basePass = this.pipeline.buildPasses(type);
+			basePass = pipe.buildPasses(type);
 		}
 		this.baseDefaultUniforms = basePass.defaultUniforms;
 		this.gui.rebuildParameters(type, this.effectController, this.baseDefaultUniforms);
 
 		// Update active layer's name
-		const active = this.layerManager.getActiveLayer();
 		if (active) {
-			active.name = type + " " + active.id;
+			const displayName = isCustomEffect(type) ? type.slice(5) : type;
+			active.name = displayName + " " + active.id;
 			if (this.layerPanel) this.layerPanel.refresh();
 		}
 		this.requestRender();
