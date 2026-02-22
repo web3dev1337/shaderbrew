@@ -12,6 +12,7 @@ const require = createRequire(import.meta.url);
 const puppeteer = require("/home/ab/.nvm/versions/node/v25.2.1/lib/node_modules/puppeteer");
 import fs from 'fs';
 import path from 'path';
+import { execSync } from 'child_process';
 
 const GRID = 6, FRAMES = 36;
 const SPRITES_DIR = path.resolve('sprites');
@@ -150,6 +151,11 @@ async function main() {
       const data = frames.frames[f].replace(/^data:image\/png;base64,/, '');
       fs.writeFileSync(path.join(outDir, `${String(f).padStart(4, '0')}.png`), Buffer.from(data, 'base64'));
     }
+
+    // Compress with pngquant if available
+    try {
+      execSync(`pngquant --quality=70-90 --speed 1 --ext .png --force ${outDir}/*.png`, {stdio:'ignore'});
+    } catch(e) { /* pngquant not installed or failed — keep originals */ }
 
     done++;
     console.log(`  ✓ ${effect.name}: ${frames.frames.length} frames (${frames.sres}px) → ${outDir}/`);

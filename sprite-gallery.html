@@ -254,8 +254,8 @@ function renderGrid(){
     const ctx=cv.getContext("2d");
     const img=new Image();
     img.src=`sprites/${item.file}.png`;
-    const entry={card,ctx,img,fps:item.fps,frame:0,lastT:0,loaded:false,visible:false};
-    img.onload=()=>{entry.loaded=true;};
+    const entry={card,ctx,img,fps:item.fps,frame:0,lastT:0,loaded:false,visible:false,srcCell:192};
+    img.onload=()=>{entry.loaded=true;entry.srcCell=Math.round(img.naturalWidth/GRID);};
     sprites.push(entry);
     observer.observe(card);
   });
@@ -268,8 +268,9 @@ function animate(t){
     if(dt<1000/s.fps)continue;
     s.lastT=t;
     const col=s.frame%GRID,row=Math.floor(s.frame/GRID);
+    const c=s.srcCell;
     s.ctx.clearRect(0,0,192,192);
-    s.ctx.drawImage(s.img,col*192,row*192,192,192,0,0,192,192);
+    s.ctx.drawImage(s.img,col*c,row*c,c,c,0,0,192,192);
     s.frame=(s.frame+1)%FRAMES;
   }
   requestAnimationFrame(animate);
