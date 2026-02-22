@@ -1,0 +1,14 @@
+# EffectTextureMaker Findings and Roadmap
+
+Updated: 2026-02-22
+
+## Checklist
+- [ ] Use the final composited output for export, PBR, 3D preview, and tile preview (not the active layer only).
+- [ ] Record parameter changes for undo/redo (slider drags, toggles, selects) with debounced history.
+- [ ] Replace the hard-coded preset bar with a manifest-driven preset browser (search, categories, example projects).
+
+## Additional Findings (Backlog)
+- Save/load only covers a single `effectController`, not layer stacks, gradient, or PBR state.
+- `sprite-gallery.html` catalog count and `sprites/` count are out of sync with docs.
+- `CODEBASE_DOCUMENTATION.md` lists outdated sprite totals and does not mention `gen-hires-test.html` or `game-sprites/`.
+- Stats overlay is always visible and floating panels can overlap on small viewports.

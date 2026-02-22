@@ -17,6 +17,9 @@ ENTRY POINTS:
   gen-sprites.html     Headless generator: 100 pixy-based sprite sheets
   gen-custom.html      Headless generator: 19 custom GLSL sprite sheets
 
+PROJECT TRACKING:
+  FINDINGS.md          Findings checklist and usability roadmap
+
 CORE MODULES (src/):
   app.js               Main coordinator — init, animate, render
   defaults.js          65+ effect types, ~100 default parameters
