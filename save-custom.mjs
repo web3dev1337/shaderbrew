@@ -1,0 +1,43 @@
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+const puppeteer = require("/home/ab/.nvm/versions/node/v25.2.1/lib/node_modules/puppeteer");
+import fs from "fs";
+import path from "path";
+
+const URL = "http://localhost:4444/gen-custom.html";
+const OUT = path.resolve("sprites");
+
+if (!fs.existsSync(OUT)) fs.mkdirSync(OUT, { recursive: true });
+
+const browser = await puppeteer.launch({
+  headless: false,
+  executablePath: "/home/ab/.cache/puppeteer/chrome/linux-140.0.7339.207/chrome-linux64/chrome",
+  args: [
+    "--no-sandbox",
+    "--disable-setuid-sandbox",
+    "--disable-gpu-sandbox",
+    "--enable-webgl",
+    "--ignore-gpu-blocklist"
+  ]
+});
+const page = await browser.newPage();
+page.on("console", m => process.stdout.write(`[page] ${m.text()}\n`));
+page.on("pageerror", e => process.stderr.write(`[err] ${e}\n`));
+
+console.log("Loading gen-custom.html...");
+await page.goto(URL, { waitUntil: "domcontentloaded", timeout: 120000 });
+
+console.log("Waiting for custom sprite generation...");
+await page.waitForFunction("window.__done === true", { timeout: 600000, polling: 2000 });
+
+const sprites = await page.evaluate(() => window.__sprites);
+console.log(`Got ${sprites.length} sprites. Saving...`);
+
+for (const s of sprites) {
+  const b64 = s.data.replace(/^data:image\/png;base64,/, "");
+  fs.writeFileSync(path.join(OUT, s.name + ".png"), Buffer.from(b64, "base64"));
+  process.stdout.write(`  saved ${s.name}.png\n`);
+}
+
+console.log(`Done! ${sprites.length} custom PNGs saved to ${OUT}`);
+await browser.close();

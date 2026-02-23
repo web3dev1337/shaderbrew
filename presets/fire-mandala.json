@@ -1,0 +1,20 @@
+{
+	"type": "Mandara",
+	"animate": true,
+	"time": 0.0,
+	"resolution": "512",
+	"polarConversion": false,
+	"tiling": false,
+	"normalMap": false,
+	"cSpeed": 0.15,
+	"cIntensity": 0.7,
+	"cColorBalanceShadowsR": 0.85,
+	"cColorBalanceShadowsG": -0.8,
+	"cColorBalanceShadowsB": -1.0,
+	"cColorBalanceMidtonesR": 1.0,
+	"cColorBalanceMidtonesG": 0.4,
+	"cColorBalanceMidtonesB": -0.6,
+	"cColorBalanceHighlightsR": 1.0,
+	"cColorBalanceHighlightsG": 0.9,
+	"cColorBalanceHighlightsB": 0.3
+}

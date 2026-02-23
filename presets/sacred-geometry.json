@@ -1,0 +1,20 @@
+{
+	"type": "MagicCircle",
+	"animate": true,
+	"time": 0.0,
+	"resolution": "512",
+	"polarConversion": false,
+	"tiling": false,
+	"normalMap": false,
+	"cSpeed": 0.2,
+	"cIntensity": 0.8,
+	"cColorBalanceShadowsR": 0.8,
+	"cColorBalanceShadowsG": 0.5,
+	"cColorBalanceShadowsB": -0.6,
+	"cColorBalanceMidtonesR": 1.0,
+	"cColorBalanceMidtonesG": 0.85,
+	"cColorBalanceMidtonesB": 0.1,
+	"cColorBalanceHighlightsR": 1.0,
+	"cColorBalanceHighlightsG": 1.0,
+	"cColorBalanceHighlightsB": 0.8
+}

@@ -1,0 +1,52 @@
+{
+	"type": "CoherentNoise",
+	"animate": false,
+	"time": 22.7,
+	"resolution": "1024",
+	"polarConversion": true,
+	"tiling": false,
+	"normalMap": false,
+	"cHeightScale": 2,
+	"cRadialMask": 0.55,
+
+	"cColorBalanceShadowsR": -0.90,
+	"cColorBalanceShadowsG": -0.70,
+	"cColorBalanceShadowsB": 0.85,
+
+	"cColorBalanceMidtonesR": 0.60,
+	"cColorBalanceMidtonesG": 0.10,
+	"cColorBalanceMidtonesB": 1.0,
+
+	"cColorBalanceHighlightsR": 1.0,
+	"cColorBalanceHighlightsG": 1.0,
+	"cColorBalanceHighlightsB": 1.0,
+
+	"cToonEnable": true,
+	"cToonDark": 0.55,
+	"cToonLight": 0.88,
+
+	"cNoiseOctave": 6,
+	"cNoiseFrequency": 24,
+	"cNoiseAmplitude": 1.9,
+	"cNoiseLacunarity": 4,
+	"cNoisePersistence": 0.70,
+
+	"cGradientNoise": 0.0,
+	"cValueNoise": 0.0,
+	"cVoronoiNoise": 0.90,
+	"cVoronoiCell": 0.0,
+	"cSimplexNoise": 0.35,
+
+	"cRepeat": 1,
+	"cTurbulence": 1.0,
+	"cRidge": 1.0,
+	"cRidgeOffset": 0.15,
+	"cScaleShift": 0.40,
+	"cPowerExponent": 4.2,
+	"cBias": 0.30,
+	"cGain": -0.50,
+	"cThreshold": 0.35,
+	"cInvert": 1.0,
+	"cNoiseSphereEnable": false,
+	"cNoiseGraphEnable": false
+}

@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Generate Composite Sprites</title></head>
+<body>
+<div id="status">Loading...</div>
+<script type="importmap">
+{"imports":{"three":"https://unpkg.com/three@0.174.0/build/three.module.min.js"}}
+</script>
+<script type="module">
+import * as THREE from "three";
+import { NOISE_LIB, SHADERS } from "./shader-defs.js";
+
+const params=new URLSearchParams(location.search);
+const SRES=parseInt(params.get("res"))||192,GRID=6,FRAMES=GRID*GRID,SHEET=SRES*GRID;
+const ONLY=params.get("only"); // comma-separated recipe nums: "201,202"
+const status=document.getElementById("status");
+
+const cv=document.createElement("canvas");cv.width=SRES;cv.height=SRES;
+const r3=new THREE.WebGLRenderer({canvas:cv,alpha:true,preserveDrawingBuffer:true});
+r3.setSize(SRES,SRES,false);r3.autoClear=true;
+function makeRT(){return new THREE.WebGLRenderTarget(SRES,SRES,{
+  minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter,
+  type:THREE.UnsignedByteType,
+  format:THREE.RGBAFormat
+});}
+
+const ppV=`varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.0,1.0);}`;
+
+// ==================== MASK SHADER ====================
+// Applies a shape mask to a layer texture, outputting masked RGBA
+const maskFrag=`
+uniform sampler2D tDiffuse;
+uniform int maskType;
+uniform vec4 maskParams;
+uniform float maskFeather;
+uniform vec2 maskCenter;
+uniform bool maskInvert;
+uniform float layerOpacity;
+uniform vec2 layerScale;
+uniform vec2 layerOffset;
+varying vec2 vUv;
+
+void main(){
+  // UV transform for layer scale/offset
+  vec2 uv=(vUv-0.5)/layerScale+0.5-layerOffset;
+  vec4 color=texture2D(tDiffuse,uv);
+
+  // Mask coordinate space: -1 to 1 centered
+  vec2 p=(vUv-0.5-maskCenter)*2.0;
+  float m=1.0;
+
+  if(maskType==1){ // circle: params.x=radius
+    m=1.0-smoothstep(maskParams.x-maskFeather,maskParams.x+maskFeather,length(p));
+  } else if(maskType==2){ // ring: params.x=inner, params.y=outer
+    float r=length(p);
+    m=smoothstep(maskParams.x-maskFeather,maskParams.x+maskFeather,r)
+     *(1.0-smoothstep(maskParams.y-maskFeather,maskParams.y+maskFeather,r));
+  } else if(maskType==3){ // rect: params.xy=half-size, params.z=corner radius
+    vec2 d=abs(p)-maskParams.xy+maskParams.z;
+    float box=length(max(d,0.0))-maskParams.z;
+    m=1.0-smoothstep(-maskFeather,maskFeather,box);
+  } else if(maskType==4){ // radial gradient: 1 at center → 0 at params.x
+    m=1.0-clamp(length(p)/max(maskParams.x,0.001),0.0,1.0);
+  } else if(maskType==5){ // linear gradient: params.x=angle, params.y=offset
+    vec2 dir=vec2(cos(maskParams.x),sin(maskParams.x));
+    m=clamp(dot(p,dir)+maskParams.y+0.5,0.0,1.0);
+  } else if(maskType==6){ // angular: params.x=startAngle, params.y=endAngle
+    float a=atan(p.y,p.x); // -PI to PI
+    float start=maskParams.x;
+    float end=maskParams.y;
+    m=smoothstep(start-maskFeather,start+maskFeather,a)
+     *(1.0-smoothstep(end-maskFeather,end+maskFeather,a));
+  } else if(maskType==7){ // diamond: params.x=radius
+    float d=abs(p.x)+abs(p.y);
+    m=1.0-smoothstep(maskParams.x-maskFeather,maskParams.x+maskFeather,d);
+  }
+  // maskType==0 → no mask, m stays 1.0
+
+  if(maskInvert) m=1.0-m;
+
+  float alpha=color.a*m*layerOpacity;
+  // Check UV bounds - hide out-of-range when scaled
+  if(uv.x<0.0||uv.x>1.0||uv.y<0.0||uv.y>1.0) alpha=0.0;
+
+  gl_FragColor=vec4(color.rgb*alpha,alpha);
+}`;
+
+const maskScene=new THREE.Scene(),maskCam=new THREE.Camera();
+const maskMat=new THREE.ShaderMaterial({
+  uniforms:{
+    tDiffuse:{value:null},
+    maskType:{value:0},
+    maskParams:{value:new THREE.Vector4(0,0,0,0)},
+    maskFeather:{value:0.05},
+    maskCenter:{value:new THREE.Vector2(0,0)},
+    maskInvert:{value:false},
+    layerOpacity:{value:1.0},
+    layerScale:{value:new THREE.Vector2(1,1)},
+    layerOffset:{value:new THREE.Vector2(0,0)}
+  },
+  vertexShader:ppV,fragmentShader:maskFrag,
+  depthTest:false,depthWrite:false,transparent:true
+});
+maskScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),maskMat));
+
+// ==================== BLEND SHADER ====================
+// Composites a masked layer onto an accumulator using blend modes
+const blendFrag=`
+uniform sampler2D tBase;
+uniform sampler2D tLayer;
+uniform int blendMode;
+varying vec2 vUv;
+
+void main(){
+  vec4 base=texture2D(tBase,vUv);
+  vec4 layer=texture2D(tLayer,vUv);
+  float a=layer.a;
+
+  vec3 result;
+  if(blendMode==0){ // normal — alpha-over
+    result=mix(base.rgb,layer.rgb/(max(a,0.001)),a);
+  } else if(blendMode==1){ // add
+    result=base.rgb+layer.rgb;
+  } else if(blendMode==2){ // multiply
+    result=mix(base.rgb,base.rgb*layer.rgb/(max(a,0.001)),a);
+  } else if(blendMode==3){ // screen
+    vec3 layerRGB=layer.rgb/(max(a,0.001));
+    result=mix(base.rgb,1.0-(1.0-base.rgb)*(1.0-layerRGB),a);
+  } else { // fallback normal
+    result=mix(base.rgb,layer.rgb/(max(a,0.001)),a);
+  }
+
+  float outA=base.a+a*(1.0-base.a);
+  gl_FragColor=vec4(result*outA,outA);
+}`;
+
+const blendScene=new THREE.Scene(),blendCam=new THREE.Camera();
+const blendMat=new THREE.ShaderMaterial({
+  uniforms:{
+    tBase:{value:null},
+    tLayer:{value:null},
+    blendMode:{value:0}
+  },
+  vertexShader:ppV,fragmentShader:blendFrag,
+  depthTest:false,depthWrite:false,transparent:true
+});
+blendScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),blendMat));
+
+// ==================== EFFECT RENDERER ====================
+const fxScene=new THREE.Scene(),fxCam=new THREE.Camera();
+const fxPlane=new THREE.Mesh(new THREE.PlaneGeometry(2,2));
+fxScene.add(fxPlane);
+
+function renderShader(shaderSrc,t,target){
+  const mat=new THREE.ShaderMaterial({
+    uniforms:{time:{value:t},resolution:{value:new THREE.Vector2(SRES,SRES)}},
+    vertexShader:ppV,fragmentShader:shaderSrc,
+    depthTest:false,depthWrite:false
+  });
+  fxPlane.material=mat;
+  r3.setRenderTarget(target);r3.clear();
+  r3.render(fxScene,fxCam);
+  r3.setRenderTarget(null);
+  mat.dispose();
+}
+
+// ==================== ATLAS TEXTURE LAYER SUPPORT ====================
+// Renders a specific frame from a pre-rendered sprite sheet atlas onto a RT
+const atlasBlitFrag=`
+uniform sampler2D tAtlas;
+uniform vec4 uvRect; // x,y = offset, z,w = size (in 0-1 UV space)
+varying vec2 vUv;
+void main(){
+  vec2 uv=uvRect.xy+vUv*uvRect.zw;
+  gl_FragColor=texture2D(tAtlas,uv);
+}`;
+const atlasBlitScene=new THREE.Scene(),atlasBlitCam=new THREE.Camera();
+const atlasBlitMat=new THREE.ShaderMaterial({
+  uniforms:{tAtlas:{value:null},uvRect:{value:new THREE.Vector4(0,0,1,1)}},
+  vertexShader:ppV,fragmentShader:atlasBlitFrag,
+  depthTest:false,depthWrite:false,transparent:true
+});
+atlasBlitScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),atlasBlitMat));
+
+// Cache loaded atlas textures
+const atlasCache={};
+async function loadAtlas(name){
+  if(atlasCache[name]) return atlasCache[name];
+  const tex=await new THREE.TextureLoader().loadAsync(`sprites/${name}.png`);
+  tex.minFilter=THREE.LinearFilter;
+  tex.magFilter=THREE.LinearFilter;
+  tex.flipY=true;
+  atlasCache[name]=tex;
+  return tex;
+}
+
+function renderAtlasFrame(atlasTex,frameIdx,target){
+  const col=frameIdx%GRID, row=Math.floor(frameIdx/GRID);
+  const cellW=1/GRID, cellH=1/GRID;
+  // UV rect: bottom-left origin (Three.js textures are flipped)
+  const uvX=col*cellW;
+  const uvY=1-(row+1)*cellH; // flip Y for atlas rows
+  atlasBlitMat.uniforms.tAtlas.value=atlasTex;
+  atlasBlitMat.uniforms.uvRect.value.set(uvX,uvY,cellW,cellH);
+  atlasBlitMat.uniformsNeedUpdate=true;
+  r3.setRenderTarget(target);r3.clear();
+  r3.render(atlasBlitScene,atlasBlitCam);
+  r3.setRenderTarget(null);
+}
+
+// ==================== MASK TYPES ====================
+const MASK_TYPES={none:0,circle:1,ring:2,rect:3,radial:4,linear:5,angular:6,diamond:7};
+const BLEND_MODES={normal:0,add:1,multiply:2,screen:3};
+
+function applyMask(inRT,outRT,layer){
+  const mu=maskMat.uniforms;
+  mu.tDiffuse.value=inRT.texture;
+  const mask=layer.mask||{type:"none"};
+  mu.maskType.value=MASK_TYPES[mask.type]||0;
+  mu.maskFeather.value=mask.feather!=null?mask.feather:0.05;
+  mu.maskCenter.value.set(mask.centerX||0,mask.centerY||0);
+  mu.maskInvert.value=!!mask.invert;
+  mu.layerOpacity.value=layer.opacity!=null?layer.opacity:1.0;
+  mu.layerScale.value.set(layer.scale||1,layer.scale||1);
+  mu.layerOffset.value.set(layer.offsetX||0,layer.offsetY||0);
+
+  // Pack mask params based on type
+  const p=mu.maskParams.value;
+  if(mask.type==="circle") p.set(mask.radius||0.5,0,0,0);
+  else if(mask.type==="ring") p.set(mask.inner||0.2,mask.outer||0.8,0,0);
+  else if(mask.type==="rect") p.set(mask.width||0.8,mask.height||0.8,mask.cornerRadius||0,0);
+  else if(mask.type==="radial") p.set(mask.radius||1.0,0,0,0);
+  else if(mask.type==="linear") p.set(mask.angle||0,mask.offset||0,0,0);
+  else if(mask.type==="angular") p.set(mask.startAngle||0,mask.endAngle||3.14159,0,0);
+  else if(mask.type==="diamond") p.set(mask.radius||0.8,0,0,0);
+  else p.set(0,0,0,0);
+
+  maskMat.uniformsNeedUpdate=true;
+  r3.setRenderTarget(outRT);r3.clear();
+  r3.render(maskScene,maskCam);
+  r3.setRenderTarget(null);
+}
+
+function blendLayers(baseRT,layerRT,outRT,mode){
+  blendMat.uniforms.tBase.value=baseRT.texture;
+  blendMat.uniforms.tLayer.value=layerRT.texture;
+  blendMat.uniforms.blendMode.value=BLEND_MODES[mode]||0;
+  blendMat.uniformsNeedUpdate=true;
+  r3.setRenderTarget(outRT);r3.clear();
+  r3.render(blendScene,blendCam);
+  r3.setRenderTarget(null);
+}
+
+// ==================== COMPOSITE RENDERER ====================
+function renderCompositeFrame(recipe,globalT,frameIdx,accumA,accumB,tempRT,maskedRT){
+  // Clear accumA to transparent
+  r3.setRenderTarget(accumA);
+  r3.clearColor(0,0,0,0);
+  r3.clear();
+  r3.setRenderTarget(null);
+
+  let readAccum=accumA,writeAccum=accumB;
+
+  for(let li=0;li<recipe.layers.length;li++){
+    const layer=recipe.layers[li];
+
+    if(layer.atlas){
+      // Atlas texture layer — blit frame from pre-rendered sprite sheet
+      const atlasTex=atlasCache[layer.atlas];
+      if(!atlasTex) continue;
+      renderAtlasFrame(atlasTex,frameIdx,tempRT);
+    } else if(layer.shader){
+      // Live GLSL shader layer
+      const src=SHADERS[layer.shader];
+      if(!src) continue;
+      const layerT=layer.tStart+(globalT*(layer.tEnd-layer.tStart));
+      renderShader(src,layerT,tempRT);
+    } else continue;
+
+    // Apply mask
+    applyMask(tempRT,maskedRT,layer);
+
+    // Blend onto accumulator
+    blendLayers(readAccum,maskedRT,writeAccum,layer.blend||"normal");
+
+    // Swap ping-pong
+    const tmp=readAccum;readAccum=writeAccum;writeAccum=tmp;
+  }
+
+  return readAccum;
+}
+
+async function makeCompositeSpriteSheet(recipe){
+  // Preload any atlas textures needed by this recipe
+  for(const layer of recipe.layers){
+    if(layer.atlas) await loadAtlas(layer.atlas);
+  }
+
+  const canvas=document.createElement("canvas");
+  canvas.width=SHEET;canvas.height=SHEET;
+  const ctx=canvas.getContext("2d",{willReadFrequently:true});
+
+  const accumA=makeRT(),accumB=makeRT(),tempRT=makeRT(),maskedRT=makeRT();
+  const pixBuf=new Uint8Array(SRES*SRES*4);
+
+  for(let f=0;f<FRAMES;f++){
+    const globalT=f/(FRAMES-1); // 0 to 1
+
+    const resultRT=renderCompositeFrame(recipe,globalT,f,accumA,accumB,tempRT,maskedRT);
+
+    r3.readRenderTargetPixels(resultRT,0,0,SRES,SRES,pixBuf);
+    const col=f%GRID,row=Math.floor(f/GRID);
+    const img=ctx.createImageData(SRES,SRES);
+    for(let y=0;y<SRES;y++){
+      const s=(SRES-1-y)*SRES*4,d=y*SRES*4;
+      for(let x=0;x<SRES*4;x++) img.data[d+x]=pixBuf[s+x];
+    }
+    ctx.putImageData(img,col*SRES,row*SRES);
+  }
+
+  accumA.dispose();accumB.dispose();tempRT.dispose();maskedRT.dispose();
+  return canvas;
+}
+
+// ==================== COMPOSITE CATALOG ====================
+
+const COMPOSITE_CATALOG=[
+  // 201. Dark Ritual Portal — Dark Ritual (#029) ring + warp tunnel center
+  // Dark Ritual is naturally a ring (transparent center) — no mask needed on it
+  // Warp tunnel fills the hole; overlap into ring ensures no gap
+  {name:"Dark Ritual Portal",cat:"magic",fps:5,layers:[
+    {shader:"warp_tunnel",tStart:0,tEnd:15,blend:"normal",opacity:1.0,
+     mask:{type:"circle",radius:0.45,feather:0.1}},
+    {atlas:"029-dark-ritual",blend:"normal",opacity:1.0,
+     mask:{type:"none"}}
+  ]},
+  // 202. Dark Ritual Inferno — Dark Ritual ring + warp inferno center
+  {name:"Dark Ritual Inferno",cat:"fire",fps:5,layers:[
+    {shader:"warp_inferno",tStart:0,tEnd:12,blend:"normal",opacity:1.0,
+     mask:{type:"circle",radius:0.45,feather:0.1}},
+    {atlas:"029-dark-ritual",blend:"normal",opacity:1.0,
+     mask:{type:"none"}}
+  ]},
+  // 203. Dark Ritual Void — Dark Ritual ring + void warp center
+  {name:"Dark Ritual Void",cat:"dark",fps:5,layers:[
+    {shader:"warp_void",tStart:0,tEnd:30,blend:"normal",opacity:1.0,
+     mask:{type:"circle",radius:0.45,feather:0.1}},
+    {atlas:"029-dark-ritual",blend:"normal",opacity:1.0,
+     mask:{type:"none"}}
+  ]},
+  // 204. Shield Break — energy shield + reality shatter cracking through
+  {name:"Shield Break",cat:"energy",fps:9,layers:[
+    {shader:"energy_shield",tStart:0,tEnd:12,blend:"normal",opacity:1.0,
+     mask:{type:"none"}},
+    {shader:"reality_shatter",tStart:0.5,tEnd:16,blend:"screen",opacity:0.8,
+     mask:{type:"radial",radius:1.2,feather:0.1}}
+  ]},
+  // 205. Phoenix Gate — phoenix flames inside a portal ring
+  {name:"Phoenix Gate",cat:"fire",fps:8,layers:[
+    {shader:"phoenix",tStart:0,tEnd:15,blend:"normal",opacity:1.0,
+     mask:{type:"circle",radius:0.45,feather:0.06}},
+    {shader:"portal",tStart:0,tEnd:20,blend:"add",opacity:0.9,
+     mask:{type:"ring",inner:0.35,outer:0.95,feather:0.05}}
+  ]},
+  // 206. Cosmic Portal — cosmic eye peering through dimensional rift
+  {name:"Cosmic Portal",cat:"cosmic",fps:6,layers:[
+    {shader:"cosmic_eye",tStart:0,tEnd:25,blend:"normal",opacity:1.0,scale:0.8,
+     mask:{type:"circle",radius:0.4,feather:0.08}},
+    {shader:"portal",tStart:0,tEnd:20,blend:"add",opacity:0.85,
+     mask:{type:"ring",inner:0.3,outer:0.9,feather:0.05}}
+  ]},
+  // 207. Dragon Gate — dragon breath erupting from summoning circle
+  {name:"Dragon Gate",cat:"fire",fps:9,layers:[
+    {shader:"dragon_breath",tStart:0,tEnd:15,blend:"normal",opacity:1.0,
+     mask:{type:"circle",radius:0.4,feather:0.05}},
+    {shader:"summoning",tStart:0,tEnd:20,blend:"add",opacity:0.9,
+     mask:{type:"ring",inner:0.3,outer:1.0,feather:0.06}}
+  ]},
+  // 208. Void Rift — void tendrils reaching through a diamond-shaped tear
+  {name:"Void Rift",cat:"dark",fps:7,layers:[
+    {shader:"void_tendril",tStart:0,tEnd:20,blend:"normal",opacity:1.0,
+     mask:{type:"diamond",radius:0.6,feather:0.08}},
+    {shader:"reality_shatter",tStart:0.5,tEnd:16,blend:"add",opacity:0.6,
+     mask:{type:"diamond",radius:0.7,feather:0.15,invert:true}}
+  ]}
+];
+
+// ==================== GENERATE ALL ====================
+window.__sprites=[];
+window.__done=false;
+
+async function generateAll(){
+  const onlySet=ONLY?new Set(ONLY.split(",").map(n=>parseInt(n))):null;
+  for(let i=0;i<COMPOSITE_CATALOG.length;i++){
+    const num=i+201;
+    if(onlySet&&!onlySet.has(num)) continue;
+    const recipe=COMPOSITE_CATALOG[i];
+    status.textContent=`Compositing ${num}/${COMPOSITE_CATALOG.length}: ${recipe.name} (${SRES}px)`;
+
+    // Validate layers — each must have either a shader or atlas source
+    let valid=true;
+    for(const layer of recipe.layers){
+      if(layer.atlas) continue; // atlas layers validated during preload
+      if(!layer.shader || !SHADERS[layer.shader]){
+        status.textContent=`ERROR: no shader "${layer.shader}" in ${recipe.name}`;
+        valid=false;break;
+      }
+    }
+    if(!valid) continue;
+
+    const canvas=await makeCompositeSpriteSheet(recipe);
+    const numStr=String(num).padStart(3,"0");
+    const slug=recipe.name.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/-$/,"");
+    window.__sprites.push({name:`${numStr}-${slug}`,data:canvas.toDataURL("image/png")});
+    await new Promise(r=>setTimeout(r,0));
+  }
+  status.textContent=`Done! ${COMPOSITE_CATALOG.length} composite sprites generated.`;
+  window.__done=true;
+}
+generateAll();
+</script>
+</body></html>

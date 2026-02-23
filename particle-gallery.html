@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Particle Forge — 100 Effects</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#030306;color:#ccc;font-family:monospace;overflow-x:hidden}
+.header{text-align:center;padding:1.875rem 1.25rem 0.625rem}
+.header h1{font-size:1.5rem;letter-spacing:4px;
+background:linear-gradient(90deg,#ff6622,#ff44ff,#44aaff,#ff6622);background-size:300% 100%;
+-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:shine 4s linear infinite}
+@keyframes shine{0%{background-position:0% 50%}100%{background-position:300% 50%}}
+.header p{color:#555;font-size:0.75rem;margin-top:0.375rem}
+.header a{color:#e94560;text-decoration:none}
+
+#loading{text-align:center;padding:2.5rem;color:#777;font-size:0.8rem}
+.bar{width:min(360px,80vw);height:4px;background:#111;margin:0.75rem auto 0;border-radius:3px;overflow:hidden}
+.bar-fill{width:0;height:100%;background:linear-gradient(90deg,#ff6622,#ff44ff,#44aaff);transition:width .3s}
+#load-text{margin-top:0.5rem;font-size:0.6875rem;color:#444}
+
+.filter-bar{max-width:1400px;margin:0 auto 1rem;display:flex;gap:0.375rem;justify-content:center;flex-wrap:wrap;padding:0 1rem}
+.toggle-btn{font-family:monospace;font-size:0.6875rem;padding:0.4375rem 0.875rem;border:1px solid #333;border-radius:0.375rem;
+background:#0a0a12;color:#888;cursor:pointer;transition:all .2s;letter-spacing:.5px}
+.toggle-btn.active{background:#1a1a2e;color:#fff;border-color:#e94560}
+.toggle-btn:hover{border-color:#555;color:#bbb}
+
+#content{display:none}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(140px, calc(50% - 0.375rem)),1fr));gap:0.75rem;max-width:1400px;margin:0 auto;padding:0 1rem 2.5rem}
+
+.card{background:#0a0a12;border:1px solid #1a1a2e;border-radius:0.5rem;overflow:hidden;transition:all .25s}
+.card:hover{border-color:#e94560;box-shadow:0 0 20px rgba(233,69,96,.2);transform:translateY(-1px)}
+.card canvas{width:100%;aspect-ratio:1;display:block;background:#000}
+.card .info{padding:0.375rem 0.5rem;border-top:1px solid #1a1a2e;display:flex;justify-content:space-between;align-items:center}
+.card .name{font-size:0.625rem;color:#d0d0e8;font-weight:bold;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .cat-tag{font-size:0.5rem;padding:1px 0.375rem;border-radius:0.5rem;background:#1a1a2e;color:#666;text-transform:uppercase;flex-shrink:0;margin-left:0.25rem}
+.card.hidden{display:none}
+
+.links{text-align:center;padding:1.25rem;font-size:0.6875rem;color:#444;border-top:1px solid #111}
+.links a{color:#e94560;text-decoration:none;margin:0 0.625rem}
+@media(max-width:600px){
+.header{padding:1rem 0.75rem 0.375rem}
+.header h1{font-size:1.125rem;letter-spacing:2px}
+.filter-bar{gap:0.25rem;padding:0 0.5rem}
+.toggle-btn{padding:0.3125rem 0.5rem;font-size:0.625rem}
+}
+</style>
+</head>
+<body>
+<div class="header">
+<h1>PARTICLE FORGE &mdash; 100 Effects</h1>
+<p>Procedural sprite sheet particles &middot; gradient color mapping &middot; circle masked |
+<a href="particles.html">3D Particles</a> | <a href="gallery.html">Gallery</a> | <a href="editor.html">Editor</a></p>
+</div>
+<div id="loading">
+Generating 100 sprite sheets&hellip;
+<div class="bar"><div class="bar-fill" id="pbar"></div></div>
+<div id="load-text">Initializing WebGL&hellip;</div>
+</div>
+<div id="content">
+<div class="filter-bar" id="filters"></div>
+<div class="grid" id="grid"></div>
+</div>
+<div class="links">
+<a href="particles.html">3D Particle Systems</a>
+<a href="gallery.html">Texture Gallery</a>
+<a href="editor.html">Editor</a>
+<a href="demos.html">Material Demos</a>
+</div>
+
+<canvas id="gl" style="display:none" width="128" height="128"></canvas>
+
+<script type="importmap">
+{"imports":{
+  "three":"https://unpkg.com/three@0.174.0/build/three.module.js",
+  "three/addons/":"https://unpkg.com/three@0.174.0/examples/jsm/"
+}}
+</script>
+<script type="module">
+import * as THREE from "three";
+import * as PIXY from "./pixy.module.min.js";
+
+const SRES=128, GRID=4, FRAMES=GRID*GRID, SHEET=SRES*GRID;
+const BATCH=5;
+const pbar=document.getElementById("pbar");
+const loadText=document.getElementById("load-text");
+function prog(p){pbar.style.width=p+"%";}
+
+const glCanvas=document.getElementById("gl");
+const r3=new THREE.WebGLRenderer({canvas:glCanvas,alpha:true,preserveDrawingBuffer:true,powerPreference:"high-performance"});
+r3.setSize(SRES,SRES);r3.autoClear=true;
+
+const texScene=new THREE.Scene();const texCam=new THREE.Camera();
+texScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),new THREE.MeshBasicMaterial()));
+
+function makeRT(){
+return new THREE.WebGLRenderTarget(SRES,SRES,{minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter,format:THREE.RGBAFormat});
+}
+const rtA=makeRT(),rtB=makeRT(),rtC=makeRT();
+
+const grungeTex=await new Promise(ok=>{
+new THREE.TextureLoader().load("images/grunge.png",t=>{
+t.wrapS=t.wrapT=THREE.RepeatWrapping;t.minFilter=THREE.LinearFilter;t.magFilter=THREE.LinearFilter;ok(t);
+});});
+
+const ppV=`varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.0,1.0);}`;
+
+const gradScene=new THREE.Scene(),gradCam=new THREE.Camera();
+const gradMat=new THREE.ShaderMaterial({
+uniforms:{tDiffuse:{value:null},tGradient:{value:null},intensity:{value:1}},vertexShader:ppV,
+fragmentShader:`uniform sampler2D tDiffuse;uniform sampler2D tGradient;uniform float intensity;varying vec2 vUv;
+void main(){vec4 t=texture2D(tDiffuse,vUv);float l=clamp(dot(t.rgb,vec3(.299,.587,.114)),0.,1.);
+vec4 g=texture2D(tGradient,vec2(l,.5));gl_FragColor=vec4(mix(t.rgb,g.rgb,intensity),1.);}`,
+depthTest:false,depthWrite:false});
+gradScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),gradMat));
+
+const maskScene=new THREE.Scene(),maskCam=new THREE.Camera();
+const maskMat=new THREE.ShaderMaterial({
+uniforms:{tDiffuse:{value:null}},vertexShader:ppV,
+fragmentShader:`uniform sampler2D tDiffuse;varying vec2 vUv;
+void main(){vec4 c=texture2D(tDiffuse,vUv);float d=length(vUv-.5)*2.;
+float mask=1.-smoothstep(.3,1.,d);
+float lum=dot(c.rgb,vec3(.299,.587,.114));
+float kill=smoothstep(.0,.04,lum);
+float alpha=mask*kill;
+gl_FragColor=vec4(c.rgb*alpha,alpha);}`,
+depthTest:false,depthWrite:false});
+maskScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),maskMat));
+
+function D(){return{animate:false,time:5,resolution:SRES+"",polarConversion:false,tiling:false,normalMap:false,cHeightScale:2,cRadialMask:1,cColorBalanceShadowsR:0,cColorBalanceShadowsG:0,cColorBalanceShadowsB:0,cColorBalanceMidtonesR:0,cColorBalanceMidtonesG:0,cColorBalanceMidtonesB:0,cColorBalanceHighlightsR:0,cColorBalanceHighlightsG:0,cColorBalanceHighlightsB:0,cToonEnable:false,cToonDark:.8,cToonLight:.95,cFrequency:30,cAmplitude:.01,cIntensity:.5,cDirectionX:0,cDirectionY:1,cPowerExponent:1,cRadius:.5,cInnerRadius:1,cInnerRadius2:1,cSize:1,cWidth:1,cHeight:1,cDepth:1,cColor:1,cPetals:6,cOffset:.2,cVolume:3,cBeta:4,cDelta:.05,cScale:1,cInnerWidth:.4,cStrength:1,cPower:1,cRange:2,cEmission:1,cBloom:1,cLightX:1,cLightY:1,cLightZ:1,cAmbient:1,cSmoothness:1,cSmoothnessPower:1,cThickness:1,cThicknessPower:1,cCameraTilt:0,cCameraPan:0,cSpeed:1,cAngle:0,cDensity:1,cAlpha:1,cRepeat:1,cScaleShift:0,cBias:0,cGain:0,cInvert:0,cThreshold:0,cDiamondGearTeeth:18,cDiamondGearMid:.8,cBrushStrokeX1:-.4,cBrushStrokeY1:0,cBrushStrokeX2:1.1,cBrushStrokeY2:.8,cBubblesVariation:1,cFlameEyeInnerFade:1,cFlameEyeOuterFade:1,cFlameEyeBorder:1,cSplatLines:20,cSplatSpotStep:.04,cTrabeculumVariation:2,cLifeTime:.9,cGravity:.26,cCount:300,cExplosionRadius:1.75,cExplosionDownScale:1.25,cExplosionGrain:2,cExplosionSpeed:.3,cExplosionBallness:2,cExplosionGrowth:2.2,cExplosionFade:1.6,cExplosionDensity:1.35,cExplosionContrast:1,cExplosionRollingInitDamp:.3,cExplosionRollingSpeed:2,cExplosionDelayRange:.25,cExplosionBallSpread:1,cExplosionBloom:0,cExplosionEmission:.2,cExplosionColor:1,cNoiseOctave:8,cNoiseFrequency:1,cNoiseAmplitude:.65,cNoisePersistence:.5,cNoiseScale:1,cNoiseSphereEnable:false,cNoiseGraphEnable:false,cNoiseStrength:1,cNoiseDepth:3,cNoiseSize:8,cNoiseLacunarity:2,cTurbulence:0,cRidge:0,cRidgeOffset:.9,cGradientNoise:0,cValueNoise:0,cVoronoiNoise:0,cVoronoiCell:0,cSimplexNoise:1}}
+
+function renderFx(type,params,target){
+const sh=new PIXY.FxgenShader();sh.enable(type.toUpperCase());sh.enable("TOON");sh.enable("GLSL3");
+const u=sh.generateUniforms();const mat=sh.createMaterial(u,{defines:sh.generateDefines()});
+const ec=Object.assign(D(),params);
+u.resolution.value.set(SRES,SRES);u.mouse.value.set(.5,.5);
+u.cameraPos.value.set(0,0,3.8);u.cameraDir.value.set(0,0,-1);
+for(const k of Object.keys(ec)){if(k==="resolution"||k==="type")continue;
+try{PIXY.FxgenShaderUtils.SetShaderParameter(u,k,ec[k])}catch(e){}}
+PIXY.FxgenShaderUtils.SetShaderParameter(u,"cColorBalanceShadows",new THREE.Vector3(ec.cColorBalanceShadowsR,ec.cColorBalanceShadowsG,ec.cColorBalanceShadowsB));
+PIXY.FxgenShaderUtils.SetShaderParameter(u,"cColorBalanceMidtones",new THREE.Vector3(ec.cColorBalanceMidtonesR,ec.cColorBalanceMidtonesG,ec.cColorBalanceMidtonesB));
+PIXY.FxgenShaderUtils.SetShaderParameter(u,"cColorBalanceHighlights",new THREE.Vector3(ec.cColorBalanceHighlightsR,ec.cColorBalanceHighlightsG,ec.cColorBalanceHighlightsB));
+PIXY.FxgenShaderUtils.SetShaderParameter(u,"cDirection",new THREE.Vector2(ec.cDirectionX,ec.cDirectionY));
+PIXY.FxgenShaderUtils.SetShaderParameter(u,"tGrunge",grungeTex);
+texScene.overrideMaterial=mat;r3.setRenderTarget(target);
+r3.render(texScene,texCam);r3.setRenderTarget(null);texScene.overrideMaterial=null;mat.dispose();
+}
+
+function doGrad(inRT,gradTex,outRT){
+gradMat.uniforms.tDiffuse.value=inRT.texture;gradMat.uniforms.tGradient.value=gradTex;
+gradMat.uniformsNeedUpdate=true;
+r3.setRenderTarget(outRT);r3.clear();r3.render(gradScene,gradCam);r3.setRenderTarget(null);
+}
+function doMask(inRT,outRT){
+maskMat.uniforms.tDiffuse.value=inRT.texture;maskMat.uniformsNeedUpdate=true;
+r3.setRenderTarget(outRT);r3.clear();r3.render(maskScene,maskCam);r3.setRenderTarget(null);
+}
+function makeGrad(stops){
+const c=document.createElement("canvas");c.width=256;c.height=1;
+const ctx=c.getContext("2d"),g=ctx.createLinearGradient(0,0,256,0);
+for(const s of stops)g.addColorStop(s.p,s.c);
+ctx.fillStyle=g;ctx.fillRect(0,0,256,1);
+const tex=new THREE.CanvasTexture(c);
+tex.minFilter=THREE.LinearFilter;tex.magFilter=THREE.LinearFilter;
+tex.wrapS=tex.wrapT=THREE.ClampToEdgeWrapping;tex.needsUpdate=true;return tex;
+}
+
+const pixBuf=new Uint8Array(SRES*SRES*4);
+
+function makeSpriteSheet(effect,params,gradTex,tStart,tEnd){
+const canvas=document.createElement("canvas");
+canvas.width=SHEET;canvas.height=SHEET;
+const ctx=canvas.getContext("2d",{willReadFrequently:true});
+for(let f=0;f<FRAMES;f++){
+const t=tStart+(f/(FRAMES-1))*(tEnd-tStart);
+const p=Object.assign({},params,{time:t});
+renderFx(effect,p,rtA);
+doGrad(rtA,gradTex,rtB);
+doMask(rtB,rtC);
+r3.readRenderTargetPixels(rtC,0,0,SRES,SRES,pixBuf);
+const col=f%GRID,row=Math.floor(f/GRID);
+const img=ctx.createImageData(SRES,SRES);
+for(let y=0;y<SRES;y++){
+const s=(SRES-1-y)*SRES*4,d=y*SRES*4;
+for(let x=0;x<SRES*4;x++)img.data[d+x]=pixBuf[s+x];
+}
+ctx.putImageData(img,col*SRES,row*SRES);
+}
+return canvas;
+}
+
+// ══════════════════════════════════════════════════════════════
+// 100 PARTICLE DEFINITIONS
+// ══════════════════════════════════════════════════════════════
+const particles=[
+// ── FIRE & HEAT (1-15) ──
+{name:"Inferno Burst",cat:"fire",effect:"Explosion",params:{cExplosionRadius:2,cExplosionBallness:4,cExplosionGrowth:3,cExplosionDensity:1.5,cExplosionContrast:1.2,cExplosionGrain:1.5},grad:[{p:0,c:"#0a0000"},{p:.2,c:"#661100"},{p:.4,c:"#cc3300"},{p:.6,c:"#ff7700"},{p:.8,c:"#ffcc33"},{p:1,c:"#ffffdd"}],tStart:0.3,tEnd:3.5,fps:10},
+{name:"Napalm Drop",cat:"fire",effect:"Explosion",params:{cExplosionRadius:3,cExplosionBallness:6,cExplosionGrowth:2,cExplosionDensity:2,cExplosionContrast:1.5},grad:[{p:0,c:"#000000"},{p:.25,c:"#330000"},{p:.5,c:"#881100"},{p:.75,c:"#cc4400"},{p:1,c:"#ff7700"}],tStart:0.2,tEnd:2.5,fps:8},
+{name:"Phoenix Flare",cat:"fire",effect:"Explosion",params:{cExplosionRadius:2,cExplosionBallness:3,cExplosionGrowth:4,cExplosionDensity:1},grad:[{p:0,c:"#1a0500"},{p:.2,c:"#884400"},{p:.4,c:"#ddaa00"},{p:.6,c:"#ffdd44"},{p:.8,c:"#ffffaa"},{p:1,c:"#ffffff"}],tStart:0.5,tEnd:3.0,fps:8},
+{name:"Magma Splash",cat:"fire",effect:"Explosion",params:{cExplosionRadius:2.5,cExplosionBallness:5,cExplosionGrowth:2.5,cExplosionDensity:1.8,cExplosionGrain:2},grad:[{p:0,c:"#000000"},{p:.25,c:"#440000"},{p:.5,c:"#991100"},{p:.75,c:"#dd4400"},{p:1,c:"#ff6600"}],tStart:0.3,tEnd:2.0,fps:7},
+{name:"Solar Eruption",cat:"fire",effect:"Corona",params:{cIntensity:0.8},grad:[{p:0,c:"#1a0800"},{p:.2,c:"#993300"},{p:.4,c:"#dd6600"},{p:.6,c:"#ffaa00"},{p:.8,c:"#ffdd44"},{p:1,c:"#ffffff"}],tStart:1,tEnd:8,fps:6},
+{name:"Candle Light",cat:"fire",effect:"Flame",params:{cSpeed:0.3},grad:[{p:0,c:"#0a0400"},{p:.25,c:"#553300"},{p:.5,c:"#aa6600"},{p:.75,c:"#ddaa33"},{p:1,c:"#ffdd88"}],tStart:2,tEnd:12,fps:5},
+{name:"Wildfire",cat:"fire",effect:"Flame",params:{cSpeed:1.5},grad:[{p:0,c:"#100000"},{p:.2,c:"#661100"},{p:.4,c:"#cc2200"},{p:.6,c:"#ff5500"},{p:.8,c:"#ffaa22"},{p:1,c:"#ffeeaa"}],tStart:0.5,tEnd:4,fps:10},
+{name:"Furnace Core",cat:"fire",effect:"Corona",params:{cIntensity:1.2,cRadius:0.3},grad:[{p:0,c:"#0a0000"},{p:.25,c:"#660000"},{p:.5,c:"#cc1100"},{p:.75,c:"#ff3300"},{p:1,c:"#ff7744"}],tStart:1,tEnd:7,fps:5},
+{name:"Dragon Breath",cat:"fire",effect:"Flame",params:{cSpeed:2.0},grad:[{p:0,c:"#080000"},{p:.2,c:"#551100"},{p:.4,c:"#aa3300"},{p:.6,c:"#dd5500"},{p:.8,c:"#ff8822"},{p:1,c:"#ffcc44"}],tStart:0.3,tEnd:3,fps:12},
+{name:"Ember Drift",cat:"fire",effect:"Flame",params:{cSpeed:0.4},grad:[{p:0,c:"#050200"},{p:.25,c:"#442200"},{p:.5,c:"#884400"},{p:.75,c:"#bb6622"},{p:1,c:"#dd8844"}],tStart:3,tEnd:15,fps:4},
+{name:"Firework Pop",cat:"fire",effect:"Explosion",params:{cExplosionRadius:1.5,cExplosionBallness:2,cExplosionGrowth:5,cExplosionDensity:0.8,cExplosionGrain:3},grad:[{p:0,c:"#000000"},{p:.2,c:"#553300"},{p:.4,c:"#aa6600"},{p:.6,c:"#ffcc00"},{p:.8,c:"#ffff66"},{p:1,c:"#ffffff"}],tStart:0.1,tEnd:1.5,fps:12},
+{name:"Thermal Pulse",cat:"fire",effect:"Energy",params:{cSpeed:0.8},grad:[{p:0,c:"#0a0200"},{p:.25,c:"#552200"},{p:.5,c:"#aa4400"},{p:.75,c:"#dd6600"},{p:1,c:"#ff8800"}],tStart:1,tEnd:6,fps:7},
+{name:"Combustion",cat:"fire",effect:"Explosion",params:{cExplosionRadius:1.8,cExplosionBallness:3,cExplosionGrowth:3.5,cExplosionContrast:1.8,cExplosionDensity:1.2},grad:[{p:0,c:"#000000"},{p:.2,c:"#441100"},{p:.4,c:"#992200"},{p:.6,c:"#ee5500"},{p:.8,c:"#ffaa33"},{p:1,c:"#ffffcc"}],tStart:0.2,tEnd:2.5,fps:9},
+{name:"Hellfire",cat:"fire",effect:"Flame",params:{cSpeed:1.0},grad:[{p:0,c:"#000000"},{p:.2,c:"#220000"},{p:.4,c:"#550000"},{p:.6,c:"#881100"},{p:.8,c:"#bb2200"},{p:1,c:"#dd4400"}],tStart:1,tEnd:6,fps:8},
+{name:"Bonfire Glow",cat:"fire",effect:"Bonfire",params:{},grad:[{p:0,c:"#0a0200"},{p:.2,c:"#663300"},{p:.4,c:"#cc5500"},{p:.6,c:"#ff8800"},{p:.8,c:"#ffbb44"},{p:1,c:"#ffeeaa"}],tStart:1,tEnd:8,fps:6},
+// ── ICE & FROST (16-27) ──
+{name:"Frost Nova",cat:"ice",effect:"Explosion",params:{cExplosionRadius:2,cExplosionBallness:3,cExplosionGrowth:4,cExplosionDensity:1},grad:[{p:0,c:"#000818"},{p:.2,c:"#112266"},{p:.4,c:"#3366cc"},{p:.6,c:"#66aaff"},{p:.8,c:"#ccecff"},{p:1,c:"#ffffff"}],tStart:0.3,tEnd:3,fps:8},
+{name:"Blizzard Swirl",cat:"ice",effect:"Cloud",params:{cSpeed:1.5},grad:[{p:0,c:"#000410"},{p:.2,c:"#112244"},{p:.4,c:"#3366aa"},{p:.6,c:"#88bbdd"},{p:.8,c:"#cce4ff"},{p:1,c:"#ffffff"}],tStart:1,tEnd:8,fps:7},
+{name:"Crystal Shard",cat:"ice",effect:"CoherentNoise",params:{cVoronoiNoise:0.9,cSimplexNoise:0.1,cVoronoiCell:0.8,cRidge:0.5},grad:[{p:0,c:"#000820"},{p:.2,c:"#1144aa"},{p:.4,c:"#3388dd"},{p:.6,c:"#88ccff"},{p:.8,c:"#ddeeff"},{p:1,c:"#ffffff"}],tStart:1,tEnd:6,fps:6},
+{name:"Frozen Mist",cat:"ice",effect:"Smoke",params:{cSpeed:0.5},grad:[{p:0,c:"#000308"},{p:.2,c:"#0a1133"},{p:.4,c:"#2244aa"},{p:.6,c:"#5588cc"},{p:.8,c:"#aaccee"},{p:1,c:"#eef4ff"}],tStart:2,tEnd:12,fps:4},
+{name:"Snowfall",cat:"ice",effect:"Snow",params:{},grad:[{p:0,c:"#000410"},{p:.2,c:"#223366"},{p:.4,c:"#5588bb"},{p:.6,c:"#99bbdd"},{p:.8,c:"#ccddef"},{p:1,c:"#ffffff"}],tStart:1,tEnd:8,fps:5},
+{name:"Ice Spike",cat:"ice",effect:"CoherentNoise",params:{cRidge:0.9,cTurbulence:0.3,cSimplexNoise:0.6,cVoronoiNoise:0.4,cInvert:1},grad:[{p:0,c:"#000a1a"},{p:.2,c:"#0033aa"},{p:.4,c:"#2266dd"},{p:.6,c:"#55aaff"},{p:.8,c:"#aaddff"},{p:1,c:"#ffffff"}],tStart:1,tEnd:5,fps:7},
+{name:"Glacial Pulse",cat:"ice",effect:"Corona",params:{cIntensity:0.6},grad:[{p:0,c:"#000818"},{p:.2,c:"#0044aa"},{p:.4,c:"#2288dd"},{p:.6,c:"#55bbff"},{p:.8,c:"#aaddff"},{p:1,c:"#eef8ff"}],tStart:2,tEnd:10,fps:5},
+{name:"Arctic Breath",cat:"ice",effect:"Cloud2",params:{cSpeed:0.8},grad:[{p:0,c:"#000410"},{p:.2,c:"#0a2244"},{p:.4,c:"#2255aa"},{p:.6,c:"#4488cc"},{p:.8,c:"#88bbee"},{p:1,c:"#ddeeff"}],tStart:1,tEnd:8,fps:6},
+{name:"Permafrost Crack",cat:"ice",effect:"Caustics",params:{cSpeed:0.4},grad:[{p:0,c:"#000a18"},{p:.2,c:"#003366"},{p:.4,c:"#0066aa"},{p:.6,c:"#2299cc"},{p:.8,c:"#66ccee"},{p:1,c:"#aaeeff"}],tStart:2,tEnd:10,fps:5},
+{name:"Diamond Dust",cat:"ice",effect:"SparkNoise",params:{cNoiseFrequency:2},grad:[{p:0,c:"#000410"},{p:.2,c:"#223355"},{p:.4,c:"#5588aa"},{p:.6,c:"#88bbdd"},{p:.8,c:"#cce4ff"},{p:1,c:"#ffffff"}],tStart:1,tEnd:5,fps:8},
+{name:"Hail Burst",cat:"ice",effect:"Explosion",params:{cExplosionRadius:1.5,cExplosionBallness:2,cExplosionGrowth:4,cExplosionGrain:2.5},grad:[{p:0,c:"#000818"},{p:.2,c:"#1144aa"},{p:.4,c:"#4488dd"},{p:.6,c:"#88ccff"},{p:.8,c:"#ccebff"},{p:1,c:"#ffffff"}],tStart:0.2,tEnd:2,fps:10},
+{name:"Cryo Flash",cat:"ice",effect:"Explosion2",params:{cExplosionRadius:2,cExplosionGrowth:3},grad:[{p:0,c:"#000410"},{p:.2,c:"#0044bb"},{p:.4,c:"#2288ff"},{p:.6,c:"#66bbff"},{p:.8,c:"#aaddff"},{p:1,c:"#ffffff"}],tStart:0.3,tEnd:2.5,fps:9},
+// ── MAGIC & ARCANE (28-42) ──
+{name:"Arcane Bolt",cat:"magic",effect:"Corona",params:{cIntensity:0.9},grad:[{p:0,c:"#0a0018"},{p:.2,c:"#4400aa"},{p:.4,c:"#9933ff"},{p:.6,c:"#dd66ff"},{p:.8,c:"#ffaaff"},{p:1,c:"#ffffff"}],tStart:1,tEnd:8,fps:6},
+{name:"Dark Ritual",cat:"magic",effect:"Corona",params:{cIntensity:1.0,cRadius:0.4},grad:[{p:0,c:"#000000"},{p:.2,c:"#220033"},{p:.4,c:"#440066"},{p:.6,c:"#770099"},{p:.8,c:"#aa33cc"},{p:1,c:"#dd66ff"}],tStart:2,tEnd:10,fps:5},
+{name:"Fairy Dust",cat:"magic",effect:"CoherentNoise",params:{cSimplexNoise:0.5,cVoronoiNoise:0.5,cNoiseFrequency:2},grad:[{p:0,c:"#0a0008"},{p:.2,c:"#aa3388"},{p:.4,c:"#ff66aa"},{p:.6,c:"#ffaacc"},{p:.8,c:"#ffd4e8"},{p:1,c:"#fff0f8"}],tStart:1,tEnd:6,fps:7},
+{name:"Mana Burst",cat:"magic",effect:"Explosion",params:{cExplosionRadius:2,cExplosionBallness:3,cExplosionGrowth:3,cExplosionDensity:1.2},grad:[{p:0,c:"#000020"},{p:.2,c:"#1100aa"},{p:.4,c:"#4422ff"},{p:.6,c:"#7744ff"},{p:.8,c:"#aa88ff"},{p:1,c:"#ddccff"}],tStart:0.3,tEnd:3,fps:8},
+{name:"Enchantment Glow",cat:"magic",effect:"Corona",params:{cIntensity:0.7},grad:[{p:0,c:"#000a10"},{p:.2,c:"#004444"},{p:.4,c:"#008888"},{p:.6,c:"#22bbbb"},{p:.8,c:"#66dddd"},{p:1,c:"#aaffee"}],tStart:2,tEnd:10,fps:5},
+{name:"Rune Pulse",cat:"magic",effect:"Trabeculum",params:{cTrabeculumVariation:3},grad:[{p:0,c:"#0a0018"},{p:.2,c:"#3300aa"},{p:.4,c:"#6622dd"},{p:.6,c:"#9944ff"},{p:.8,c:"#cc88ff"},{p:1,c:"#eeccff"}],tStart:1,tEnd:6,fps:6},
+{name:"Spirit Wisp",cat:"magic",effect:"Corona",params:{cIntensity:0.5,cRadius:0.3},grad:[{p:0,c:"#000a08"},{p:.2,c:"#004422"},{p:.4,c:"#228844"},{p:.6,c:"#44cc66"},{p:.8,c:"#88ee99"},{p:1,c:"#ccffdd"}],tStart:2,tEnd:10,fps:5},
+{name:"Mystic Flame",cat:"magic",effect:"Flame",params:{cSpeed:0.8},grad:[{p:0,c:"#08000a"},{p:.2,c:"#440066"},{p:.4,c:"#8822aa"},{p:.6,c:"#bb44dd"},{p:.8,c:"#dd88ff"},{p:1,c:"#ffccff"}],tStart:1,tEnd:6,fps:7},
+{name:"Soul Fire",cat:"magic",effect:"Flame",params:{cSpeed:0.6},grad:[{p:0,c:"#000a08"},{p:.2,c:"#003322"},{p:.4,c:"#006644"},{p:.6,c:"#22aa66"},{p:.8,c:"#66dd88"},{p:1,c:"#aaffcc"}],tStart:1,tEnd:7,fps:6},
+{name:"Hex Sigil",cat:"magic",effect:"FlameEye",params:{cFlameEyeInnerFade:0.8,cFlameEyeOuterFade:0.5},grad:[{p:0,c:"#000800"},{p:.2,c:"#003300"},{p:.4,c:"#116600"},{p:.6,c:"#33aa00"},{p:.8,c:"#66dd22"},{p:1,c:"#aaffaa"}],tStart:1,tEnd:8,fps:5},
+{name:"Astral Flare",cat:"magic",effect:"Flare",params:{},grad:[{p:0,c:"#0a0010"},{p:.2,c:"#332266"},{p:.4,c:"#6644aa"},{p:.6,c:"#9966dd"},{p:.8,c:"#cc99ff"},{p:1,c:"#eeccff"}],tStart:1,tEnd:5,fps:7},
+{name:"Ether Burst",cat:"magic",effect:"Explosion",params:{cExplosionRadius:1.8,cExplosionBallness:2,cExplosionGrowth:4,cExplosionDensity:0.8},grad:[{p:0,c:"#080010"},{p:.2,c:"#2200aa"},{p:.4,c:"#5533ff"},{p:.6,c:"#8866ff"},{p:.8,c:"#bb99ff"},{p:1,c:"#eeddff"}],tStart:0.3,tEnd:2.5,fps:9},
+{name:"Shadow Bolt",cat:"magic",effect:"Explosion",params:{cExplosionRadius:2,cExplosionBallness:4,cExplosionGrowth:2,cExplosionDensity:1.5,cExplosionContrast:1.5},grad:[{p:0,c:"#000000"},{p:.2,c:"#110022"},{p:.4,c:"#220044"},{p:.6,c:"#440088"},{p:.8,c:"#6600bb"},{p:1,c:"#9933ee"}],tStart:0.3,tEnd:2.5,fps:8},
+{name:"Holy Radiance",cat:"magic",effect:"Corona",params:{cIntensity:1.0},grad:[{p:0,c:"#0a0800"},{p:.2,c:"#665500"},{p:.4,c:"#aa8800"},{p:.6,c:"#ddbb22"},{p:.8,c:"#ffdd66"},{p:1,c:"#fff8cc"}],tStart:1,tEnd:8,fps:5},
+{name:"Void Rift",cat:"magic",effect:"CoherentNoise",params:{cVoronoiNoise:0.8,cSimplexNoise:0.2,cRidge:0.7,cTurbulence:0.5,cInvert:1},grad:[{p:0,c:"#000000"},{p:.2,c:"#0a0020"},{p:.4,c:"#1a0044"},{p:.6,c:"#2a0066"},{p:.8,c:"#440088"},{p:1,c:"#6600aa"}],tStart:1,tEnd:5,fps:6},
+// ── NATURE & WATER (43-55) ──
+{name:"Ocean Ripple",cat:"nature",effect:"Caustics",params:{cSpeed:0.6},grad:[{p:0,c:"#000810"},{p:.2,c:"#003355"},{p:.4,c:"#006699"},{p:.6,c:"#2299bb"},{p:.8,c:"#55ccdd"},{p:1,c:"#aaeeff"}],tStart:1,tEnd:8,fps:6},
+{name:"Rain Splash",cat:"nature",effect:"Caustics",params:{cSpeed:1.0},grad:[{p:0,c:"#000410"},{p:.2,c:"#1144aa"},{p:.4,c:"#3388dd"},{p:.6,c:"#66bbff"},{p:.8,c:"#aaddff"},{p:1,c:"#ddeeff"}],tStart:0.5,tEnd:4,fps:8},
+{name:"Tidal Surge",cat:"nature",effect:"WaterTurbulence",params:{cSpeed:0.8},grad:[{p:0,c:"#000a10"},{p:.2,c:"#002244"},{p:.4,c:"#004466"},{p:.6,c:"#006688"},{p:.8,c:"#2299aa"},{p:1,c:"#55bbcc"}],tStart:1,tEnd:8,fps:6},
+{name:"Swamp Gas",cat:"nature",effect:"Smoke",params:{cSpeed:0.6},grad:[{p:0,c:"#020400"},{p:.2,c:"#112200"},{p:.4,c:"#334400"},{p:.6,c:"#557700"},{p:.8,c:"#779900"},{p:1,c:"#99bb22"}],tStart:2,tEnd:12,fps:4},
+{name:"Pollen Cloud",cat:"nature",effect:"Cloud",params:{cSpeed:0.4},grad:[{p:0,c:"#040400"},{p:.2,c:"#333300"},{p:.4,c:"#666600"},{p:.6,c:"#999922"},{p:.8,c:"#bbbb44"},{p:1,c:"#dddd88"}],tStart:2,tEnd:12,fps:4},
+{name:"Leaf Whirl",cat:"nature",effect:"CoherentNoise",params:{cSimplexNoise:0.7,cTurbulence:0.6,cNoiseFrequency:1.5},grad:[{p:0,c:"#020400"},{p:.2,c:"#224400"},{p:.4,c:"#448800"},{p:.6,c:"#66aa00"},{p:.8,c:"#88cc22"},{p:1,c:"#bbee66"}],tStart:1,tEnd:6,fps:7},
+{name:"Moss Glow",cat:"nature",effect:"Trabeculum",params:{cTrabeculumVariation:2},grad:[{p:0,c:"#000800"},{p:.2,c:"#003300"},{p:.4,c:"#005500"},{p:.6,c:"#228800"},{p:.8,c:"#44aa22"},{p:1,c:"#88cc66"}],tStart:2,tEnd:8,fps:5},
+{name:"Morning Dew",cat:"nature",effect:"Caustics",params:{cSpeed:0.3},grad:[{p:0,c:"#000808"},{p:.2,c:"#002244"},{p:.4,c:"#225588"},{p:.6,c:"#55aacc"},{p:.8,c:"#88ccee"},{p:1,c:"#cceeff"}],tStart:3,tEnd:15,fps:4},
+{name:"Waterfall Mist",cat:"nature",effect:"Cloud2",params:{cSpeed:1.2},grad:[{p:0,c:"#000810"},{p:.2,c:"#0a2244"},{p:.4,c:"#224488"},{p:.6,c:"#4488cc"},{p:.8,c:"#88bbee"},{p:1,c:"#ccddff"}],tStart:1,tEnd:6,fps:7},
+{name:"Coral Pulse",cat:"nature",effect:"Caustics",params:{cSpeed:0.5},grad:[{p:0,c:"#0a0400"},{p:.2,c:"#662233"},{p:.4,c:"#cc4455"},{p:.6,c:"#ee7766"},{p:.8,c:"#ffaa88"},{p:1,c:"#ffccbb"}],tStart:2,tEnd:10,fps:5},
+{name:"Algae Bloom",cat:"nature",effect:"Caustics",params:{cSpeed:0.7},grad:[{p:0,c:"#000a04"},{p:.2,c:"#003322"},{p:.4,c:"#006644"},{p:.6,c:"#009966"},{p:.8,c:"#33bb88"},{p:1,c:"#88ddaa"}],tStart:1,tEnd:8,fps:6},
+{name:"Mud Splash",cat:"nature",effect:"Explosion",params:{cExplosionRadius:2,cExplosionBallness:5,cExplosionGrowth:2.5,cExplosionDensity:2,cExplosionGrain:2.5},grad:[{p:0,c:"#000000"},{p:.2,c:"#221100"},{p:.4,c:"#443322"},{p:.6,c:"#665544"},{p:.8,c:"#887766"},{p:1,c:"#aa9988"}],tStart:0.3,tEnd:2,fps:7},
+{name:"Volcanic Ash",cat:"nature",effect:"Smoke",params:{cSpeed:0.8},grad:[{p:0,c:"#000000"},{p:.2,c:"#111111"},{p:.4,c:"#222222"},{p:.6,c:"#444444"},{p:.8,c:"#555544"},{p:1,c:"#776655"}],tStart:1,tEnd:8,fps:6},
+// ── COSMIC & SPACE (56-68) ──
+{name:"Nebula Cloud",cat:"cosmic",effect:"CoherentNoise",params:{cSimplexNoise:0.6,cVoronoiNoise:0.4,cTurbulence:0.3,cNoiseOctave:10},grad:[{p:0,c:"#000008"},{p:.2,c:"#220044"},{p:.4,c:"#6622aa"},{p:.6,c:"#aa44dd"},{p:.8,c:"#dd66ff"},{p:1,c:"#ffaaff"}],tStart:1,tEnd:8,fps:5},
+{name:"Star Birth",cat:"cosmic",effect:"Explosion",params:{cExplosionRadius:1.5,cExplosionBallness:2,cExplosionGrowth:5,cExplosionDensity:0.6,cExplosionGrain:1},grad:[{p:0,c:"#000010"},{p:.2,c:"#0022aa"},{p:.4,c:"#2266ff"},{p:.6,c:"#66aaff"},{p:.8,c:"#aaddff"},{p:1,c:"#ffffff"}],tStart:0.2,tEnd:2,fps:9},
+{name:"Supernova",cat:"cosmic",effect:"Explosion",params:{cExplosionRadius:3,cExplosionBallness:3,cExplosionGrowth:4,cExplosionDensity:1,cExplosionContrast:2},grad:[{p:0,c:"#000000"},{p:.2,c:"#4400aa"},{p:.4,c:"#aa22ff"},{p:.6,c:"#ff66ff"},{p:.8,c:"#ffaacc"},{p:1,c:"#ffffff"}],tStart:0.2,tEnd:3.5,fps:8},
+{name:"Cosmic Ray",cat:"cosmic",effect:"Lightning",params:{},grad:[{p:0,c:"#000010"},{p:.2,c:"#1122aa"},{p:.4,c:"#3355ff"},{p:.6,c:"#6688ff"},{p:.8,c:"#99bbff"},{p:1,c:"#ddeeff"}],tStart:1,tEnd:5,fps:9},
+{name:"Dark Matter",cat:"cosmic",effect:"CoherentNoise",params:{cVoronoiNoise:0.6,cSimplexNoise:0.4,cRidge:0.5,cNoiseFrequency:0.8},grad:[{p:0,c:"#000000"},{p:.2,c:"#050010"},{p:.4,c:"#0a0020"},{p:.6,c:"#110033"},{p:.8,c:"#1a0044"},{p:1,c:"#220066"}],tStart:2,tEnd:10,fps:4},
+{name:"Pulsar Beam",cat:"cosmic",effect:"Electric",params:{cSpeed:1.5},grad:[{p:0,c:"#000810"},{p:.2,c:"#0044aa"},{p:.4,c:"#2288ff"},{p:.6,c:"#55bbff"},{p:.8,c:"#88ddff"},{p:1,c:"#ffffff"}],tStart:0.5,tEnd:4,fps:10},
+{name:"Galaxy Swirl",cat:"cosmic",effect:"CoherentNoise",params:{cVoronoiNoise:0.3,cSimplexNoise:0.7,cRidge:0.4,cTurbulence:0.6,cNoiseOctave:12,polarConversion:true},grad:[{p:0,c:"#000008"},{p:.2,c:"#110044"},{p:.4,c:"#3322aa"},{p:.6,c:"#6644dd"},{p:.8,c:"#aa88ff"},{p:1,c:"#eeccff"}],tStart:1,tEnd:8,fps:5},
+{name:"Meteor Trail",cat:"cosmic",effect:"FlameLance",params:{cSpeed:1.2},grad:[{p:0,c:"#050200"},{p:.2,c:"#553300"},{p:.4,c:"#aa5500"},{p:.6,c:"#dd7700"},{p:.8,c:"#ffaa33"},{p:1,c:"#ffdd88"}],tStart:1,tEnd:5,fps:8},
+{name:"Solar Wind",cat:"cosmic",effect:"Corona",params:{cIntensity:0.6,cRadius:0.4},grad:[{p:0,c:"#080800"},{p:.2,c:"#554400"},{p:.4,c:"#aa8800"},{p:.6,c:"#ddbb22"},{p:.8,c:"#ffdd55"},{p:1,c:"#ffffaa"}],tStart:2,tEnd:10,fps:5},
+{name:"Quasar Jet",cat:"cosmic",effect:"Electric",params:{cSpeed:2.0},grad:[{p:0,c:"#000410"},{p:.2,c:"#1133aa"},{p:.4,c:"#3366ff"},{p:.6,c:"#6699ff"},{p:.8,c:"#aaccff"},{p:1,c:"#eeeeff"}],tStart:0.3,tEnd:3,fps:11},
+{name:"Wormhole",cat:"cosmic",effect:"CoherentNoise",params:{cVoronoiNoise:0.7,cRidge:0.8,cTurbulence:0.4,cInvert:1,polarConversion:true},grad:[{p:0,c:"#000000"},{p:.2,c:"#0a0033"},{p:.4,c:"#220066"},{p:.6,c:"#440099"},{p:.8,c:"#6622cc"},{p:1,c:"#8844ee"}],tStart:1,tEnd:6,fps:6},
+{name:"Antimatter Pop",cat:"cosmic",effect:"Explosion",params:{cExplosionRadius:2,cExplosionBallness:2,cExplosionGrowth:5,cExplosionContrast:2,cExplosionGrain:0.5},grad:[{p:0,c:"#000000"},{p:.2,c:"#000000"},{p:.4,c:"#2200aa"},{p:.6,c:"#aa22ff"},{p:.8,c:"#ff88ff"},{p:1,c:"#ffffff"}],tStart:0.1,tEnd:1.5,fps:12},
+{name:"Starfield Dust",cat:"cosmic",effect:"SparkNoise",params:{cNoiseFrequency:3},grad:[{p:0,c:"#000004"},{p:.2,c:"#0a0a22"},{p:.4,c:"#222244"},{p:.6,c:"#444466"},{p:.8,c:"#888899"},{p:1,c:"#ccccdd"}],tStart:1,tEnd:5,fps:5},
+// ── ENERGY & ELECTRIC (69-82) ──
+{name:"Lightning Strike",cat:"energy",effect:"Lightning",params:{},grad:[{p:0,c:"#000818"},{p:.2,c:"#0044aa"},{p:.4,c:"#2288ff"},{p:.6,c:"#66bbff"},{p:.8,c:"#aaddff"},{p:1,c:"#ffffff"}],tStart:0.5,tEnd:4,fps:10},
+{name:"Tesla Coil",cat:"energy",effect:"Electric",params:{cSpeed:1.0},grad:[{p:0,c:"#000810"},{p:.2,c:"#1144aa"},{p:.4,c:"#3388ee"},{p:.6,c:"#66aaff"},{p:.8,c:"#99ccff"},{p:1,c:"#ddeeff"}],tStart:1,tEnd:5,fps:9},
+{name:"Plasma Orb",cat:"energy",effect:"Corona",params:{cIntensity:1.0},grad:[{p:0,c:"#0a0018"},{p:.2,c:"#550088"},{p:.4,c:"#aa22cc"},{p:.6,c:"#dd55ff"},{p:.8,c:"#ff88ff"},{p:1,c:"#ffccff"}],tStart:1,tEnd:7,fps:6},
+{name:"EMP Wave",cat:"energy",effect:"Explosion",params:{cExplosionRadius:3,cExplosionBallness:1,cExplosionGrowth:6,cExplosionDensity:0.5},grad:[{p:0,c:"#000410"},{p:.2,c:"#1144aa"},{p:.4,c:"#4488ff"},{p:.6,c:"#88bbff"},{p:.8,c:"#bbddff"},{p:1,c:"#ffffff"}],tStart:0.1,tEnd:1.5,fps:12},
+{name:"Neon Surge",cat:"energy",effect:"Electric",params:{cSpeed:1.5},grad:[{p:0,c:"#0a000a"},{p:.2,c:"#660044"},{p:.4,c:"#cc0088"},{p:.6,c:"#ff22aa"},{p:.8,c:"#ff66cc"},{p:1,c:"#ffaaee"}],tStart:0.5,tEnd:4,fps:10},
+{name:"Volt Stream",cat:"energy",effect:"Lightning",params:{cSpeed:1.5},grad:[{p:0,c:"#040800"},{p:.2,c:"#336600"},{p:.4,c:"#66aa00"},{p:.6,c:"#99dd22"},{p:.8,c:"#bbee55"},{p:1,c:"#eeffaa"}],tStart:0.5,tEnd:3,fps:11},
+{name:"Static Charge",cat:"energy",effect:"Electric",params:{cSpeed:0.5},grad:[{p:0,c:"#000408"},{p:.2,c:"#112244"},{p:.4,c:"#224488"},{p:.6,c:"#4477cc"},{p:.8,c:"#77aaee"},{p:1,c:"#aaddff"}],tStart:2,tEnd:8,fps:6},
+{name:"Power Core",cat:"energy",effect:"Corona",params:{cIntensity:1.2,cRadius:0.25},grad:[{p:0,c:"#0a0400"},{p:.2,c:"#773300"},{p:.4,c:"#dd5500"},{p:.6,c:"#ff7700"},{p:.8,c:"#ffaa33"},{p:1,c:"#ffdd88"}],tStart:1,tEnd:6,fps:7},
+{name:"Ion Trail",cat:"energy",effect:"Electric",params:{cSpeed:0.8},grad:[{p:0,c:"#000808"},{p:.2,c:"#004444"},{p:.4,c:"#008888"},{p:.6,c:"#22bbbb"},{p:.8,c:"#66dddd"},{p:1,c:"#aaffff"}],tStart:1,tEnd:6,fps:8},
+{name:"Spark Shower",cat:"energy",effect:"SparkNoise",params:{cNoiseFrequency:2.5},grad:[{p:0,c:"#0a0800"},{p:.2,c:"#886600"},{p:.4,c:"#ddaa00"},{p:.6,c:"#ffcc22"},{p:.8,c:"#ffdd66"},{p:1,c:"#ffffaa"}],tStart:1,tEnd:4,fps:10},
+{name:"Circuit Glow",cat:"energy",effect:"Electric",params:{cSpeed:0.6},grad:[{p:0,c:"#000800"},{p:.2,c:"#004400"},{p:.4,c:"#008800"},{p:.6,c:"#22aa22"},{p:.8,c:"#55dd55"},{p:1,c:"#aaffaa"}],tStart:1,tEnd:6,fps:7},
+{name:"Thunder Clap",cat:"energy",effect:"Explosion",params:{cExplosionRadius:2.5,cExplosionBallness:2,cExplosionGrowth:5,cExplosionDensity:0.8,cExplosionGrain:1},grad:[{p:0,c:"#000410"},{p:.2,c:"#2244aa"},{p:.4,c:"#5588ff"},{p:.6,c:"#88bbff"},{p:.8,c:"#bbddff"},{p:1,c:"#ffffff"}],tStart:0.1,tEnd:2,fps:10},
+{name:"Fusion Spark",cat:"energy",effect:"Explosion",params:{cExplosionRadius:1.5,cExplosionBallness:1.5,cExplosionGrowth:6,cExplosionContrast:2,cExplosionGrain:0.5},grad:[{p:0,c:"#000808"},{p:.2,c:"#004444"},{p:.4,c:"#22aaaa"},{p:.6,c:"#66dddd"},{p:.8,c:"#aaffff"},{p:1,c:"#ffffff"}],tStart:0.1,tEnd:1.5,fps:12},
+{name:"Energy Shield",cat:"energy",effect:"Corona",params:{cIntensity:0.5,cRadius:0.6},grad:[{p:0,c:"#000410"},{p:.2,c:"#1133aa"},{p:.4,c:"#3366dd"},{p:.6,c:"#5599ff"},{p:.8,c:"#88bbff"},{p:1,c:"#bbddff"}],tStart:2,tEnd:10,fps:5},
+// ── DARK & SHADOW (83-92) ──
+{name:"Shadow Smoke",cat:"dark",effect:"Smoke",params:{cSpeed:0.5},grad:[{p:0,c:"#000000"},{p:.2,c:"#080808"},{p:.4,c:"#111111"},{p:.6,c:"#1a1a1a"},{p:.8,c:"#222222"},{p:1,c:"#333333"}],tStart:2,tEnd:12,fps:4},
+{name:"Void Tendrils",cat:"dark",effect:"Trabeculum",params:{cTrabeculumVariation:4},grad:[{p:0,c:"#000000"},{p:.2,c:"#0a0018"},{p:.4,c:"#1a0033"},{p:.6,c:"#2a004d"},{p:.8,c:"#3a0066"},{p:1,c:"#550088"}],tStart:1,tEnd:6,fps:5},
+{name:"Blight Cloud",cat:"dark",effect:"Cloud",params:{cSpeed:0.6},grad:[{p:0,c:"#000000"},{p:.2,c:"#0a1100"},{p:.4,c:"#1a2200"},{p:.6,c:"#2a3300"},{p:.8,c:"#3a4400"},{p:1,c:"#557700"}],tStart:2,tEnd:10,fps:4},
+{name:"Nightmare Eye",cat:"dark",effect:"FlameEye",params:{cFlameEyeInnerFade:1.2,cFlameEyeOuterFade:0.6,cFlameEyeBorder:0.8},grad:[{p:0,c:"#000000"},{p:.2,c:"#220000"},{p:.4,c:"#440000"},{p:.6,c:"#660000"},{p:.8,c:"#880000"},{p:1,c:"#aa2200"}],tStart:1,tEnd:8,fps:5},
+{name:"Death Fog",cat:"dark",effect:"Cloud2",params:{cSpeed:0.4},grad:[{p:0,c:"#000000"},{p:.2,c:"#050508"},{p:.4,c:"#0a0a10"},{p:.6,c:"#111118"},{p:.8,c:"#1a1a22"},{p:1,c:"#222233"}],tStart:3,tEnd:15,fps:3},
+{name:"Corruption",cat:"dark",effect:"CoherentNoise",params:{cRidge:0.8,cVoronoiNoise:0.6,cSimplexNoise:0.4,cTurbulence:0.4},grad:[{p:0,c:"#000000"},{p:.2,c:"#110020"},{p:.4,c:"#220040"},{p:.6,c:"#3a0060"},{p:.8,c:"#550080"},{p:1,c:"#7700aa"}],tStart:1,tEnd:6,fps:5},
+{name:"Wither Haze",cat:"dark",effect:"Smoke",params:{cSpeed:0.3},grad:[{p:0,c:"#000000"},{p:.2,c:"#0a0800"},{p:.4,c:"#1a1100"},{p:.6,c:"#2a1a00"},{p:.8,c:"#3a2200"},{p:1,c:"#554400"}],tStart:3,tEnd:15,fps:3},
+{name:"Dark Blaze",cat:"dark",effect:"Flame",params:{cSpeed:0.8},grad:[{p:0,c:"#000000"},{p:.2,c:"#110000"},{p:.4,c:"#220000"},{p:.6,c:"#440000"},{p:.8,c:"#660000"},{p:1,c:"#881100"}],tStart:1,tEnd:6,fps:7},
+{name:"Phantom Wisp",cat:"dark",effect:"Corona",params:{cIntensity:0.3,cRadius:0.3},grad:[{p:0,c:"#000000"},{p:.2,c:"#0a0a10"},{p:.4,c:"#1a1a22"},{p:.6,c:"#2a2a33"},{p:.8,c:"#444455"},{p:1,c:"#666677"}],tStart:2,tEnd:10,fps:4},
+{name:"Decay Spore",cat:"dark",effect:"Trabeculum",params:{cTrabeculumVariation:5},grad:[{p:0,c:"#000000"},{p:.2,c:"#0a0800"},{p:.4,c:"#1a1400"},{p:.6,c:"#2a2200"},{p:.8,c:"#443300"},{p:1,c:"#665544"}],tStart:2,tEnd:8,fps:5},
+// ── ABSTRACT & ARTISTIC (93-100) ──
+{name:"Rainbow Burst",cat:"abstract",effect:"Explosion",params:{cExplosionRadius:2,cExplosionBallness:3,cExplosionGrowth:3.5,cExplosionDensity:1},grad:[{p:0,c:"#ff0000"},{p:.2,c:"#ff8800"},{p:.4,c:"#ffff00"},{p:.6,c:"#00ff00"},{p:.8,c:"#0088ff"},{p:1,c:"#8800ff"}],tStart:0.3,tEnd:3,fps:8},
+{name:"Neon Dreams",cat:"abstract",effect:"CoherentNoise",params:{cSimplexNoise:0.5,cVoronoiNoise:0.5,cTurbulence:0.5,cNoiseFrequency:1.5},grad:[{p:0,c:"#0a000a"},{p:.2,c:"#ff0088"},{p:.4,c:"#ff00ff"},{p:.6,c:"#8800ff"},{p:.8,c:"#0044ff"},{p:1,c:"#00ffff"}],tStart:1,tEnd:6,fps:7},
+{name:"Watercolor Wash",cat:"abstract",effect:"Cloud",params:{cSpeed:0.5},grad:[{p:0,c:"#e8ddd0"},{p:.2,c:"#ccaa88"},{p:.4,c:"#aa8877"},{p:.6,c:"#9977aa"},{p:.8,c:"#8888bb"},{p:1,c:"#aabbcc"}],tStart:2,tEnd:10,fps:4},
+{name:"Ink Splash",cat:"abstract",effect:"Explosion",params:{cExplosionRadius:2,cExplosionBallness:4,cExplosionGrowth:2.5,cExplosionDensity:2,cExplosionContrast:2},grad:[{p:0,c:"#000000"},{p:.2,c:"#111111"},{p:.4,c:"#1a1a1a"},{p:.6,c:"#222222"},{p:.8,c:"#333333"},{p:1,c:"#444444"}],tStart:0.2,tEnd:2,fps:8},
+{name:"Gold Dust",cat:"abstract",effect:"CoherentNoise",params:{cSimplexNoise:0.8,cVoronoiNoise:0.2,cNoiseFrequency:2},grad:[{p:0,c:"#0a0400"},{p:.2,c:"#554400"},{p:.4,c:"#aa8800"},{p:.6,c:"#ddbb22"},{p:.8,c:"#ffdd55"},{p:1,c:"#ffffaa"}],tStart:1,tEnd:6,fps:6},
+{name:"Cherry Blossom",cat:"abstract",effect:"Cloud",params:{cSpeed:0.4},grad:[{p:0,c:"#0a0004"},{p:.2,c:"#552233"},{p:.4,c:"#aa4466"},{p:.6,c:"#dd6688"},{p:.8,c:"#ffaacc"},{p:1,c:"#ffdde8"}],tStart:2,tEnd:12,fps:4},
+{name:"Acid Wave",cat:"abstract",effect:"CoherentNoise",params:{cSimplexNoise:0.3,cVoronoiNoise:0.7,cTurbulence:0.6,cRidge:0.3},grad:[{p:0,c:"#000800"},{p:.2,c:"#116600"},{p:.4,c:"#33aa00"},{p:.6,c:"#88dd00"},{p:.8,c:"#ccff22"},{p:1,c:"#eeff88"}],tStart:1,tEnd:5,fps:8},
+{name:"Prismatic Aura",cat:"abstract",effect:"Corona",params:{cIntensity:0.8},grad:[{p:0,c:"#220000"},{p:.2,c:"#884400"},{p:.4,c:"#dddd00"},{p:.6,c:"#00aa44"},{p:.8,c:"#0044aa"},{p:1,c:"#440088"}],tStart:1,tEnd:8,fps:6}
+];
+
+// ══════════════════════════════════════════════════════════════
+// GENERATE ALL SPRITE SHEETS IN BATCHES
+// ══════════════════════════════════════════════════════════════
+const sheets=[];
+const total=particles.length;
+let generated=0;
+
+function generateBatch(startIdx){
+return new Promise(resolve=>{
+const end=Math.min(startIdx+BATCH,total);
+for(let i=startIdx;i<end;i++){
+const p=particles[i];
+const gradTex=makeGrad(p.grad);
+const canvas=makeSpriteSheet(p.effect,p.params,gradTex,p.tStart,p.tEnd);
+sheets.push(canvas);
+gradTex.dispose();
+generated++;
+const pct=Math.round((generated/total)*95)+5;
+prog(pct);
+loadText.textContent=`${generated}/${total} — ${p.name}`;
+}
+setTimeout(resolve,0);
+});
+}
+
+prog(5);
+loadText.textContent="Generating sprite sheets...";
+for(let i=0;i<total;i+=BATCH){
+await generateBatch(i);
+}
+
+// ══════════════════════════════════════════════════════════════
+// BUILD GALLERY UI
+// ══════════════════════════════════════════════════════════════
+const categories=["all","fire","ice","magic","nature","cosmic","energy","dark","abstract"];
+const catLabels={all:"All",fire:"Fire",ice:"Ice",magic:"Magic",nature:"Nature",cosmic:"Cosmic",energy:"Energy",dark:"Dark",abstract:"Abstract"};
+const filtersEl=document.getElementById("filters");
+let activeCat="all";
+
+for(const cat of categories){
+const btn=document.createElement("button");
+btn.className="toggle-btn"+(cat==="all"?" active":"");
+btn.textContent=catLabels[cat];
+btn.dataset.cat=cat;
+btn.onclick=()=>{
+activeCat=cat;
+filtersEl.querySelectorAll(".toggle-btn").forEach(b=>b.classList.remove("active"));
+btn.classList.add("active");
+document.querySelectorAll(".card").forEach(card=>{
+if(cat==="all"||card.dataset.cat===cat){card.classList.remove("hidden");}
+else{card.classList.add("hidden");}
+});
+};
+filtersEl.appendChild(btn);
+}
+
+const gridEl=document.getElementById("grid");
+const cardData=[];
+
+for(let i=0;i<total;i++){
+const p=particles[i];
+const card=document.createElement("div");
+card.className="card";
+card.dataset.cat=p.cat;
+
+const cv=document.createElement("canvas");
+cv.width=200;cv.height=200;
+card.appendChild(cv);
+
+const info=document.createElement("div");
+info.className="info";
+const nameEl=document.createElement("span");
+nameEl.className="name";
+nameEl.textContent=p.name;
+info.appendChild(nameEl);
+const tagEl=document.createElement("span");
+tagEl.className="cat-tag";
+tagEl.textContent=p.cat;
+info.appendChild(tagEl);
+card.appendChild(info);
+
+gridEl.appendChild(card);
+cardData.push({canvas:cv,ctx:cv.getContext("2d"),sheet:sheets[i],fps:p.fps,frame:0,visible:false,lastTime:0});
+}
+
+// ══════════════════════════════════════════════════════════════
+// ANIMATION WITH INTERSECTION OBSERVER
+// ══════════════════════════════════════════════════════════════
+const observer=new IntersectionObserver((entries)=>{
+for(const e of entries){
+const idx=Array.from(gridEl.children).indexOf(e.target);
+if(idx>=0)cardData[idx].visible=e.isIntersecting;
+}
+},{threshold:0.1});
+
+document.querySelectorAll(".card").forEach(card=>observer.observe(card));
+
+function animateAll(now){
+requestAnimationFrame(animateAll);
+for(let i=0;i<cardData.length;i++){
+const d=cardData[i];
+if(!d.visible)continue;
+const interval=1000/d.fps;
+if(now-d.lastTime<interval)continue;
+d.lastTime=now;
+const f=d.frame%FRAMES;
+const col=f%GRID,row=Math.floor(f/GRID);
+d.ctx.clearRect(0,0,200,200);
+d.ctx.drawImage(d.sheet,col*SRES,row*SRES,SRES,SRES,0,0,200,200);
+d.frame++;
+}
+}
+
+prog(100);
+loadText.textContent="Done!";
+await new Promise(r=>setTimeout(r,300));
+document.getElementById("loading").style.display="none";
+document.getElementById("content").style.display="block";
+
+requestAnimationFrame(animateAll);
+
+</script>
+		<script type="module" src="src/ui/top-nav.js"></script>
+	</body>
+</html>

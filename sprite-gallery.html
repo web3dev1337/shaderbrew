@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sprite Gallery — 160 Animated Effects</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#030306;color:#ccc;font-family:'Segoe UI',system-ui,sans-serif}
+.header{text-align:center;padding:1.875rem 1.25rem 0.9375rem}
+.header h1{font-size:1.5rem;color:#e0e0ff;letter-spacing:3px;font-family:monospace;
+background:linear-gradient(90deg,#ff6622,#ff44ff,#44aaff,#ff6622);background-size:300% 100%;
+-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:shine 4s linear infinite}
+@keyframes shine{0%{background-position:0% 50%}100%{background-position:300% 50%}}
+.header p{color:#555;font-size:0.8rem;margin-top:0.25rem;font-family:monospace}
+.header a{color:#e94560;text-decoration:none}
+.filters{max-width:1400px;margin:0.625rem auto 1.25rem;display:flex;gap:0.375rem;justify-content:center;flex-wrap:wrap;padding:0 1.25rem}
+.filters button{font-family:monospace;font-size:0.6875rem;padding:0.4375rem 0.875rem;border:1px solid #333;border-radius:0.375rem;
+background:#111;color:#aaa;cursor:pointer;transition:all .2s}
+.filters button.active{background:#1a1a2e;color:#fff;border-color:#e94560}
+.filters button:hover{border-color:#666}
+.grid{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(160px, calc(50% - 0.5rem)),1fr));gap:0.75rem;padding:0 1.25rem 2.5rem}
+.card{background:#0a0a14;border:1px solid #1a1a2e;border-radius:0.5rem;overflow:hidden;transition:border-color .2s,box-shadow .2s}
+.card:hover{border-color:#e94560;box-shadow:0 0 20px rgba(233,69,96,.15)}
+.card canvas{width:100%;aspect-ratio:1;display:block;background:#000}
+.card .info{padding:0.5rem 0.625rem}
+.card .name{font-family:monospace;font-size:0.75rem;color:#e0e0ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .meta{font-size:0.625rem;color:#555;font-family:monospace;margin-top:0.125rem}
+.card .tag-row{display:flex;gap:0.375rem;flex-wrap:wrap;margin-top:0.1875rem}
+.card .cat-tag{display:inline-block;font-size:0.5625rem;padding:0.0625rem 0.375rem;border-radius:0.1875rem;color:#888;border:1px solid #222}
+.card .source-tag{text-transform:uppercase;letter-spacing:0.08em}
+.count{text-align:center;font-family:monospace;font-size:0.75rem;color:#444;padding:0.625rem;margin-bottom:0.625rem}
+@media(max-width:600px){
+.header{padding:1rem 0.75rem 0.5rem}
+.header h1{font-size:1.125rem}
+.grid{grid-template-columns:repeat(auto-fill,minmax(min(130px, calc(50% - 0.375rem)),1fr));gap:0.5rem;padding:0 0.75rem 1.5rem}
+.filters{gap:0.25rem;padding:0 0.75rem}
+.filters button{padding:0.3125rem 0.5rem;font-size:0.625rem}
+}
+</style>
+</head>
+<body>
+<div class="header">
+<h1>SPRITE GALLERY</h1>
+<p>160 animated sprite sheets (100 FXGEN library + 52 custom GLSL + 8 composites) &mdash; 6&times;6 grid, 192px frames &mdash; <a href="particles.html">3D View</a> | <a href="gallery.html">Texture Gallery</a></p>
+</div>
+
+<div class="filters" id="sourceFilters"></div>
+<div class="filters" id="filters"></div>
+<div class="count" id="count"></div>
+<div class="grid" id="grid"></div>
+
+<script>
+const GRID=6,FRAMES=GRID*GRID;
+const CATALOG=[
+{name:"Inferno Burst",cat:"fire",file:"001-inferno-burst",fps:10},
+{name:"Napalm Drop",cat:"fire",file:"002-napalm-drop",fps:8},
+{name:"Phoenix Flare",cat:"fire",file:"003-phoenix-flare",fps:8},
+{name:"Magma Splash",cat:"fire",file:"004-magma-splash",fps:7},
+{name:"Solar Eruption",cat:"fire",file:"005-solar-eruption",fps:6},
+{name:"Candle Light",cat:"fire",file:"006-candle-light",fps:5},
+{name:"Wildfire",cat:"fire",file:"007-wildfire",fps:10},
+{name:"Furnace Core",cat:"fire",file:"008-furnace-core",fps:5},
+{name:"Dragon Breath",cat:"fire",file:"009-dragon-breath",fps:12},
+{name:"Ember Drift",cat:"fire",file:"010-ember-drift",fps:4},
+{name:"Firework Pop",cat:"fire",file:"011-firework-pop",fps:12},
+{name:"Thermal Pulse",cat:"fire",file:"012-thermal-pulse",fps:7},
+{name:"Combustion",cat:"fire",file:"013-combustion",fps:9},
+{name:"Hellfire",cat:"fire",file:"014-hellfire",fps:8},
+{name:"Bonfire Glow",cat:"fire",file:"015-bonfire-glow",fps:6},
+{name:"Frost Nova",cat:"ice",file:"016-frost-nova",fps:8},
+{name:"Blizzard Swirl",cat:"ice",file:"017-blizzard-swirl",fps:7},
+{name:"Crystal Shard",cat:"ice",file:"018-crystal-shard",fps:6},
+{name:"Frozen Mist",cat:"ice",file:"019-frozen-mist",fps:4},
+{name:"Snowfall",cat:"ice",file:"020-snowfall",fps:5},
+{name:"Ice Spike",cat:"ice",file:"021-ice-spike",fps:7},
+{name:"Glacial Pulse",cat:"ice",file:"022-glacial-pulse",fps:5},
+{name:"Arctic Breath",cat:"ice",file:"023-arctic-breath",fps:6},
+{name:"Permafrost Crack",cat:"ice",file:"024-permafrost-crack",fps:5},
+{name:"Diamond Dust",cat:"ice",file:"025-diamond-dust",fps:8},
+{name:"Hail Burst",cat:"ice",file:"026-hail-burst",fps:10},
+{name:"Cryo Flash",cat:"ice",file:"027-cryo-flash",fps:9},
+{name:"Arcane Bolt",cat:"magic",file:"028-arcane-bolt",fps:6},
+{name:"Dark Ritual",cat:"magic",file:"029-dark-ritual",fps:5},
+{name:"Fairy Dust",cat:"magic",file:"030-fairy-dust",fps:7},
+{name:"Mana Burst",cat:"magic",file:"031-mana-burst",fps:8},
+{name:"Enchantment Glow",cat:"magic",file:"032-enchantment-glow",fps:5},
+{name:"Rune Pulse",cat:"magic",file:"033-rune-pulse",fps:6},
+{name:"Spirit Wisp",cat:"magic",file:"034-spirit-wisp",fps:5},
+{name:"Mystic Flame",cat:"magic",file:"035-mystic-flame",fps:7},
+{name:"Soul Fire",cat:"magic",file:"036-soul-fire",fps:6},
+{name:"Hex Sigil",cat:"magic",file:"037-hex-sigil",fps:5},
+{name:"Astral Flare",cat:"magic",file:"038-astral-flare",fps:7},
+{name:"Ether Burst",cat:"magic",file:"039-ether-burst",fps:9},
+{name:"Shadow Bolt",cat:"magic",file:"040-shadow-bolt",fps:8},
+{name:"Holy Radiance",cat:"magic",file:"041-holy-radiance",fps:5},
+{name:"Void Rift",cat:"magic",file:"042-void-rift",fps:6},
+{name:"Ocean Ripple",cat:"nature",file:"043-ocean-ripple",fps:6},
+{name:"Rain Splash",cat:"nature",file:"044-rain-splash",fps:8},
+{name:"Tidal Surge",cat:"nature",file:"045-tidal-surge",fps:6},
+{name:"Swamp Gas",cat:"nature",file:"046-swamp-gas",fps:4},
+{name:"Pollen Cloud",cat:"nature",file:"047-pollen-cloud",fps:4},
+{name:"Leaf Whirl",cat:"nature",file:"048-leaf-whirl",fps:7},
+{name:"Moss Glow",cat:"nature",file:"049-moss-glow",fps:5},
+{name:"Morning Dew",cat:"nature",file:"050-morning-dew",fps:4},
+{name:"Waterfall Mist",cat:"nature",file:"051-waterfall-mist",fps:7},
+{name:"Coral Pulse",cat:"nature",file:"052-coral-pulse",fps:5},
+{name:"Algae Bloom",cat:"nature",file:"053-algae-bloom",fps:6},
+{name:"Mud Splash",cat:"nature",file:"054-mud-splash",fps:7},
+{name:"Volcanic Ash",cat:"nature",file:"055-volcanic-ash",fps:6},
+{name:"Nebula Cloud",cat:"cosmic",file:"056-nebula-cloud",fps:5},
+{name:"Star Birth",cat:"cosmic",file:"057-star-birth",fps:9},
+{name:"Supernova",cat:"cosmic",file:"058-supernova",fps:8},
+{name:"Cosmic Ray",cat:"cosmic",file:"059-cosmic-ray",fps:9},
+{name:"Dark Matter",cat:"cosmic",file:"060-dark-matter",fps:4},
+{name:"Pulsar Beam",cat:"cosmic",file:"061-pulsar-beam",fps:10},
+{name:"Galaxy Swirl",cat:"cosmic",file:"062-galaxy-swirl",fps:5},
+{name:"Meteor Trail",cat:"cosmic",file:"063-meteor-trail",fps:8},
+{name:"Solar Wind",cat:"cosmic",file:"064-solar-wind",fps:5},
+{name:"Quasar Jet",cat:"cosmic",file:"065-quasar-jet",fps:11},
+{name:"Wormhole",cat:"cosmic",file:"066-wormhole",fps:6},
+{name:"Antimatter Pop",cat:"cosmic",file:"067-antimatter-pop",fps:12},
+{name:"Starfield Dust",cat:"cosmic",file:"068-starfield-dust",fps:5},
+{name:"Lightning Strike",cat:"energy",file:"069-lightning-strike",fps:10},
+{name:"Tesla Coil",cat:"energy",file:"070-tesla-coil",fps:9},
+{name:"Plasma Orb",cat:"energy",file:"071-plasma-orb",fps:6},
+{name:"EMP Wave",cat:"energy",file:"072-emp-wave",fps:12},
+{name:"Neon Surge",cat:"energy",file:"073-neon-surge",fps:10},
+{name:"Volt Stream",cat:"energy",file:"074-volt-stream",fps:11},
+{name:"Static Charge",cat:"energy",file:"075-static-charge",fps:6},
+{name:"Power Core",cat:"energy",file:"076-power-core",fps:7},
+{name:"Ion Trail",cat:"energy",file:"077-ion-trail",fps:8},
+{name:"Spark Shower",cat:"energy",file:"078-spark-shower",fps:10},
+{name:"Circuit Glow",cat:"energy",file:"079-circuit-glow",fps:7},
+{name:"Thunder Clap",cat:"energy",file:"080-thunder-clap",fps:10},
+{name:"Fusion Spark",cat:"energy",file:"081-fusion-spark",fps:12},
+{name:"Energy Shield",cat:"energy",file:"082-energy-shield",fps:5},
+{name:"Shadow Smoke",cat:"dark",file:"083-shadow-smoke",fps:4},
+{name:"Void Tendrils",cat:"dark",file:"084-void-tendrils",fps:5},
+{name:"Blight Cloud",cat:"dark",file:"085-blight-cloud",fps:4},
+{name:"Nightmare Eye",cat:"dark",file:"086-nightmare-eye",fps:5},
+{name:"Death Fog",cat:"dark",file:"087-death-fog",fps:3},
+{name:"Corruption",cat:"dark",file:"088-corruption",fps:5},
+{name:"Wither Haze",cat:"dark",file:"089-wither-haze",fps:3},
+{name:"Dark Blaze",cat:"dark",file:"090-dark-blaze",fps:7},
+{name:"Phantom Wisp",cat:"dark",file:"091-phantom-wisp",fps:4},
+{name:"Decay Spore",cat:"dark",file:"092-decay-spore",fps:5},
+{name:"Rainbow Burst",cat:"abstract",file:"093-rainbow-burst",fps:8},
+{name:"Neon Dreams",cat:"abstract",file:"094-neon-dreams",fps:7},
+{name:"Watercolor Wash",cat:"abstract",file:"095-watercolor-wash",fps:4},
+{name:"Ink Splash",cat:"abstract",file:"096-ink-splash",fps:8},
+{name:"Gold Dust",cat:"abstract",file:"097-gold-dust",fps:6},
+{name:"Cherry Blossom",cat:"abstract",file:"098-cherry-blossom",fps:4},
+{name:"Acid Wave",cat:"abstract",file:"099-acid-wave",fps:8},
+{name:"Prismatic Aura",cat:"abstract",file:"100-prismatic-aura",fps:6},
+// === CUSTOM GLSL SHADERS (raymarched, fractals, physics) ===
+{name:"Volumetric Nebula",cat:"cosmic",file:"101-volumetric-nebula",fps:6},
+{name:"Black Hole",cat:"cosmic",file:"102-black-hole",fps:5},
+{name:"Shockwave Pulse",cat:"energy",file:"103-shockwave-pulse",fps:10},
+{name:"Plasma Containment",cat:"energy",file:"104-plasma-containment",fps:7},
+{name:"Julia Fractal Morph",cat:"abstract",file:"105-julia-fractal-morph",fps:5},
+{name:"Warp Tunnel",cat:"cosmic",file:"106-warp-tunnel",fps:10},
+{name:"Warp Inferno",cat:"cosmic",file:"107-warp-inferno",fps:10},
+{name:"Warp Void",cat:"cosmic",file:"108-warp-void",fps:6},
+{name:"Warp Electric",cat:"cosmic",file:"109-warp-electric",fps:12},
+{name:"Warp Rainbow",cat:"cosmic",file:"110-warp-rainbow",fps:9},
+{name:"Tornado Vortex",cat:"nature",file:"111-tornado-vortex",fps:7},
+{name:"Bioluminescent",cat:"nature",file:"112-bioluminescent",fps:6},
+{name:"Singularity",cat:"cosmic",file:"113-singularity",fps:7},
+{name:"Aurora Borealis",cat:"nature",file:"114-aurora-borealis",fps:5},
+{name:"Cosmic Jellyfish",cat:"nature",file:"115-cosmic-jellyfish",fps:6},
+{name:"God Rays",cat:"energy",file:"116-god-rays",fps:6},
+{name:"Reality Glitch",cat:"abstract",file:"117-reality-glitch",fps:10},
+{name:"Crystal Geode",cat:"abstract",file:"118-crystal-geode",fps:5},
+{name:"Phoenix Rebirth",cat:"fire",file:"119-phoenix-rebirth",fps:8},
+{name:"Supernova",cat:"cosmic",file:"120-supernova",fps:8},
+{name:"Dimensional Portal",cat:"magic",file:"121-dimensional-portal",fps:8},
+{name:"Deep Ocean",cat:"nature",file:"122-deep-ocean",fps:6},
+{name:"Galaxy Spiral",cat:"cosmic",file:"123-galaxy-spiral",fps:4},
+{name:"Mandelbrot Zoom",cat:"abstract",file:"124-mandelbrot-zoom",fps:5},
+{name:"Chain Lightning",cat:"energy",file:"125-chain-lightning",fps:12},
+{name:"Solar Flare",cat:"fire",file:"126-solar-flare",fps:7},
+{name:"Whirlpool",cat:"nature",file:"127-whirlpool",fps:7},
+{name:"DNA Helix",cat:"abstract",file:"128-dna-helix",fps:8},
+{name:"Lava Flow",cat:"fire",file:"129-lava-flow",fps:5},
+{name:"Time Vortex",cat:"abstract",file:"130-time-vortex",fps:8},
+{name:"Fluid Ink",cat:"abstract",file:"131-fluid-ink",fps:6},
+{name:"Quantum Entangle",cat:"energy",file:"132-quantum-entangle",fps:8},
+{name:"Gravity Well",cat:"cosmic",file:"133-gravity-well",fps:6},
+{name:"Sound Visualizer",cat:"abstract",file:"134-sound-visualizer",fps:10},
+{name:"Smoke Ring",cat:"nature",file:"135-smoke-ring",fps:6},
+{name:"Magic Runes",cat:"magic",file:"136-magic-runes",fps:8},
+{name:"Dissolve",cat:"energy",file:"137-dissolve",fps:8},
+{name:"Energy Shield",cat:"magic",file:"138-energy-shield",fps:10},
+{name:"Reality Shatter",cat:"abstract",file:"139-reality-shatter",fps:7},
+{name:"Blood Moon",cat:"cosmic",file:"140-blood-moon",fps:4},
+{name:"Particle Collider",cat:"energy",file:"141-particle-collider",fps:10},
+{name:"Dragon Breath",cat:"fire",file:"142-dragon-breath",fps:9},
+{name:"Neural Network",cat:"abstract",file:"143-neural-network",fps:7},
+{name:"Cosmic Eye",cat:"cosmic",file:"144-cosmic-eye",fps:5},
+{name:"Hypercube",cat:"abstract",file:"145-hypercube",fps:8},
+{name:"Soul Extraction",cat:"magic",file:"146-soul-extraction",fps:6},
+{name:"Neon Rain",cat:"abstract",file:"147-neon-rain",fps:8},
+{name:"Galaxy Collision",cat:"cosmic",file:"148-galaxy-collision",fps:4},
+{name:"EMP Blast",cat:"energy",file:"149-emp-blast",fps:8},
+{name:"Void Tendril",cat:"dark",file:"150-void-tendril",fps:7},
+{name:"Summoning Circle",cat:"magic",file:"151-summoning-circle",fps:7},
+{name:"Lightning Smite",cat:"energy",file:"152-lightning-smite",fps:24},
+{name:"Dark Ritual Portal",cat:"magic",file:"201-dark-ritual-portal",fps:5},
+{name:"Dark Ritual Inferno",cat:"fire",file:"202-dark-ritual-inferno",fps:5},
+{name:"Dark Ritual Void",cat:"dark",file:"203-dark-ritual-void",fps:5},
+{name:"Shield Break",cat:"energy",file:"204-shield-break",fps:9},
+{name:"Phoenix Gate",cat:"fire",file:"205-phoenix-gate",fps:8},
+{name:"Cosmic Portal",cat:"cosmic",file:"206-cosmic-portal",fps:6},
+{name:"Dragon Gate",cat:"fire",file:"207-dragon-gate",fps:9},
+{name:"Void Rift",cat:"dark",file:"208-void-rift",fps:7}
+];
+
+const SOURCE_LABELS={all:"All",fxgen:"FXGEN Library",custom:"Custom GLSL",composite:"Composite Builds"};
+const SOURCE_COLORS={fxgen:"#44aaff",custom:"#e94560",composite:"#ffaa22"};
+const catColors={fire:"#e94560",ice:"#44aaff",magic:"#bb66ff",nature:"#44cc66",cosmic:"#aa88ff",energy:"#ffaa22",dark:"#666677",abstract:"#ff66aa"};
+const cats=["all",...new Set(CATALOG.map(c=>c.cat))];
+
+const sourceFiltersEl=document.getElementById("sourceFilters");
+const filtersEl=document.getElementById("filters");
+const gridEl=document.getElementById("grid");
+const countEl=document.getElementById("count");
+let activeCat="all";
+let activeSource="all";
+
+function sourceFor(file){
+  const id=parseInt(file.split("-")[0],10);
+  if(Number.isNaN(id))return"fxgen";
+  if(id>=200)return"composite";
+  if(id>=101)return"custom";
+  return"fxgen";
+}
+
+const sourceCounts={fxgen:0,custom:0,composite:0};
+CATALOG.forEach(item=>{
+  item.source=sourceFor(item.file);
+  if(sourceCounts[item.source]!=null)sourceCounts[item.source]+=1;
+});
+
+const params=new URLSearchParams(window.location.search);
+const sourceParam=params.get("source");
+if(sourceParam&&SOURCE_LABELS[sourceParam])activeSource=sourceParam;
+const catParam=params.get("cat");
+if(catParam&&cats.includes(catParam))activeCat=catParam;
+
+["all","fxgen","custom","composite"].forEach(src=>{
+  const b=document.createElement("button");
+  const srcCount=src==="all"?CATALOG.length:sourceCounts[src];
+  const label=SOURCE_LABELS[src]||src;
+  b.textContent=`${label} (${srcCount})`;
+  if(src===activeSource)b.classList.add("active");
+  b.onclick=()=>{
+    activeSource=src;
+    sourceFiltersEl.querySelectorAll("button").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active");
+    renderGrid();
+  };
+  sourceFiltersEl.appendChild(b);
+});
+
+cats.forEach(c=>{
+  const b=document.createElement("button");
+  const catCount=c==="all"?CATALOG.length:CATALOG.filter(x=>x.cat===c).length;
+  b.textContent=c==="all"?`All (${CATALOG.length})`:c.charAt(0).toUpperCase()+c.slice(1)+` (${catCount})`;
+  if(c===activeCat)b.classList.add("active");
+  b.onclick=()=>{
+    activeCat=c;
+    filtersEl.querySelectorAll("button").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active");
+    renderGrid();
+  };
+  filtersEl.appendChild(b);
+});
+
+const sprites=[];
+const observer=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    const s=sprites.find(s=>s.card===e.target);
+    if(s)s.visible=e.isIntersecting;
+  });
+},{threshold:0.1});
+
+function renderGrid(){
+  gridEl.innerHTML="";
+  sprites.forEach(s=>{observer.unobserve(s.card);});
+  sprites.length=0;
+  const filtered=CATALOG.filter(item=>{
+    if(activeSource!=="all"&&item.source!==activeSource)return false;
+    if(activeCat!=="all"&&item.cat!==activeCat)return false;
+    return true;
+  });
+  const sourceLabel=SOURCE_LABELS[activeSource]||activeSource;
+  const catLabel=activeCat==="all"?"All Categories":activeCat;
+  countEl.textContent=`Showing ${filtered.length} of ${CATALOG.length} effects — ${sourceLabel} · ${catLabel}`;
+  filtered.forEach(item=>{
+    const card=document.createElement("div");
+    card.className="card";
+    const cv=document.createElement("canvas");
+    cv.width=192;cv.height=192;
+    const info=document.createElement("div");
+    info.className="info";
+    const sourceLabel=SOURCE_LABELS[item.source]||item.source;
+    const sourceColor=SOURCE_COLORS[item.source]||"#666";
+    info.innerHTML=`<div class="name">${item.name}</div><div class="meta">${item.fps} fps &middot; 36 frames</div><div class="tag-row"><span class="cat-tag" style="border-color:${catColors[item.cat]||'#333'};color:${catColors[item.cat]||'#888'}">${item.cat}</span><span class="cat-tag source-tag" style="border-color:${sourceColor};color:${sourceColor}">${sourceLabel}</span></div>`;
+    card.appendChild(cv);card.appendChild(info);gridEl.appendChild(card);
+
+    const ctx=cv.getContext("2d");
+    const img=new Image();
+    img.src=`sprites/${item.file}.png`;
+    const entry={card,ctx,img,fps:item.fps,frame:0,lastT:0,loaded:false,visible:false,srcCell:192};
+    img.onload=()=>{entry.loaded=true;entry.srcCell=Math.round(img.naturalWidth/GRID);};
+    sprites.push(entry);
+    observer.observe(card);
+  });
+}
+
+function animate(t){
+  for(const s of sprites){
+    if(!s.visible||!s.loaded)continue;
+    const dt=t-s.lastT;
+    if(dt<1000/s.fps)continue;
+    s.lastT=t;
+    const col=s.frame%GRID,row=Math.floor(s.frame/GRID);
+    const c=s.srcCell;
+    s.ctx.clearRect(0,0,192,192);
+    s.ctx.drawImage(s.img,col*c,row*c,c,c,0,0,192,192);
+    s.frame=(s.frame+1)%FRAMES;
+  }
+  requestAnimationFrame(animate);
+}
+
+renderGrid();
+requestAnimationFrame(animate);
+</script>
+		<script type="module" src="src/ui/top-nav.js"></script>
+	</body>
+</html>

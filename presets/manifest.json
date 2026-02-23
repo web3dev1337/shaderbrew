@@ -1,0 +1,421 @@
+[
+  {
+    "id": "alien-flesh",
+    "name": "Alien Flesh",
+    "file": "presets/alien-flesh.json",
+    "kind": "preset",
+    "category": "bio",
+    "tags": [
+      "bio"
+    ]
+  },
+  {
+    "id": "alien-nebula",
+    "name": "Alien Nebula",
+    "file": "presets/alien-nebula.json",
+    "kind": "preset",
+    "category": "cosmic",
+    "tags": [
+      "cosmic"
+    ]
+  },
+  {
+    "id": "aurora-borealis",
+    "name": "Aurora Borealis",
+    "file": "presets/aurora-borealis.json",
+    "kind": "preset",
+    "category": "cosmic",
+    "tags": [
+      "cosmic"
+    ]
+  },
+  {
+    "id": "bioluminescent-deep",
+    "name": "Bioluminescent Deep",
+    "file": "presets/bioluminescent-deep.json",
+    "kind": "preset",
+    "category": "bio",
+    "tags": [
+      "bio"
+    ]
+  },
+  {
+    "id": "black-hole",
+    "name": "Black Hole",
+    "file": "presets/black-hole.json",
+    "kind": "preset",
+    "category": "cosmic",
+    "tags": [
+      "cosmic"
+    ]
+  },
+  {
+    "id": "blood-moon",
+    "name": "Blood Moon",
+    "file": "presets/blood-moon.json",
+    "kind": "preset",
+    "category": "cosmic",
+    "tags": [
+      "cosmic"
+    ]
+  },
+  {
+    "id": "copper-patina",
+    "name": "Copper Patina",
+    "file": "presets/copper-patina.json",
+    "kind": "preset",
+    "category": "material",
+    "tags": [
+      "material"
+    ]
+  },
+  {
+    "id": "crystal-voronoi",
+    "name": "Crystal Voronoi",
+    "file": "presets/crystal-voronoi.json",
+    "kind": "preset",
+    "category": "material",
+    "tags": [
+      "material"
+    ]
+  },
+  {
+    "id": "cyberpunk-circuit",
+    "name": "Cyberpunk Circuit",
+    "file": "presets/cyberpunk-circuit.json",
+    "kind": "preset",
+    "category": "sci-fi",
+    "tags": [
+      "sci-fi"
+    ]
+  },
+  {
+    "id": "dark-matter",
+    "name": "Dark Matter",
+    "file": "presets/dark-matter.json",
+    "kind": "preset",
+    "category": "cosmic",
+    "tags": [
+      "cosmic"
+    ]
+  },
+  {
+    "id": "desert-sand",
+    "name": "Desert Sand",
+    "file": "presets/desert-sand.json",
+    "kind": "preset",
+    "category": "nature",
+    "tags": [
+      "nature"
+    ]
+  },
+  {
+    "id": "digital-rain",
+    "name": "Digital Rain",
+    "file": "presets/digital-rain.json",
+    "kind": "preset",
+    "category": "sci-fi",
+    "tags": [
+      "sci-fi"
+    ]
+  },
+  {
+    "id": "dragon-scales",
+    "name": "Dragon Scales",
+    "file": "presets/dragon-scales.json",
+    "kind": "preset",
+    "category": "material",
+    "tags": [
+      "material"
+    ]
+  },
+  {
+    "id": "electric-storm",
+    "name": "Electric Storm",
+    "file": "presets/electric-storm.json",
+    "kind": "preset",
+    "category": "energy",
+    "tags": [
+      "energy"
+    ]
+  },
+  {
+    "id": "emerald-marble",
+    "name": "Emerald Marble",
+    "file": "presets/emerald-marble.json",
+    "kind": "preset",
+    "category": "material",
+    "tags": [
+      "material"
+    ]
+  },
+  {
+    "id": "fire-mandala",
+    "name": "Fire Mandala",
+    "file": "presets/fire-mandala.json",
+    "kind": "preset",
+    "category": "fire",
+    "tags": [
+      "fire"
+    ]
+  },
+  {
+    "id": "frozen-lightning",
+    "name": "Frozen Lightning",
+    "file": "presets/frozen-lightning.json",
+    "kind": "preset",
+    "category": "ice",
+    "tags": [
+      "ice"
+    ]
+  },
+  {
+    "id": "helix-nebula",
+    "name": "Helix Nebula",
+    "file": "presets/helix-nebula.json",
+    "kind": "preset",
+    "category": "cosmic",
+    "tags": [
+      "cosmic"
+    ]
+  },
+  {
+    "id": "ice-crystal",
+    "name": "Ice Crystal",
+    "file": "presets/ice-crystal.json",
+    "kind": "preset",
+    "category": "ice",
+    "tags": [
+      "ice"
+    ]
+  },
+  {
+    "id": "inferno-vortex",
+    "name": "Inferno Vortex",
+    "file": "presets/inferno-vortex.json",
+    "kind": "preset",
+    "category": "fire",
+    "tags": [
+      "fire"
+    ]
+  },
+  {
+    "id": "lava-planet",
+    "name": "Lava Planet",
+    "file": "presets/lava-planet.json",
+    "kind": "preset",
+    "category": "cosmic",
+    "tags": [
+      "cosmic"
+    ]
+  },
+  {
+    "id": "magma-channels",
+    "name": "Magma Channels",
+    "file": "presets/magma-channels.json",
+    "kind": "preset",
+    "category": "fire",
+    "tags": [
+      "fire"
+    ]
+  },
+  {
+    "id": "mercury-pool",
+    "name": "Mercury Pool",
+    "file": "presets/mercury-pool.json",
+    "kind": "preset",
+    "category": "material",
+    "tags": [
+      "material"
+    ]
+  },
+  {
+    "id": "neon-veins",
+    "name": "Neon Veins",
+    "file": "presets/neon-veins.json",
+    "kind": "preset",
+    "category": "sci-fi",
+    "tags": [
+      "sci-fi"
+    ]
+  },
+  {
+    "id": "neural-tissue",
+    "name": "Neural Tissue",
+    "file": "presets/neural-tissue.json",
+    "kind": "preset",
+    "category": "bio",
+    "tags": [
+      "bio"
+    ]
+  },
+  {
+    "id": "ocean-abyss",
+    "name": "Ocean Abyss",
+    "file": "presets/ocean-abyss.json",
+    "kind": "preset",
+    "category": "nature",
+    "tags": [
+      "nature"
+    ]
+  },
+  {
+    "id": "ocean-caustics",
+    "name": "Ocean Caustics",
+    "file": "presets/ocean-caustics.json",
+    "kind": "preset",
+    "category": "nature",
+    "tags": [
+      "nature"
+    ]
+  },
+  {
+    "id": "plasma-ball",
+    "name": "Plasma Ball",
+    "file": "presets/plasma-ball.json",
+    "kind": "preset",
+    "category": "energy",
+    "tags": [
+      "energy"
+    ]
+  },
+  {
+    "id": "plasma-storm",
+    "name": "Plasma Storm",
+    "file": "presets/plasma-storm.json",
+    "kind": "preset",
+    "category": "energy",
+    "tags": [
+      "energy"
+    ]
+  },
+  {
+    "id": "quantum-foam",
+    "name": "Quantum Foam",
+    "file": "presets/quantum-foam.json",
+    "kind": "preset",
+    "category": "cosmic",
+    "tags": [
+      "cosmic"
+    ]
+  },
+  {
+    "id": "rust-metal",
+    "name": "Rust Metal",
+    "file": "presets/rust-metal.json",
+    "kind": "preset",
+    "category": "material",
+    "tags": [
+      "material"
+    ]
+  },
+  {
+    "id": "sacred-geometry",
+    "name": "Sacred Geometry",
+    "file": "presets/sacred-geometry.json",
+    "kind": "preset",
+    "category": "abstract",
+    "tags": [
+      "abstract"
+    ]
+  },
+  {
+    "id": "smoke-vortex",
+    "name": "Smoke Vortex",
+    "file": "presets/smoke-vortex.json",
+    "kind": "preset",
+    "category": "nature",
+    "tags": [
+      "nature"
+    ]
+  },
+  {
+    "id": "solar-chromosphere",
+    "name": "Solar Chromosphere",
+    "file": "presets/solar-chromosphere.json",
+    "kind": "preset",
+    "category": "cosmic",
+    "tags": [
+      "cosmic"
+    ]
+  },
+  {
+    "id": "starfield",
+    "name": "Starfield",
+    "file": "presets/starfield.json",
+    "kind": "preset",
+    "category": "cosmic",
+    "tags": [
+      "cosmic"
+    ]
+  },
+  {
+    "id": "storm-eye",
+    "name": "Storm Eye",
+    "file": "presets/storm-eye.json",
+    "kind": "preset",
+    "category": "nature",
+    "tags": [
+      "nature"
+    ]
+  },
+  {
+    "id": "supernova",
+    "name": "Supernova",
+    "file": "presets/supernova.json",
+    "kind": "preset",
+    "category": "cosmic",
+    "tags": [
+      "cosmic"
+    ]
+  },
+  {
+    "id": "toxic-waste",
+    "name": "Toxic Waste",
+    "file": "presets/toxic-waste.json",
+    "kind": "preset",
+    "category": "bio",
+    "tags": [
+      "bio"
+    ]
+  },
+  {
+    "id": "nebula-bloom",
+    "name": "Nebula Bloom",
+    "file": "presets/projects/nebula-bloom.json",
+    "kind": "project",
+    "category": "example",
+    "description": "Two-layer nebula with starfield glow and a cool gradient ramp.",
+    "tags": [
+      "layers",
+      "nebula",
+      "starfield"
+    ]
+  },
+  {
+    "id": "firestorm-cascade",
+    "name": "Firestorm Cascade",
+    "file": "presets/projects/firestorm-cascade.json",
+    "kind": "project",
+    "category": "example",
+    "description": "Inferno base with electric storm and smoky depth, tuned for additive energy.",
+    "tags": [
+      "layers",
+      "fire",
+      "electric"
+    ]
+  },
+  {
+    "id": "biotech-veil",
+    "name": "Biotech Veil",
+    "file": "presets/projects/biotech-veil.json",
+    "kind": "project",
+    "category": "example",
+    "description": "Organic tissue layered with circuit and rain motifs for tech-bio textures.",
+    "tags": [
+      "layers",
+      "bio",
+      "sci-fi"
+    ]
+  }
+]

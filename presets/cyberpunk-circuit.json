@@ -1,0 +1,23 @@
+{
+	"type": "BinaryMatrix",
+	"animate": true,
+	"time": 3.5,
+	"resolution": "512",
+	"polarConversion": false,
+	"tiling": true,
+	"normalMap": false,
+	"cToonEnable": true,
+	"cToonDark": 0.4,
+	"cToonLight": 0.75,
+	"cSpeed": 0.3,
+	"cScale": 2.5,
+	"cColorBalanceShadowsR": -0.9,
+	"cColorBalanceShadowsG": 0.8,
+	"cColorBalanceShadowsB": 1.0,
+	"cColorBalanceMidtonesR": -0.6,
+	"cColorBalanceMidtonesG": 1.0,
+	"cColorBalanceMidtonesB": 0.7,
+	"cColorBalanceHighlightsR": 0.3,
+	"cColorBalanceHighlightsG": 1.0,
+	"cColorBalanceHighlightsB": 1.0
+}

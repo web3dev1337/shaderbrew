@@ -1,0 +1,31 @@
+{
+	"type": "Corona",
+	"animate": true,
+	"time": 0,
+	"resolution": "1024",
+	"polarConversion": false,
+	"tiling": false,
+	"normalMap": false,
+	"cHeightScale": 2,
+	"cRadialMask": 1.0,
+
+	"cColorBalanceShadowsR": 0.80,
+	"cColorBalanceShadowsG": -0.20,
+	"cColorBalanceShadowsB": -1.0,
+
+	"cColorBalanceMidtonesR": 1.0,
+	"cColorBalanceMidtonesG": 0.50,
+	"cColorBalanceMidtonesB": -0.75,
+
+	"cColorBalanceHighlightsR": 1.0,
+	"cColorBalanceHighlightsG": 1.0,
+	"cColorBalanceHighlightsB": 0.85,
+
+	"cToonEnable": false,
+	"cToonDark": 0.8,
+	"cToonLight": 0.95,
+
+	"cIntensity": 0.72,
+	"cRadius": 0.38,
+	"cSize": 3.8
+}

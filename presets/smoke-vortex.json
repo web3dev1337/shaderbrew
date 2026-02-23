@@ -1,0 +1,21 @@
+{
+	"type": "Smoke",
+	"animate": true,
+	"time": 0.0,
+	"resolution": "512",
+	"polarConversion": true,
+	"tiling": false,
+	"normalMap": false,
+	"cRadialMask": 0.7,
+	"cDensity": 1.5,
+	"cSpeed": 0.6,
+	"cColorBalanceShadowsR": -0.3,
+	"cColorBalanceShadowsG": 0.8,
+	"cColorBalanceShadowsB": 1.0,
+	"cColorBalanceMidtonesR": 0.1,
+	"cColorBalanceMidtonesG": 0.5,
+	"cColorBalanceMidtonesB": 0.7,
+	"cColorBalanceHighlightsR": 0.6,
+	"cColorBalanceHighlightsG": 0.9,
+	"cColorBalanceHighlightsB": 1.0
+}

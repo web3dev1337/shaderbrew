@@ -1,0 +1,21 @@
+{
+	"type": "Solar",
+	"animate": true,
+	"time": 0.0,
+	"resolution": "512",
+	"polarConversion": true,
+	"tiling": false,
+	"normalMap": false,
+	"cRadialMask": 0.6,
+	"cIntensity": 0.4,
+	"cPowerExponent": 3.0,
+	"cColorBalanceShadowsR": 0.3,
+	"cColorBalanceShadowsG": -1.0,
+	"cColorBalanceShadowsB": 0.9,
+	"cColorBalanceMidtonesR": 0.7,
+	"cColorBalanceMidtonesG": -0.5,
+	"cColorBalanceMidtonesB": 1.0,
+	"cColorBalanceHighlightsR": 1.0,
+	"cColorBalanceHighlightsG": 0.6,
+	"cColorBalanceHighlightsB": 1.0
+}

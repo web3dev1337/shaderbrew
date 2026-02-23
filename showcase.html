@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EffectTextureMaker — Feature Showcase</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:radial-gradient(1200px 600px at 50% -200px,#16162a 0%,#07070c 55%,#030306 100%);color:#ccc;font-family:'Segoe UI',system-ui,sans-serif;line-height:1.6}
+.hero{padding:70px 20px 50px;border-bottom:1px solid #0a0a15}
+.hero-inner{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:minmax(280px,1.1fr) minmax(260px,.9fr);gap:28px;align-items:center}
+.hero-kicker{font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:#666;font-family:monospace;margin-bottom:10px}
+.hero h1{font-size:44px;color:#e0e0ff;letter-spacing:2px;margin-bottom:10px;font-family:monospace}
+.hero .sub{color:#666;font-size:14px;max-width:520px}
+.hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.hero-actions a{display:inline-block;padding:8px 18px;border-radius:6px;border:1px solid #333;background:#111;color:#bbb;text-decoration:none;font-family:monospace;font-size:12px;letter-spacing:.5px;transition:all .2s}
+.hero-actions a.primary{background:#1a1a3e;border-color:#e94560;color:#fff}
+.hero-actions a:hover{border-color:#e94560;color:#fff}
+.hero-card{background:linear-gradient(180deg,#0a0a14,#08080f);border:1px solid #1a1a2e;border-radius:12px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.45)}
+.hero-card canvas{width:100%;aspect-ratio:1;display:block;background:#000}
+.hero-caption{padding:10px 12px;font-family:monospace;font-size:11px;color:#777;border-top:1px solid #1a1a2e}
+.hero-caption strong{color:#e0e0ff}
+.perf-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:16px}
+.perf-bar .label{font-size:10px;color:#777;text-transform:uppercase;letter-spacing:.2em;font-family:monospace}
+.perf-bar button{padding:4px 10px;border:1px solid #333;border-radius:12px;background:#111;color:#888;font-family:monospace;font-size:10px;cursor:pointer;transition:all .2s}
+.perf-bar button.on{background:#1a1a3e;border-color:#e94560;color:#fff}
+.perf-meta{font-size:10px;color:#555;font-family:monospace}
+.perf-toggle{margin-left:auto}
+.perf-toggle button{padding:4px 10px;border-radius:6px}
+.chapter{max-width:1400px;margin:0 auto;padding:50px 20px 40px;border-bottom:1px solid #08080f}
+.chapter-num{font-family:monospace;font-size:13px;color:#e94560;letter-spacing:2px;display:block;margin-bottom:2px}
+.chapter h2{font-size:26px;color:#e0e0ff;margin-bottom:6px;letter-spacing:1px}
+.new{display:inline-block;background:#e94560;color:#fff;font-size:9px;padding:2px 7px;border-radius:10px;vertical-align:middle;margin-left:8px;letter-spacing:1px;font-weight:bold}
+.chapter>p{color:#777;max-width:750px;font-size:14px;margin-bottom:20px}
+.demo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.demo-grid.wide{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.card{background:#0a0a12;border:1px solid #1a1a2e;border-radius:8px;overflow:hidden;transition:all .3s}
+.card:hover{border-color:#e94560;box-shadow:0 0 20px rgba(233,69,96,.2)}
+.card canvas{width:100%;aspect-ratio:1;display:block;background:#000}
+.card .lbl{padding:7px 10px;font-size:11px;color:#888;text-align:center;border-top:1px solid #1a1a2e;font-family:monospace;letter-spacing:.5px}
+.card .lbl .nm{color:#e0e0ff;display:block;font-weight:bold;margin-bottom:1px;font-size:12px}
+.card .lbl .desc{font-size:10px;color:#555}
+.card.highlight{border-color:#e94560;box-shadow:0 0 15px rgba(233,69,96,.15)}
+.arrow{text-align:center;padding:15px;color:#1a1a2e;font-size:28px;user-select:none}
+.pipeline-row{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.pipeline-row .pipe-arrow{color:#e94560;font-family:monospace;font-size:22px;font-weight:bold;flex-shrink:0;padding:0 2px}
+.pipeline-row .card{flex:1;min-width:160px;max-width:260px}
+.build-section{padding-top:40px}
+.build-rows{display:flex;flex-direction:column;gap:18px;margin:10px 0 18px}
+.build-row{background:#07070f;border:1px solid #121225;border-radius:10px;padding:12px}
+.build-title{font-family:monospace;font-size:12px;color:#e0e0ff;letter-spacing:1px;margin-bottom:8px}
+.step-list{list-style:disc;padding-left:18px;margin:6px 0 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,150px));gap:8px;justify-content:start}
+.step-list li{background:#0a0a12;border:1px solid #1a1a2e;border-radius:8px;padding:6px;list-style-position:inside}
+.step-list li canvas{width:100%;aspect-ratio:1;display:block;background:#000;border-radius:6px;margin:6px 0 8px}
+.step-title{font-family:monospace;font-size:11px;color:#e0e0ff;letter-spacing:.4px}
+.step-desc{font-size:10px;color:#666}
+.pbr-strip{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.preview-wrap{display:flex;justify-content:center;align-items:flex-start;gap:20px;flex-wrap:wrap}
+.preview-wrap canvas{border-radius:10px;border:1px solid #1a1a2e;cursor:grab}
+.preview-info{color:#666;font-family:monospace;font-size:11px;max-width:260px;padding-top:10px}
+.preview-info h3{color:#e0e0ff;font-size:14px;margin-bottom:8px}
+.preview-info p{margin-bottom:8px}
+.preview-info kbd{background:#1a1a2e;padding:2px 6px;border-radius:3px;color:#aaa;font-size:10px}
+.preview-info .map-list{list-style:none;padding:0;margin:8px 0}
+.preview-info .map-list li{padding:2px 0;color:#555}
+.preview-info .map-list li::before{content:"▸ ";color:#e94560}
+.forge-frame{width:100%;max-width:1400px;margin:0 auto;border:1px solid #1a1a2e;border-radius:10px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.45)}
+.forge-frame iframe{width:100%;height:520px;border:0;display:block;background:#050508}
+.section-note{color:#e94560;font-size:12px;font-family:monospace;margin-bottom:12px;opacity:.8}
+.section-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.section-actions a{display:inline-block;padding:6px 12px;border-radius:6px;border:1px solid #333;background:#111;color:#bbb;text-decoration:none;font-family:monospace;font-size:11px;letter-spacing:.4px;transition:all .2s}
+.section-actions a.primary{background:#1a1a3e;border-color:#e94560;color:#fff}
+.section-actions a:hover{border-color:#e94560;color:#fff}
+.vs-label{background:#e94560;color:#fff;padding:2px 8px;border-radius:4px;font-family:monospace;font-size:10px;letter-spacing:1px;align-self:center;flex-shrink:0}
+.outro{text-align:center;padding:50px 20px;max-width:700px;margin:0 auto}
+.outro h2{color:#e0e0ff;margin-bottom:10px;font-size:22px}
+.outro p{color:#555;margin-bottom:18px;font-size:14px}
+.outro a{display:inline-block;padding:10px 28px;background:#e94560;color:#fff;text-decoration:none;border-radius:6px;font-family:monospace;letter-spacing:1px;font-size:14px;margin:0 6px}
+#loading{text-align:center;padding:60px;color:#555;font-family:monospace;font-size:14px}
+.progress{width:300px;height:3px;background:#111;margin:12px auto 0;border-radius:3px;overflow:hidden}
+.progress-bar{width:0;height:100%;background:#e94560;transition:width .3s}
+@media(max-width:700px){
+.hero-inner{grid-template-columns:1fr}
+.demo-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+.pbr-strip{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+.pipeline-row{flex-direction:column}.pipeline-row .card{max-width:100%}
+.pipeline-row .pipe-arrow{transform:rotate(90deg)}
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+<div class="hero-inner">
+<div class="hero-content">
+<div class="hero-kicker">Procedural Texture Suite</div>
+<h1>Feature Showcase</h1>
+<p class="sub">A guided tour through the editor, layers, gradients, PBR maps, and the 3D preview. Each section below renders live from the same shader engine powering the editor.</p>
+<div class="hero-actions">
+<a class="primary" href="editor.html">Open Editor</a>
+<a href="gallery.html">Gallery</a>
+<a href="demos.html">Material Forge</a>
+<a href="sprite-gallery.html">Sprite Gallery</a>
+<a href="particles.html">Particles</a>
+</div>
+<div class="perf-bar">
+<div class="label">Quality</div>
+<button data-quality="low">Low</button>
+<button data-quality="med">Med</button>
+<button data-quality="high">High</button>
+<div class="perf-meta" id="quality-meta"></div>
+<div class="perf-toggle"><button id="toggle-3d">Pause 3D</button></div>
+</div>
+</div>
+<div class="hero-visual">
+<div class="hero-card">
+<canvas id="hero-canvas"></canvas>
+<div class="hero-caption"><strong>Dark Ritual Portal</strong> — Sprite sheet playback (<span id="hero-fps">5</span> fps)</div>
+</div>
+</div>
+</div>
+</div>
+
+<div id="loading">
+Initializing WebGL + loading shaders...
+<div class="progress"><div class="progress-bar" id="pbar"></div></div>
+</div>
+
+<div id="chapters" style="display:none">
+
+<section class="chapter" id="forge-preview">
+<span class="chapter-num">FEATURED 3D</span>
+<h2>Material Forge — Live Multi-Shape Preview</h2>
+<p>A live 3D window showing multiple geometries spinning with procedural materials, bloom, and PBR lighting. This is the same scene as the full Material Forge page, embedded here for quick access.</p>
+<div class="forge-frame">
+<iframe title="Material Forge" src="demos.html?embed=1"></iframe>
+</div>
+</section>
+<div class="arrow">&#x25BC;</div>
+
+<section class="chapter build-section" id="ritual-build">
+<span class="chapter-num">FEATURED BUILD</span>
+<h2>Dark Ritual Portal — Sprite Build <span class="new">NEW</span></h2>
+<p>Step-by-step construction of the hero portal. Each row groups the inputs that build the warp core, then the ritual ring, then the final alpha composite.</p>
+<div class="build-rows" id="ritual-build-rows">
+<div class="build-row">
+<div class="build-title">Warp Tunnel Build</div>
+<ul class="step-list" id="ritual-steps-core"></ul>
+</div>
+<div class="build-row">
+<div class="build-title">Dark Ritual Ring Build</div>
+<ul class="step-list" id="ritual-steps-ring"></ul>
+</div>
+<div class="build-row">
+<div class="build-title">Composite</div>
+<ul class="step-list" id="ritual-steps-comp"></ul>
+</div>
+</div>
+<div class="section-note">Pipeline overview</div>
+<div id="grid-ritual"></div>
+<div class="preview-wrap" id="grid-ritual-3d"></div>
+</section>
+<div class="arrow">&#x25BC;</div>
+
+<section class="chapter" id="custom-library">
+<span class="chapter-num">CUSTOM GLSL</span>
+<h2>Custom Shader Library <span class="new">NEW</span></h2>
+<p>52 hand-written fragment shaders that bypass the FXGEN library entirely — volumetric raymarching, fractals, portals, and cosmic phenomena. Each tile below is a live GLSL render, animated from its sprite sheet frames.</p>
+<div class="demo-grid wide" id="grid-custom"></div>
+<div class="section-actions">
+<a class="primary" href="sprite-gallery.html?source=custom">View all 52 custom shaders</a>
+<a href="sprite-gallery.html?source=fxgen">Compare FXGEN library</a>
+</div>
+</section>
+<div class="arrow">&#x25BC;</div>
+
+<section class="chapter" id="ch1">
+<span class="chapter-num">CHAPTER 01</span>
+<h2>The Raw Canvas</h2>
+<p>The original tool generates 70+ procedural textures from pure math — explosions, energy fields, fluid simulations, geometric mandalas. Visually striking patterns, but locked to grayscale or basic tinting.</p>
+<div class="demo-grid wide" id="grid-raw"></div>
+</section>
+<div class="arrow">&#x25BC;</div>
+
+<section class="chapter" id="ch2">
+<span class="chapter-num">CHAPTER 02</span>
+<h2>Color Balance — The Original Color System</h2>
+<p>The built-in color tool: 9 sliders controlling RGB across shadows, midtones, and highlights. It shifts the palette, but the results feel limited — you're painting with numbers. Same effects, now with hand-tuned color.</p>
+<div class="demo-grid wide" id="grid-color"></div>
+</section>
+<div class="arrow">&#x25BC;</div>
+
+<section class="chapter" id="ch3">
+<span class="chapter-num">CHAPTER 03</span>
+<h2>Gradient Color Mapping <span class="new">NEW</span></h2>
+<p>This changes everything. Define a full color gradient with unlimited stops. The shader maps the texture's brightness to your palette — same pattern, completely different look. Below: one explosion texture mapped through 10 palettes.</p>
+<div class="demo-grid" id="grid-grad"></div>
+</section>
+<div class="arrow">&#x25BC;</div>
+
+<section class="chapter" id="ch4">
+<span class="chapter-num">CHAPTER 04</span>
+<h2>Multi-Layer Compositing <span class="new">NEW</span></h2>
+<p>Stack effects with blend modes. Below: organic water caustics layered with a digital matrix — maximum contrast between natural and synthetic. Nine blend modes, nine completely different textures from the same two inputs.</p>
+<div class="demo-grid" id="grid-blend"></div>
+</section>
+<div class="arrow">&#x25BC;</div>
+
+<section class="chapter" id="ch5">
+<span class="chapter-num">CHAPTER 05</span>
+<h2>The Power of Combination</h2>
+<p>The full pipeline: pick two effects, blend them, then apply a gradient color ramp. Each row shows the complete journey from two inputs to a final texture that no single effect could produce.</p>
+<div id="grid-combined"></div>
+</section>
+<div class="arrow">&#x25BC;</div>
+
+<section class="chapter" id="ch6">
+<span class="chapter-num">CHAPTER 06</span>
+<h2>PBR Map Generation <span class="new">NEW</span></h2>
+<p>Turn any texture into a game-ready PBR material. One input, five output maps. The color map gets a gradient ramp applied; the structural maps (normal, roughness, AO, metallic) are derived from the underlying height data.</p>
+<div class="section-note">Source: ridge noise with voronoi cells — good surface variation for PBR</div>
+<div class="pbr-strip" id="grid-pbr"></div>
+</section>
+<div class="arrow">&#x25BC;</div>
+
+<section class="chapter" id="ch7">
+<span class="chapter-num">CHAPTER 07</span>
+<h2>3D Material Preview <span class="new">NEW</span></h2>
+<p>See your material in context. The 3D preview uses the exact color + PBR maps from Chapter 6, so you can see how each pipeline step translates into a lit, reflective surface.</p>
+<div class="preview-wrap" id="grid-3d"></div>
+</section>
+
+</div>
+
+<div class="outro" id="outro" style="display:none">
+<h2>From Single Effect to Texture Studio</h2>
+<p>Multi-layer compositing, gradient color mapping, PBR material generation, 3D preview, undo/redo, and ZIP export — all running entirely in your browser.</p>
+<a href="editor.html">Open Editor</a>
+<a href="gallery.html">View Gallery</a>
+<a href="demos.html">Material Forge</a>
+</div>
+
+<script type="importmap">
+{"imports":{"three":"https://unpkg.com/three@0.174.0/build/three.module.min.js","three/addons/":"https://unpkg.com/three@0.174.0/examples/jsm/","pixy":"./pixy.module.min.js"}}
+</script>
+<script type="module">
+import*as THREE from"three";
+import*as PIXY from"pixy";
+import{OrbitControls}from"three/addons/controls/OrbitControls.js";
+import{SHADERS}from"./shader-defs.js";
+
+const QUALITY_PRESETS={low:256,med:384,high:512};
+const FPS_PRESETS={low:6,med:10,high:12};
+const GRID=6;
+const FRAMES=GRID*GRID;
+const url=new URL(window.location.href);
+const qParam=url.searchParams.get("q");
+const autoQuality=(window.innerWidth<900||((navigator.hardwareConcurrency||8)<=4))?"low":"med";
+const QUALITY=QUALITY_PRESETS[qParam]?qParam:autoQuality;
+const RES=QUALITY_PRESETS[QUALITY];
+const ANIM_FPS=FPS_PRESETS[QUALITY]||8;
+const pixelBuf=new Uint8Array(RES*RES*4);
+const pbar=document.getElementById("pbar");
+
+const qualityMeta=document.getElementById("quality-meta");
+if(qualityMeta)qualityMeta.textContent=`Rendering at ${RES}px (${QUALITY.toUpperCase()})`;
+const heroFps=document.getElementById("hero-fps");
+if(heroFps)heroFps.textContent=String(ANIM_FPS);
+document.querySelectorAll("[data-quality]").forEach(btn=>{
+const q=btn.getAttribute("data-quality");
+if(q===QUALITY)btn.classList.add("on");
+btn.onclick=()=>{
+if(q===QUALITY)return;
+const next=new URL(window.location.href);
+next.searchParams.set("q",q);
+window.location.href=next.toString();
+};
+});
+
+let previewPaused=false;
+const toggle3dBtn=document.getElementById("toggle-3d");
+if(toggle3dBtn){
+toggle3dBtn.onclick=()=>{
+previewPaused=!previewPaused;
+toggle3dBtn.classList.toggle("on",previewPaused);
+toggle3dBtn.textContent=previewPaused?"Resume 3D":"Pause 3D";
+if(window.__previewControl)window.__previewControl.setPaused(previewPaused);
+};
+}
+
+const renderer=new THREE.WebGLRenderer({alpha:true,antialias:false});
+renderer.setSize(RES,RES);renderer.autoClear=true;
+const bScene=new THREE.Scene();const bCam=new THREE.Camera();
+bScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),new THREE.MeshBasicMaterial()));
+
+function makeRT(){return new THREE.WebGLRenderTarget(RES,RES,{minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter})}
+const rt=Array.from({length:6},makeRT);
+const pbrRT={struct:makeRT(),color:makeRT(),normal:makeRT(),rough:makeRT(),ao:makeRT(),metal:makeRT()};
+const ritualRT={core:makeRT(),masked:makeRT(),ring:makeRT(),ringAlpha:makeRT(),blend:makeRT(),normal:makeRT(),rough:makeRT(),ao:makeRT(),metal:makeRT()};
+
+const grungeTex=await new Promise(ok=>{
+new THREE.TextureLoader().load("images/grunge.png",t=>{
+t.wrapS=t.wrapT=THREE.RepeatWrapping;t.minFilter=THREE.LinearFilter;t.magFilter=THREE.LinearFilter;ok(t);
+});});
+const ritualAtlas=await new Promise(ok=>{
+new THREE.TextureLoader().load("sprites/029-dark-ritual.png",t=>{
+t.wrapS=t.wrapT=THREE.ClampToEdgeWrapping;t.minFilter=THREE.LinearFilter;t.magFilter=THREE.LinearFilter;ok(t);
+});});
+const ritualPortalAtlas=await new Promise(ok=>{
+new THREE.TextureLoader().load("sprites/201-dark-ritual-portal.png",t=>{
+t.wrapS=t.wrapT=THREE.ClampToEdgeWrapping;t.minFilter=THREE.LinearFilter;t.magFilter=THREE.LinearFilter;ok(t);
+});});
+
+// === GRADIENTS ===
+const GRADS={
+Fire:[{p:0,c:"#000000"},{p:.15,c:"#330000"},{p:.35,c:"#aa1100"},{p:.55,c:"#ff4400"},{p:.75,c:"#ffaa00"},{p:.9,c:"#ffdd44"},{p:1,c:"#ffffcc"}],
+Ice:[{p:0,c:"#000011"},{p:.25,c:"#002255"},{p:.5,c:"#2277bb"},{p:.75,c:"#88ccee"},{p:.9,c:"#cceeFF"},{p:1,c:"#ffffff"}],
+Neon:[{p:0,c:"#05000a"},{p:.15,c:"#220044"},{p:.35,c:"#7700cc"},{p:.55,c:"#ff00ff"},{p:.75,c:"#00ffff"},{p:.9,c:"#aaffff"},{p:1,c:"#ffffff"}],
+Earth:[{p:0,c:"#0a0500"},{p:.2,c:"#2a1800"},{p:.4,c:"#6b4410"},{p:.6,c:"#aa7733"},{p:.8,c:"#ccaa66"},{p:1,c:"#f5e8d0"}],
+Toxic:[{p:0,c:"#000000"},{p:.2,c:"#001a00"},{p:.4,c:"#006600"},{p:.6,c:"#33cc00"},{p:.8,c:"#88ff22"},{p:1,c:"#ccff88"}],
+Plasma:[{p:0,c:"#050005"},{p:.15,c:"#2a0055"},{p:.3,c:"#7700aa"},{p:.45,c:"#cc00cc"},{p:.6,c:"#ff2255"},{p:.75,c:"#ff7700"},{p:.9,c:"#ffcc00"},{p:1,c:"#ffff88"}],
+Ocean:[{p:0,c:"#000208"},{p:.2,c:"#001133"},{p:.4,c:"#003366"},{p:.6,c:"#0077aa"},{p:.8,c:"#22bbcc"},{p:1,c:"#88ffee"}],
+Ember:[{p:0,c:"#000000"},{p:.2,c:"#1a0000"},{p:.35,c:"#550000"},{p:.5,c:"#aa2200"},{p:.65,c:"#ee5500"},{p:.8,c:"#ffaa22"},{p:.95,c:"#ffdd88"},{p:1,c:"#fff8ee"}],
+ Aether:[{p:0,c:"#070615"},{p:.18,c:"#12204a"},{p:.36,c:"#1b6fa5"},{p:.55,c:"#43c6d6"},{p:.7,c:"#f2c14e"},{p:.85,c:"#ff6fb1"},{p:1,c:"#fff1d6"}],
+Frost:[{p:0,c:"#020210"},{p:.2,c:"#0a1133"},{p:.4,c:"#224488"},{p:.6,c:"#5599cc"},{p:.8,c:"#99ccee"},{p:1,c:"#eef8ff"}],
+Void:[{p:0,c:"#000000"},{p:.2,c:"#0a0022"},{p:.4,c:"#220055"},{p:.6,c:"#5500aa"},{p:.8,c:"#9933dd"},{p:1,c:"#dd88ff"}]
+};
+function makeGrad(stops){
+const c=document.createElement("canvas");c.width=256;c.height=1;
+const ctx=c.getContext("2d"),g=ctx.createLinearGradient(0,0,256,0);
+for(const s of stops)g.addColorStop(s.p,s.c);
+ctx.fillStyle=g;ctx.fillRect(0,0,256,1);
+const tex=new THREE.CanvasTexture(c);
+tex.minFilter=THREE.LinearFilter;tex.magFilter=THREE.LinearFilter;
+tex.wrapS=tex.wrapT=THREE.ClampToEdgeWrapping;tex.needsUpdate=true;return tex;
+}
+const gTex={};for(const[k,v]of Object.entries(GRADS))gTex[k]=makeGrad(v);
+
+// === POST-PROCESS SHADERS ===
+const ppV=`varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.0,1.0);}`;
+
+const gradS=new THREE.Scene(),gradC=new THREE.Camera();
+const gradM=new THREE.ShaderMaterial({
+uniforms:{tDiffuse:{value:null},tGradient:{value:null},intensity:{value:1.0}},vertexShader:ppV,
+fragmentShader:`uniform sampler2D tDiffuse;uniform sampler2D tGradient;uniform float intensity;varying vec2 vUv;
+void main(){vec4 t=texture2D(tDiffuse,vUv);float l=clamp(dot(t.rgb,vec3(.299,.587,.114)),0.,1.);
+vec4 g=texture2D(tGradient,vec2(l,.5));gl_FragColor=vec4(mix(t.rgb,g.rgb,intensity),1.);}`,
+depthTest:false,depthWrite:false});
+const gradQ=new THREE.Mesh(new THREE.PlaneGeometry(2,2),gradM);gradS.add(gradQ);
+
+const blendS=new THREE.Scene(),blendC=new THREE.Camera();
+const blendM=new THREE.ShaderMaterial({
+uniforms:{tBase:{value:null},tBlend:{value:null},opacity:{value:1},blendMode:{value:0}},vertexShader:ppV,
+fragmentShader:`uniform sampler2D tBase;uniform sampler2D tBlend;uniform float opacity;uniform int blendMode;varying vec2 vUv;
+vec3 bN(vec3 a,vec3 b){return b;}vec3 bM(vec3 a,vec3 b){return a*b;}
+vec3 bSc(vec3 a,vec3 b){return 1.-(1.-a)*(1.-b);}
+vec3 bO(vec3 a,vec3 b){return vec3(a.r<.5?2.*a.r*b.r:1.-2.*(1.-a.r)*(1.-b.r),a.g<.5?2.*a.g*b.g:1.-2.*(1.-a.g)*(1.-b.g),a.b<.5?2.*a.b*b.b:1.-2.*(1.-a.b)*(1.-b.b));}
+vec3 bA(vec3 a,vec3 b){return min(a+b,1.);}vec3 bSu(vec3 a,vec3 b){return max(a-b,0.);}
+vec3 bSf(vec3 a,vec3 b){return vec3(b.r<.5?2.*a.r*b.r+a.r*a.r*(1.-2.*b.r):sqrt(a.r)*(2.*b.r-1.)+2.*a.r*(1.-b.r),b.g<.5?2.*a.g*b.g+a.g*a.g*(1.-2.*b.g):sqrt(a.g)*(2.*b.g-1.)+2.*a.g*(1.-b.g),b.b<.5?2.*a.b*b.b+a.b*a.b*(1.-2.*b.b):sqrt(a.b)*(2.*b.b-1.)+2.*a.b*(1.-b.b));}
+vec3 bH(vec3 a,vec3 b){return bO(b,a);}vec3 bD(vec3 a,vec3 b){return abs(a-b);}
+void main(){vec4 base=texture2D(tBase,vUv);vec4 bl=texture2D(tBlend,vUv);vec3 r;
+if(blendMode==0)r=bN(base.rgb,bl.rgb);else if(blendMode==1)r=bM(base.rgb,bl.rgb);
+else if(blendMode==2)r=bSc(base.rgb,bl.rgb);else if(blendMode==3)r=bO(base.rgb,bl.rgb);
+else if(blendMode==4)r=bA(base.rgb,bl.rgb);else if(blendMode==5)r=bSu(base.rgb,bl.rgb);
+else if(blendMode==6)r=bSf(base.rgb,bl.rgb);else if(blendMode==7)r=bH(base.rgb,bl.rgb);
+else if(blendMode==8)r=bD(base.rgb,bl.rgb);else r=bl.rgb;
+gl_FragColor=vec4(mix(base.rgb,r,opacity),1.);}`,
+depthTest:false,depthWrite:false});
+const blendQ=new THREE.Mesh(new THREE.PlaneGeometry(2,2),blendM);blendS.add(blendQ);
+
+const alphaBlendS=new THREE.Scene(),alphaBlendC=new THREE.Camera();
+const alphaBlendM=new THREE.ShaderMaterial({
+uniforms:{tBase:{value:null},tBlend:{value:null},opacity:{value:1}},
+vertexShader:ppV,
+fragmentShader:`uniform sampler2D tBase;uniform sampler2D tBlend;uniform float opacity;varying vec2 vUv;
+void main(){vec4 base=texture2D(tBase,vUv);vec4 bl=texture2D(tBlend,vUv);
+float a=bl.a*opacity;vec3 col=base.rgb*(1.0-a)+bl.rgb*opacity;
+float outA=base.a+a*(1.0-base.a);gl_FragColor=vec4(col,outA);}`,
+depthTest:false,depthWrite:false});
+const alphaBlendQ=new THREE.Mesh(new THREE.PlaneGeometry(2,2),alphaBlendM);alphaBlendS.add(alphaBlendQ);
+
+const alphaViewS=new THREE.Scene(),alphaViewC=new THREE.Camera();
+const alphaViewM=new THREE.ShaderMaterial({
+uniforms:{tDiffuse:{value:null}},vertexShader:ppV,
+fragmentShader:`uniform sampler2D tDiffuse;varying vec2 vUv;
+void main(){float a=texture2D(tDiffuse,vUv).a;gl_FragColor=vec4(vec3(a),1.);}`,
+depthTest:false,depthWrite:false});
+const alphaViewQ=new THREE.Mesh(new THREE.PlaneGeometry(2,2),alphaViewM);alphaViewS.add(alphaViewQ);
+
+const maskS=new THREE.Scene(),maskC=new THREE.Camera();
+const maskM=new THREE.ShaderMaterial({
+uniforms:{tDiffuse:{value:null},radius:{value:.45},feather:{value:.1}},
+vertexShader:ppV,
+fragmentShader:`uniform sampler2D tDiffuse;uniform float radius;uniform float feather;varying vec2 vUv;
+void main(){vec2 p=(vUv-0.5)*2.0;float d=length(p);
+float m=1.0-smoothstep(radius-feather,radius+feather,d);vec4 c=texture2D(tDiffuse,vUv);
+float a=c.a*m;gl_FragColor=vec4(c.rgb*a,a);}`,
+depthTest:false,depthWrite:false});
+const maskQ=new THREE.Mesh(new THREE.PlaneGeometry(2,2),maskM);maskS.add(maskQ);
+
+const atlasS=new THREE.Scene(),atlasC=new THREE.Camera();
+const atlasM=new THREE.ShaderMaterial({
+uniforms:{tAtlas:{value:null},uGrid:{value:6},uFrame:{value:0}},
+vertexShader:ppV,
+fragmentShader:`uniform sampler2D tAtlas;uniform float uGrid;uniform float uFrame;varying vec2 vUv;
+void main(){float col=mod(uFrame,uGrid);float row=floor(uFrame/uGrid);
+vec2 cell=(vUv+vec2(col,uGrid-1.-row))/uGrid;gl_FragColor=texture2D(tAtlas,cell);}`,
+depthTest:false,depthWrite:false,transparent:true});
+const atlasQ=new THREE.Mesh(new THREE.PlaneGeometry(2,2),atlasM);atlasS.add(atlasQ);
+
+const ppS=new THREE.Scene(),ppC=new THREE.Camera();
+const ppQ=new THREE.Mesh(new THREE.PlaneGeometry(2,2),null);ppS.add(ppQ);
+
+function renderCustom(shader,time,target){
+const mat=new THREE.ShaderMaterial({
+uniforms:{time:{value:time||0},resolution:{value:new THREE.Vector2(RES,RES)}},
+vertexShader:ppV,fragmentShader:shader,depthTest:false,depthWrite:false
+});
+ppQ.material=mat;
+renderer.setRenderTarget(target);renderer.clear();
+renderer.render(ppS,ppC);renderer.setRenderTarget(null);
+mat.dispose();
+}
+
+const normalM=new THREE.ShaderMaterial({
+uniforms:{tDiffuse:{value:null},resolution:{value:new THREE.Vector2(RES,RES)},strength:{value:3.0}},vertexShader:ppV,
+fragmentShader:`uniform sampler2D tDiffuse;uniform vec2 resolution;uniform float strength;varying vec2 vUv;
+float h(vec2 u){return dot(texture2D(tDiffuse,u).rgb,vec3(.299,.587,.114));}
+void main(){vec2 tx=1./resolution;
+float tl=h(vUv+vec2(-tx.x,tx.y)),t=h(vUv+vec2(0,tx.y)),tr=h(vUv+vec2(tx.x,tx.y)),
+l=h(vUv+vec2(-tx.x,0)),r=h(vUv+vec2(tx.x,0)),
+bl=h(vUv+vec2(-tx.x,-tx.y)),b=h(vUv+vec2(0,-tx.y)),br=h(vUv+vec2(tx.x,-tx.y));
+float dx=(tr+2.*r+br)-(tl+2.*l+bl),dy=(bl+2.*b+br)-(tl+2.*t+tr);
+gl_FragColor=vec4(normalize(vec3(-dx*strength,-dy*strength,1.))*.5+.5,1.);}`,
+depthTest:false,depthWrite:false});
+
+const roughM=new THREE.ShaderMaterial({
+uniforms:{tDiffuse:{value:null},invert:{value:1.},contrast:{value:1.5},bias:{value:.45}},vertexShader:ppV,
+fragmentShader:`uniform sampler2D tDiffuse;uniform float invert,contrast,bias;varying vec2 vUv;
+void main(){float l=dot(texture2D(tDiffuse,vUv).rgb,vec3(.299,.587,.114));
+float r=mix(l,1.-l,invert);r=clamp((r-.5)*contrast+.5,0.,1.);r=clamp(r+(bias-.5),0.,1.);
+gl_FragColor=vec4(vec3(r),1.);}`,depthTest:false,depthWrite:false});
+
+const aoM=new THREE.ShaderMaterial({
+uniforms:{tDiffuse:{value:null},resolution:{value:new THREE.Vector2(RES,RES)},intensity:{value:2.},radius:{value:4.}},vertexShader:ppV,
+fragmentShader:`uniform sampler2D tDiffuse;uniform vec2 resolution;uniform float intensity,radius;varying vec2 vUv;
+float h(vec2 u){return dot(texture2D(tDiffuse,u).rgb,vec3(.299,.587,.114));}
+void main(){vec2 tx=1./resolution;float cH=h(vUv);float ao=0.,s=0.;
+for(float a=0.;a<6.283;a+=.785){vec2 d=vec2(cos(a),sin(a));
+for(float r=1.;r<=4.;r+=1.){if(r>radius)break;ao+=max(cH-h(vUv+d*tx*r),0.);s+=1.;}}
+ao=1.-clamp(ao/max(s,1.)*intensity*10.,0.,1.);gl_FragColor=vec4(vec3(ao),1.);}`,
+depthTest:false,depthWrite:false});
+
+const metalM=new THREE.ShaderMaterial({
+uniforms:{tDiffuse:{value:null},metalness:{value:.9},threshold:{value:.55},smoothing:{value:.25}},vertexShader:ppV,
+fragmentShader:`uniform sampler2D tDiffuse;uniform float metalness,threshold,smoothing;varying vec2 vUv;
+void main(){float l=dot(texture2D(tDiffuse,vUv).rgb,vec3(.299,.587,.114));
+float m=smoothstep(threshold-smoothing,threshold+smoothing,l)*metalness;
+gl_FragColor=vec4(vec3(m),1.);}`,depthTest:false,depthWrite:false});
+
+// === DEFAULTS ===
+function D(){return{animate:false,time:5,resolution:RES+"",polarConversion:false,tiling:false,normalMap:false,cHeightScale:2,cRadialMask:1,cColorBalanceShadowsR:0,cColorBalanceShadowsG:0,cColorBalanceShadowsB:0,cColorBalanceMidtonesR:0,cColorBalanceMidtonesG:0,cColorBalanceMidtonesB:0,cColorBalanceHighlightsR:0,cColorBalanceHighlightsG:0,cColorBalanceHighlightsB:0,cToonEnable:false,cToonDark:.8,cToonLight:.95,cFrequency:30,cAmplitude:.01,cIntensity:.5,cDirectionX:0,cDirectionY:1,cPowerExponent:1,cRadius:.5,cInnerRadius:1,cInnerRadius2:1,cSize:1,cWidth:1,cHeight:1,cDepth:1,cColor:1,cPetals:6,cOffset:.2,cVolume:3,cBeta:4,cDelta:.05,cScale:1,cInnerWidth:.4,cStrength:1,cPower:1,cRange:2,cEmission:1,cBloom:1,cLightX:1,cLightY:1,cLightZ:1,cAmbient:1,cSmoothness:1,cSmoothnessPower:1,cThickness:1,cThicknessPower:1,cCameraTilt:0,cCameraPan:0,cSpeed:1,cAngle:0,cDensity:1,cAlpha:1,cRepeat:1,cScaleShift:0,cBias:0,cGain:0,cInvert:0,cThreshold:0,cDiamondGearTeeth:18,cDiamondGearMid:.8,cBrushStrokeX1:-.4,cBrushStrokeY1:0,cBrushStrokeX2:1.1,cBrushStrokeY2:.8,cBubblesVariation:1,cFlameEyeInnerFade:1,cFlameEyeOuterFade:1,cFlameEyeBorder:1,cSplatLines:20,cSplatSpotStep:.04,cTrabeculumVariation:2,cLifeTime:.9,cGravity:.26,cCount:300,cExplosionRadius:1.75,cExplosionDownScale:1.25,cExplosionGrain:2,cExplosionSpeed:.3,cExplosionBallness:2,cExplosionGrowth:2.2,cExplosionFade:1.6,cExplosionDensity:1.35,cExplosionContrast:1,cExplosionRollingInitDamp:.3,cExplosionRollingSpeed:2,cExplosionDelayRange:.25,cExplosionBallSpread:1,cExplosionBloom:0,cExplosionEmission:.2,cExplosionColor:1,cNoiseOctave:8,cNoiseFrequency:1,cNoiseAmplitude:.65,cNoisePersistence:.5,cNoiseScale:1,cNoiseSphereEnable:false,cNoiseGraphEnable:false,cNoiseStrength:1,cNoiseDepth:3,cNoiseSize:8,cNoiseLacunarity:2,cTurbulence:0,cRidge:0,cRidgeOffset:.9,cGradientNoise:0,cValueNoise:0,cVoronoiNoise:0,cVoronoiCell:0,cSimplexNoise:1}}
+
+// === RENDER HELPERS ===
+function renderFx(type,params,target){
+const sh=new PIXY.FxgenShader();
+sh.enable(type.toUpperCase());sh.enable("TOON");sh.enable("GLSL3");
+const u=sh.generateUniforms();
+const mat=sh.createMaterial(u,{defines:sh.generateDefines()});
+const ec=Object.assign(D(),params);
+u.resolution.value.set(RES,RES);u.mouse.value.set(.5,.5);
+u.cameraPos.value.set(0,0,3.8);u.cameraDir.value.set(0,0,-1);
+for(const k of Object.keys(ec)){if(k==="resolution"||k==="type")continue;
+try{PIXY.FxgenShaderUtils.SetShaderParameter(u,k,ec[k])}catch(e){}}
+PIXY.FxgenShaderUtils.SetShaderParameter(u,"cColorBalanceShadows",new THREE.Vector3(ec.cColorBalanceShadowsR,ec.cColorBalanceShadowsG,ec.cColorBalanceShadowsB));
+PIXY.FxgenShaderUtils.SetShaderParameter(u,"cColorBalanceMidtones",new THREE.Vector3(ec.cColorBalanceMidtonesR,ec.cColorBalanceMidtonesG,ec.cColorBalanceMidtonesB));
+PIXY.FxgenShaderUtils.SetShaderParameter(u,"cColorBalanceHighlights",new THREE.Vector3(ec.cColorBalanceHighlightsR,ec.cColorBalanceHighlightsG,ec.cColorBalanceHighlightsB));
+PIXY.FxgenShaderUtils.SetShaderParameter(u,"cDirection",new THREE.Vector2(ec.cDirectionX,ec.cDirectionY));
+PIXY.FxgenShaderUtils.SetShaderParameter(u,"tGrunge",grungeTex);
+bScene.overrideMaterial=mat;renderer.setRenderTarget(target);
+renderer.render(bScene,bCam);renderer.setRenderTarget(null);
+bScene.overrideMaterial=null;mat.dispose();
+}
+function doGrad(inRT,name,outRT){
+gradM.uniforms.tDiffuse.value=inRT.texture;
+gradM.uniforms.tGradient.value=gTex[name];
+gradM.uniformsNeedUpdate=true;gradQ.material=gradM;
+renderer.setRenderTarget(outRT);renderer.clear();
+renderer.render(gradS,gradC);renderer.setRenderTarget(null);
+}
+function doBlend(baseRT,blendRT,mode,outRT){
+blendM.uniforms.tBase.value=baseRT.texture;blendM.uniforms.tBlend.value=blendRT.texture;
+blendM.uniforms.blendMode.value=mode;blendM.uniforms.opacity.value=1;
+blendM.uniformsNeedUpdate=true;blendQ.material=blendM;
+renderer.setRenderTarget(outRT);renderer.clear();
+renderer.render(blendS,blendC);renderer.setRenderTarget(null);
+}
+function doAlphaBlend(baseRT,blendRT,opacity,outRT){
+alphaBlendM.uniforms.tBase.value=baseRT.texture;alphaBlendM.uniforms.tBlend.value=blendRT.texture;
+alphaBlendM.uniforms.opacity.value=opacity||1;
+alphaBlendM.uniformsNeedUpdate=true;alphaBlendQ.material=alphaBlendM;
+renderer.setRenderTarget(outRT);renderer.clear();
+renderer.render(alphaBlendS,alphaBlendC);renderer.setRenderTarget(null);
+}
+function doAlphaView(inRT,outRT){
+alphaViewM.uniforms.tDiffuse.value=inRT.texture;
+alphaViewM.uniformsNeedUpdate=true;alphaViewQ.material=alphaViewM;
+renderer.setRenderTarget(outRT);renderer.clear();
+renderer.render(alphaViewS,alphaViewC);renderer.setRenderTarget(null);
+}
+function doPBR(inRT,mat,outRT){
+mat.uniforms.tDiffuse.value=inRT.texture;mat.uniformsNeedUpdate=true;ppQ.material=mat;
+renderer.setRenderTarget(outRT);renderer.clear();
+renderer.render(ppS,ppC);renderer.setRenderTarget(null);
+}
+function doMask(inRT,radius,feather,outRT){
+maskM.uniforms.tDiffuse.value=inRT.texture;maskM.uniforms.radius.value=radius;maskM.uniforms.feather.value=feather;
+maskM.uniformsNeedUpdate=true;maskQ.material=maskM;
+renderer.setRenderTarget(outRT);renderer.clear();
+renderer.render(maskS,maskC);renderer.setRenderTarget(null);
+}
+function renderAtlasFrame(tex,frame,outRT){
+atlasM.uniforms.tAtlas.value=tex;atlasM.uniforms.uFrame.value=frame;
+atlasM.uniformsNeedUpdate=true;atlasQ.material=atlasM;
+renderer.setRenderTarget(outRT);renderer.clear();
+renderer.render(atlasS,atlasC);renderer.setRenderTarget(null);
+}
+function toCanvas(srcRT,canvas){
+renderer.readRenderTargetPixels(srcRT,0,0,RES,RES,pixelBuf);
+const ctx=canvas.getContext("2d",{willReadFrequently:true});
+const img=ctx.createImageData(RES,RES);
+for(let y=0;y<RES;y++){const s=(RES-1-y)*RES*4,d=y*RES*4;
+for(let x=0;x<RES*4;x++)img.data[d+x]=pixelBuf[s+x];}
+ctx.putImageData(img,0,0);
+}
+function copyCanvas(src,dst){
+const ctx=dst.getContext("2d");
+ctx.clearRect(0,0,dst.width,dst.height);
+ctx.drawImage(src,0,0,dst.width,dst.height);
+}
+function card(container,name,desc,cls){
+const c=document.createElement("div");c.className="card"+(cls?" "+cls:"");
+const cv=document.createElement("canvas");cv.width=RES;cv.height=RES;c.appendChild(cv);
+const l=document.createElement("div");l.className="lbl";
+l.innerHTML=`<span class="nm">${name}</span><span class="desc">${desc||""}</span>`;
+c.appendChild(l);container.appendChild(c);return cv;
+}
+function stepItem(list,name,desc,cls){
+const li=document.createElement("li");if(cls)li.className=cls;
+const t=document.createElement("div");t.className="step-title";t.textContent=name;li.appendChild(t);
+const cv=document.createElement("canvas");cv.width=RES;cv.height=RES;li.appendChild(cv);
+const d=document.createElement("div");d.className="step-desc";d.textContent=desc||"";li.appendChild(d);
+list.appendChild(li);return cv;
+}
+function prog(p){pbar.style.width=p+"%";}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const animators=[];
+let animLoopStarted=false;
+
+function addAnimator(canvas,fps,update){
+	const anim={canvas,fps,update,last:0,visible:true};
+	const obs=new IntersectionObserver(entries=>{
+		entries.forEach(e=>{anim.visible=e.isIntersecting;});
+	},{threshold:.2});
+	obs.observe(canvas);
+	animators.push(anim);
+	if(!animLoopStarted){
+		animLoopStarted=true;
+		requestAnimationFrame(animLoop);
+	}
+}
+
+function animLoop(ts){
+	for(const a of animators){
+		if(!a.visible||document.hidden)continue;
+		if(ts-a.last>=1000/a.fps){
+			a.last=ts;
+			a.update(ts,a);
+		}
+	}
+	requestAnimationFrame(animLoop);
+}
+
+function renderHero(){
+const cv=document.getElementById("hero-canvas");
+if(!cv)return;
+cv.width=RES;cv.height=RES;
+renderAtlasFrame(ritualPortalAtlas,0,rt[0]);
+toCanvas(rt[0],cv);
+addAnimator(cv,ANIM_FPS,(t)=>{
+	const frame=Math.floor((t/1000)*ANIM_FPS)%FRAMES;
+	renderAtlasFrame(ritualPortalAtlas,frame,rt[0]);
+	toCanvas(rt[0],cv);
+});
+}
+
+// ===================================================================
+// CHAPTER 1: RAW EFFECTS — dramatic effect choices
+// ===================================================================
+function ch1(){
+const g=document.getElementById("grid-raw");
+const demos=[
+{type:"Explosion",p:{time:.8,cExplosionRadius:2,cExplosionBallness:3,cExplosionGrowth:2.5,cExplosionDensity:1.5,cExplosionContrast:1.2,cExplosionGrain:2.5},name:"Explosion",desc:"Volumetric fluid dynamics"},
+{type:"Corona",p:{time:3},name:"Corona",desc:"Solar energy halo"},
+{type:"MagicCircle",p:{time:2,cSpeed:.2},name:"Magic Circle",desc:"Geometric mandala pattern"},
+{type:"Caustics",p:{time:3,cSpeed:.4,tiling:true},name:"Caustics",desc:"Water refraction simulation"},
+{type:"CoherentNoise",p:{time:22.7,cNoiseOctave:6,cNoiseFrequency:24,cNoiseAmplitude:1.9,cNoiseLacunarity:4,cNoisePersistence:.7,cVoronoiNoise:.9,cSimplexNoise:.35,cTurbulence:1,cRidge:1,cRidgeOffset:.15,cScaleShift:.4,cPowerExponent:4.2,cBias:.3,cGain:-.5,cThreshold:.35,cInvert:1,polarConversion:true,cToonEnable:true,cToonDark:.55,cToonLight:.88,cRadialMask:.55},name:"Frozen Lightning",desc:"Ridge+voronoi+toon+polar warp"}
+];
+for(const d of demos){const cv=card(g,d.name,d.desc);renderFx(d.type,d.p,rt[0]);toCanvas(rt[0],cv);}
+}
+
+// ===================================================================
+// CHAPTER 2: SAME EFFECTS + COLOR BALANCE
+// ===================================================================
+function ch2(){
+const g=document.getElementById("grid-color");
+const demos=[
+{type:"Explosion",p:{time:.8,cExplosionRadius:2,cExplosionBallness:3,cExplosionGrowth:2.5,cExplosionDensity:1.5,cExplosionContrast:1.2,cExplosionGrain:2.5,
+cColorBalanceShadowsR:.85,cColorBalanceShadowsG:-.8,cColorBalanceShadowsB:-1,
+cColorBalanceMidtonesR:1,cColorBalanceMidtonesG:.4,cColorBalanceMidtonesB:-.6,
+cColorBalanceHighlightsR:1,cColorBalanceHighlightsG:.9,cColorBalanceHighlightsB:.3},
+name:"Explosion",desc:"+ Fire palette (orange/red shadows, yellow highlights)"},
+{type:"Corona",p:{time:3,
+cColorBalanceShadowsR:.6,cColorBalanceShadowsG:.2,cColorBalanceShadowsB:-.8,
+cColorBalanceMidtonesR:.9,cColorBalanceMidtonesG:.6,cColorBalanceMidtonesB:-.2,
+cColorBalanceHighlightsR:1,cColorBalanceHighlightsG:.95,cColorBalanceHighlightsB:.7},
+name:"Corona",desc:"+ Solar gold (warm orange midtones, white-gold highlights)"},
+{type:"MagicCircle",p:{time:2,cSpeed:.2,
+cColorBalanceShadowsR:.3,cColorBalanceShadowsG:-.6,cColorBalanceShadowsB:.8,
+cColorBalanceMidtonesR:.6,cColorBalanceMidtonesG:-.2,cColorBalanceMidtonesB:1,
+cColorBalanceHighlightsR:.9,cColorBalanceHighlightsG:.7,cColorBalanceHighlightsB:1},
+name:"Magic Circle",desc:"+ Arcane purple (violet shadows, cyan-white highlights)"},
+{type:"Caustics",p:{time:3,cSpeed:.4,tiling:true,
+cColorBalanceShadowsR:-.5,cColorBalanceShadowsG:.2,cColorBalanceShadowsB:.9,
+cColorBalanceMidtonesR:-.2,cColorBalanceMidtonesG:.5,cColorBalanceMidtonesB:.8,
+cColorBalanceHighlightsR:.4,cColorBalanceHighlightsG:.95,cColorBalanceHighlightsB:1},
+name:"Caustics",desc:"+ Deep ocean (dark blue shadows, bright aqua highlights)"},
+{type:"CoherentNoise",p:{time:22.7,cNoiseOctave:6,cNoiseFrequency:24,cNoiseAmplitude:1.9,cNoiseLacunarity:4,cNoisePersistence:.7,cVoronoiNoise:.9,cSimplexNoise:.35,cTurbulence:1,cRidge:1,cRidgeOffset:.15,cScaleShift:.4,cPowerExponent:4.2,cBias:.3,cGain:-.5,cThreshold:.35,cInvert:1,polarConversion:true,cToonEnable:true,cToonDark:.55,cToonLight:.88,cRadialMask:.55,
+cColorBalanceShadowsR:-.9,cColorBalanceShadowsG:-.7,cColorBalanceShadowsB:.85,
+cColorBalanceMidtonesR:.6,cColorBalanceMidtonesG:.1,cColorBalanceMidtonesB:1,
+cColorBalanceHighlightsR:1,cColorBalanceHighlightsG:1,cColorBalanceHighlightsB:1},
+name:"Frozen Lightning",desc:"+ Electric blue (deep indigo shadows, white highlights)"}
+];
+for(const d of demos){const cv=card(g,d.name,d.desc);renderFx(d.type,d.p,rt[0]);toCanvas(rt[0],cv);}
+}
+
+// ===================================================================
+// CHAPTER 3: EXPLOSION × 10 GRADIENT PALETTES
+// High-contrast Explosion base = dramatic gradient mapping
+// ===================================================================
+function ch3(){
+const g=document.getElementById("grid-grad");
+// Explosion has amazing dynamic range — bright core fading to black
+renderFx("Explosion",{time:.7,cExplosionRadius:2.2,cExplosionBallness:4,cExplosionGrowth:2.8,cExplosionDensity:1.6,cExplosionContrast:1.3,cExplosionGrain:2},rt[0]);
+const cv0=card(g,"Original","Raw explosion — grayscale");toCanvas(rt[0],cv0);
+for(const name of Object.keys(GRADS)){
+const cv=card(g,name,"Luminance → "+name,"highlight");
+doGrad(rt[0],name,rt[1]);toCanvas(rt[1],cv);
+}
+}
+
+// ===================================================================
+// CHAPTER 4: ORGANIC vs DIGITAL — 9 BLEND MODES
+// ===================================================================
+function ch4(){
+const g=document.getElementById("grid-blend");
+const MODES=["Normal","Multiply","Screen","Overlay","Add","Subtract","SoftLight","HardLight","Difference"];
+// Layer A: organic flowing caustics
+renderFx("Caustics",{time:3,cSpeed:.4,tiling:true},rt[0]);
+const cvA=card(g,"Layer A","Caustics — organic water patterns");toCanvas(rt[0],cvA);
+// Layer B: digital matrix
+renderFx("BinaryMatrix",{time:2},rt[1]);
+const cvB=card(g,"Layer B","BinaryMatrix — digital code rain");toCanvas(rt[1],cvB);
+for(let i=0;i<MODES.length;i++){
+const cv=card(g,MODES[i],"Organic + Digital blended","highlight");
+doBlend(rt[0],rt[1],i,rt[2]);toCanvas(rt[2],cv);
+}
+}
+
+// ===================================================================
+// CHAPTER 5: FULL PIPELINE — Layer A + B → Blend → Gradient
+// ===================================================================
+function ch5(){
+const g=document.getElementById("grid-combined");
+const combos=[
+{a:{type:"Explosion",p:{time:.7,cExplosionRadius:2,cExplosionBallness:3,cExplosionGrowth:2.5,cExplosionGrain:2}},
+ b:{type:"CoherentNoise",p:{time:5,cNoiseOctave:6,cNoiseFrequency:4,cRidge:.8,cVoronoiNoise:.4,cNoiseAmplitude:1}},
+ mode:2,modeName:"Screen",grad:"Fire",desc:"Volcanic eruption with magma veins"},
+{a:{type:"Electric",p:{time:1.5}},
+ b:{type:"MagicCircle",p:{time:2,cSpeed:.15}},
+ mode:4,modeName:"Add",grad:"Neon",desc:"Arcane lightning ritual"},
+{a:{type:"Caustics",p:{time:3,tiling:true}},
+ b:{type:"Trabeculum",p:{time:1,cTrabeculumVariation:3}},
+ mode:3,modeName:"Overlay",grad:"Ocean",desc:"Deep sea bioluminescent coral"},
+{a:{type:"Corona",p:{time:3}},
+ b:{type:"CoherentNoise",p:{time:12,cNoiseOctave:6,cNoiseFrequency:12,cNoiseAmplitude:1.6,cNoiseLacunarity:3,cVoronoiNoise:.7,cTurbulence:.65,cRidge:.8,cRidgeOffset:.35}},
+ mode:2,modeName:"Screen",grad:"Plasma",desc:"Supernova nebula with chromatic plasma"}
+];
+for(const c of combos){
+const row=document.createElement("div");row.className="pipeline-row";g.appendChild(row);
+renderFx(c.a.type,c.a.p,rt[0]);
+const cvA=card(row,"Layer A",c.a.type);toCanvas(rt[0],cvA);
+const a1=document.createElement("span");a1.className="pipe-arrow";a1.textContent="+";row.appendChild(a1);
+renderFx(c.b.type,c.b.p,rt[1]);
+const cvB=card(row,"Layer B",c.b.type);toCanvas(rt[1],cvB);
+const a2=document.createElement("span");a2.className="pipe-arrow";a2.textContent="→";row.appendChild(a2);
+doBlend(rt[0],rt[1],c.mode,rt[2]);
+const cvBl=card(row,c.modeName,"Blended");toCanvas(rt[2],cvBl);
+const a3=document.createElement("span");a3.className="pipe-arrow";a3.textContent="→";row.appendChild(a3);
+doGrad(rt[2],c.grad,rt[3]);
+const cvF=card(row,c.grad+" Gradient",c.desc,"highlight");toCanvas(rt[3],cvF);
+}
+}
+
+// ===================================================================
+// CHAPTER 5B: DARK RITUAL PORTAL — custom GLSL sprite build
+// ===================================================================
+function ch5b(){
+const g=document.getElementById("grid-ritual");
+const coreList=document.getElementById("ritual-steps-core");
+const ringList=document.getElementById("ritual-steps-ring");
+const compList=document.getElementById("ritual-steps-comp");
+if(coreList)coreList.innerHTML="";
+if(ringList)ringList.innerHTML="";
+if(compList)compList.innerHTML="";
+
+const cvWarp=coreList?stepItem(coreList,"Warp Tunnel — custom GLSL warp_tunnel","Raymarched tunnel core + streak noise"):null;
+const cvMask=coreList?stepItem(coreList,"Circular Mask — smoothstep radial","Keeps the tunnel inside the ring"):null;
+const cvRing=ringList?stepItem(ringList,"Dark Ritual Ring — atlas sampler #029","Sprite sheet frame with alpha"):null;
+const cvRingAlpha=ringList?stepItem(ringList,"Ring Alpha — extracted from atlas","Alpha channel used for the blend"):null;
+const cvComp=compList?stepItem(compList,"Alpha Composite — premultiplied alpha-over","Ring over tunnel using atlas alpha"):null;
+
+const row=document.createElement("div");row.className="pipeline-row";g.appendChild(row);
+const cvA=card(row,"Warp Tunnel + Mask","Custom GLSL + radial mask");
+const a1=document.createElement("span");a1.className="pipe-arrow";a1.textContent="+";
+row.appendChild(a1);
+const cvB=card(row,"Dark Ritual Ring","Atlas #029 (sprites/029-dark-ritual.png)");
+const a2=document.createElement("span");a2.className="pipe-arrow";a2.textContent="→";
+row.appendChild(a2);
+const cvF=card(row,"Alpha Composite","Dark Ritual Portal","highlight");
+
+const renderFrame=(frame)=>{
+	const time=0+(frame/(FRAMES-1))*15;
+	renderCustom(SHADERS.warp_tunnel,time,ritualRT.core);
+	if(cvWarp)toCanvas(ritualRT.core,cvWarp);
+	doMask(ritualRT.core,0.45,0.1,ritualRT.masked);
+	if(cvMask)toCanvas(ritualRT.masked,cvMask);
+	if(cvMask)copyCanvas(cvMask,cvA);else toCanvas(ritualRT.masked,cvA);
+
+	renderAtlasFrame(ritualAtlas,frame,ritualRT.ring);
+	if(cvRing)toCanvas(ritualRT.ring,cvRing);
+	if(cvRing)copyCanvas(cvRing,cvB);else toCanvas(ritualRT.ring,cvB);
+	doAlphaView(ritualRT.ring,ritualRT.ringAlpha);
+	if(cvRingAlpha)toCanvas(ritualRT.ringAlpha,cvRingAlpha);
+
+	doAlphaBlend(ritualRT.masked,ritualRT.ring,1.0,ritualRT.blend);
+	if(cvComp)toCanvas(ritualRT.blend,cvComp);
+	if(cvComp)copyCanvas(cvComp,cvF);else toCanvas(ritualRT.blend,cvF);
+};
+
+renderFrame(12);
+addAnimator(cvA,ANIM_FPS,(t)=>{
+	const frame=Math.floor((t/1000)*ANIM_FPS)%FRAMES;
+	renderFrame(frame);
+});
+
+// Build PBR maps from the ritual composite for the embedded 3D preview
+doPBR(ritualRT.blend,normalM,ritualRT.normal);
+doPBR(ritualRT.blend,roughM,ritualRT.rough);
+doPBR(ritualRT.blend,aoM,ritualRT.ao);
+doPBR(ritualRT.blend,metalM,ritualRT.metal);
+
+const wrap=document.getElementById("grid-ritual-3d");
+const r=new THREE.WebGLRenderer({antialias:true,alpha:true});
+const W=360,H=280;
+r.setSize(W,H);r.setPixelRatio(Math.min(window.devicePixelRatio,1.5));
+r.toneMapping=THREE.ACESFilmicToneMapping;r.toneMappingExposure=1.2;
+r.domElement.style.cssText="border-radius:10px;border:1px solid #222;background:#0a0a12";
+wrap.appendChild(r.domElement);
+
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x08080f);
+const cam=new THREE.PerspectiveCamera(40,W/H,.1,50);
+cam.position.set(0,0,3.2);
+
+const mat=new THREE.MeshStandardMaterial({
+color:0xffffff,roughness:.4,metalness:.6,
+map:ritualRT.blend.texture,
+normalMap:ritualRT.normal.texture,
+roughnessMap:ritualRT.rough.texture,
+aoMap:ritualRT.ao.texture,
+metalnessMap:ritualRT.metal.texture
+});
+mat.normalScale.set(1.2,1.2);
+
+const mesh=new THREE.Mesh(new THREE.SphereGeometry(1,48,48),mat);
+scene.add(mesh);
+
+const amb=new THREE.AmbientLight(0x445566,.9);scene.add(amb);
+const key=new THREE.DirectionalLight(0xffffff,1.4);key.position.set(2,3,4);scene.add(key);
+const rim=new THREE.DirectionalLight(0x6633ff,.6);rim.position.set(-2,1,-3);scene.add(rim);
+
+r.render(scene,cam);
+
+const info=document.createElement("div");info.className="preview-info";
+info.innerHTML=`
+<h3>Ritual Preview (Static)</h3>
+<p>The final composite is converted into PBR maps and applied to a 3D surface for material validation.</p>
+<ul class="map-list">
+<li>Color map (Dark Ritual composite)</li>
+<li>Normal map (Sobel)</li>
+<li>Roughness map (luminance)</li>
+<li>AO + Metallic maps</li>
+</ul>`;
+wrap.appendChild(info);
+}
+
+// ===================================================================
+// CHAPTER 6: PBR MAPS — from colorful composite
+// ===================================================================
+function ch6(){
+const g=document.getElementById("grid-pbr");
+
+// Create an interesting structural texture (tileable ridge noise + voronoi cells)
+const structP={time:8,tiling:true,cNoiseOctave:5,cNoiseFrequency:4,cNoiseAmplitude:1,
+cNoiseLacunarity:2,cNoisePersistence:.5,cRidge:.6,cRidgeOffset:.5,cVoronoiNoise:.3,cVoronoiCell:.2};
+renderFx("CoherentNoise",structP,pbrRT.struct);
+
+// Apply Aether gradient for a rich colored version
+doGrad(pbrRT.struct,"Aether",pbrRT.color);
+
+// Generate PBR maps from the structural (pre-gradient) texture
+doPBR(pbrRT.struct,normalM,pbrRT.normal);
+doPBR(pbrRT.struct,roughM,pbrRT.rough);
+doPBR(pbrRT.struct,aoM,pbrRT.ao);
+doPBR(pbrRT.struct,metalM,pbrRT.metal);
+
+const maps=[
+{rt:pbrRT.color,name:"Color (Aether Gradient)",desc:"Gradient-mapped color — what you see"},
+{rt:pbrRT.normal,name:"Normal Map",desc:"Sobel filter — surface bumps and ridges"},
+{rt:pbrRT.rough,name:"Roughness",desc:"Inverted luminance — shiny peaks, rough valleys"},
+{rt:pbrRT.ao,name:"Ambient Occlusion",desc:"Height analysis — darkened crevices"},
+{rt:pbrRT.metal,name:"Metallic",desc:"Threshold mask — bright areas become metallic"}
+];
+for(const m of maps){const cv=card(g,m.name,m.desc);toCanvas(m.rt,cv);}
+}
+
+// ===================================================================
+// CHAPTER 7: 3D PREVIEW — with environment and multiple objects
+// ===================================================================
+function ch7(){
+const g=document.getElementById("grid-3d");
+
+const makeCanvasTexture=(rt,colorSpace)=>{
+	const cv=document.createElement("canvas");
+	cv.width=RES;cv.height=RES;
+	toCanvas(rt,cv);
+	const tex=new THREE.CanvasTexture(cv);
+	tex.colorSpace=colorSpace;
+	tex.flipY=false;
+	tex.needsUpdate=true;
+	return tex;
+};
+
+const colorTex=makeCanvasTexture(pbrRT.color,THREE.SRGBColorSpace);
+const normalTex=makeCanvasTexture(pbrRT.normal,THREE.NoColorSpace);
+const roughTex=makeCanvasTexture(pbrRT.rough,THREE.NoColorSpace);
+const aoTex=makeCanvasTexture(pbrRT.ao,THREE.NoColorSpace);
+const metalTex=makeCanvasTexture(pbrRT.metal,THREE.NoColorSpace);
+
+const r3=new THREE.WebGLRenderer({antialias:true,alpha:false});
+const W=780,H=420;
+r3.setSize(W,H);r3.setPixelRatio(Math.min(window.devicePixelRatio,2));
+r3.outputColorSpace=THREE.SRGBColorSpace;
+r3.toneMapping=THREE.ACESFilmicToneMapping;r3.toneMappingExposure=2.6;
+r3.shadowMap.enabled=true;r3.shadowMap.type=THREE.PCFSoftShadowMap;
+r3.domElement.style.cssText="border-radius:10px;border:1px solid #222;cursor:grab";
+g.appendChild(r3.domElement);
+
+const scene3=new THREE.Scene();
+scene3.background=new THREE.Color(0x11111a);
+
+const cam3=new THREE.PerspectiveCamera(40,W/H,.1,100);
+cam3.position.set(3.1,2,4);cam3.lookAt(0,.2,0);
+
+const ctrl=new OrbitControls(cam3,r3.domElement);
+ctrl.enableDamping=true;ctrl.dampingFactor=.06;ctrl.target.set(0,.2,0);
+
+// Environment map from hemisphere for reflections
+const pmrem=new THREE.PMREMGenerator(r3);
+const envScene=new THREE.Scene();
+envScene.add(new THREE.HemisphereLight(0x334466,0x111111,2));
+const envLight=new THREE.DirectionalLight(0xffeedd,.8);envLight.position.set(3,5,3);envScene.add(envLight);
+const envRT=pmrem.fromScene(envScene,0,.1,100);
+pmrem.dispose();
+scene3.environment=envRT.texture;
+
+// Lighting
+const hemi=new THREE.HemisphereLight(0x7c8fb3,0x222233,1.6);scene3.add(hemi);
+const key=new THREE.DirectionalLight(0xffeedd,4.0);key.position.set(4,6,4);key.castShadow=true;
+key.shadow.mapSize.set(1024,1024);key.shadow.camera.near=1;key.shadow.camera.far=20;
+key.shadow.camera.left=-3;key.shadow.camera.right=3;key.shadow.camera.top=3;key.shadow.camera.bottom=-3;
+scene3.add(key);
+const fill=new THREE.DirectionalLight(0x9ab6e6,2.0);fill.position.set(-3,2,-2);scene3.add(fill);
+const rim=new THREE.PointLight(0xff8844,1.6,12);rim.position.set(-2,1,3);scene3.add(rim);
+const accent=new THREE.PointLight(0x77bbff,1.0,10);accent.position.set(3,0,-3);scene3.add(accent);
+
+// Shared PBR material
+const mat3=new THREE.MeshStandardMaterial({
+color:0xffffff,roughness:.2,metalness:.55,
+map:colorTex,
+normalMap:normalTex,
+roughnessMap:roughTex,
+aoMap:aoTex,
+metalnessMap:metalTex,
+envMapIntensity:2.8,
+emissive:new THREE.Color(0x2a0938),
+emissiveMap:colorTex,
+emissiveIntensity:1.05
+});
+mat3.normalScale.set(1.5,1.5);
+mat3.needsUpdate=true;
+mat3.aoMapIntensity=.5;
+
+const ensureUv2=geo=>{
+if(geo.attributes.uv&&!geo.attributes.uv2)geo.setAttribute("uv2",geo.attributes.uv);
+};
+
+// Three objects to show the material
+const sphereGeo=new THREE.SphereGeometry(.8,64,64);ensureUv2(sphereGeo);
+const sphere=new THREE.Mesh(sphereGeo,mat3);
+sphere.position.set(-1.5,.8,0);sphere.castShadow=true;sphere.receiveShadow=true;
+scene3.add(sphere);
+
+const torusGeo=new THREE.TorusKnotGeometry(.55,.2,128,32);ensureUv2(torusGeo);
+const torus=new THREE.Mesh(torusGeo,mat3);
+torus.position.set(.8,1,0);torus.castShadow=true;torus.receiveShadow=true;
+scene3.add(torus);
+
+const cubeGeo=new THREE.BoxGeometry(1,1,1,4,4,4);ensureUv2(cubeGeo);
+const cube=new THREE.Mesh(cubeGeo,mat3);
+cube.position.set(2.8,.7,-.5);cube.rotation.y=.5;cube.castShadow=true;cube.receiveShadow=true;
+scene3.add(cube);
+
+// Ground plane
+const ground=new THREE.Mesh(
+new THREE.PlaneGeometry(12,12),
+new THREE.MeshStandardMaterial({color:0x15151f,roughness:.9,metalness:0})
+);
+ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;
+scene3.add(ground);
+
+let previewInView=true;
+let previewRunning=false;
+
+function renderFrame(){
+if(!previewRunning)return;
+sphere.rotation.y+=.004;torus.rotation.y+=.006;torus.rotation.x+=.002;cube.rotation.y+=.003;
+ctrl.update();r3.render(scene3,cam3);
+requestAnimationFrame(renderFrame);
+}
+
+function updatePreviewState(){
+const shouldRun=!previewPaused&&!document.hidden&&previewInView;
+if(shouldRun&&!previewRunning){previewRunning=true;requestAnimationFrame(renderFrame);}
+if(!shouldRun&&previewRunning){previewRunning=false;}
+}
+
+const previewObserver=new IntersectionObserver(entries=>{
+entries.forEach(e=>{previewInView=e.isIntersecting;updatePreviewState();});
+},{threshold:.2});
+previewObserver.observe(r3.domElement);
+document.addEventListener("visibilitychange",updatePreviewState);
+window.__previewControl={setPaused:(paused)=>{previewPaused=paused;updatePreviewState();}};
+updatePreviewState();
+
+// Info panel
+const info=document.createElement("div");info.className="preview-info";
+info.innerHTML=`
+<h3>Interactive 3D Preview</h3>
+<p>The Aether-gradient texture from Chapter 6 applied as a full PBR material across three geometries.</p>
+<ul class="map-list">
+<li>Color map (Aether gradient-mapped)</li>
+<li>Normal map (Sobel, strength 1.5)</li>
+<li>Roughness map (inverted luminance)</li>
+<li>Ambient Occlusion (height-based)</li>
+<li>Metallic map (threshold mask)</li>
+<li>Environment reflections (PMREM)</li>
+</ul>
+<p><kbd>Drag</kbd> orbit &nbsp; <kbd>Scroll</kbd> zoom</p>
+<p style="color:#444;margin-top:12px">Renderer: WebGL2 + ACES filmic<br>
+Shadows: PCF soft shadow mapping<br>
+Lighting: hemisphere + key + fill + rim + accent</p>`;
+g.appendChild(info);
+}
+
+// ===================================================================
+// CUSTOM GLSL LIBRARY — hand-written shader previews
+// ===================================================================
+function chCustom(){
+const g=document.getElementById("grid-custom");
+if(!g)return;
+const demos=[
+{shader:"volumetric_nebula",name:"Volumetric Nebula",desc:"Raymarched FBM cloud",tStart:0,tEnd:20,fps:6},
+{shader:"black_hole",name:"Black Hole",desc:"Lensing + accretion disk",tStart:0,tEnd:25,fps:5},
+{shader:"warp_tunnel",name:"Warp Tunnel",desc:"Hyperspace streaks",tStart:0,tEnd:15,fps:10},
+{shader:"cosmic_jellyfish",name:"Cosmic Jellyfish",desc:"Bioluminescent flow",tStart:0,tEnd:20,fps:6},
+{shader:"god_rays",name:"God Rays",desc:"Volumetric beams",tStart:0,tEnd:20,fps:6},
+{shader:"reality_shatter",name:"Reality Shatter",desc:"Cracked spacetime",tStart:.5,tEnd:16,fps:7},
+{shader:"phoenix",name:"Phoenix Rebirth",desc:"Flame wings",tStart:0,tEnd:15,fps:8},
+{shader:"portal",name:"Dimensional Portal",desc:"Rift ring distortion",tStart:0,tEnd:20,fps:8},
+{shader:"time_vortex",name:"Time Vortex",desc:"Clockwork spiral",tStart:0,tEnd:20,fps:8},
+{shader:"particle_collider",name:"Particle Collider",desc:"Beam collision",tStart:0,tEnd:10,fps:10},
+{shader:"void_tendril",name:"Void Tendril",desc:"Abyssal reach",tStart:0,tEnd:20,fps:7},
+{shader:"summoning",name:"Summoning Circle",desc:"Arcane sigils",tStart:0,tEnd:20,fps:7}
+];
+for(const d of demos){
+const cv=card(g,d.name,d.desc);
+renderCustom(SHADERS[d.shader],d.tStart,rt[0]);
+toCanvas(rt[0],cv);
+addAnimator(cv,d.fps,(t)=>{
+const frame=Math.floor((t/1000)*d.fps)%FRAMES;
+const time=d.tStart+(frame/(FRAMES-1))*(d.tEnd-d.tStart);
+renderCustom(SHADERS[d.shader],time,rt[0]);
+toCanvas(rt[0],cv);
+});
+}
+}
+
+// ===================================================================
+// INIT
+// ===================================================================
+async function init(){
+prog(5);await sleep(50);
+renderHero();prog(8);await sleep(30);
+ch5b();prog(18);await sleep(20);
+chCustom();prog(26);await sleep(20);
+ch1();prog(30);await sleep(20);
+ch2();prog(44);await sleep(20);
+ch3();prog(58);await sleep(20);
+ch4();prog(72);await sleep(20);
+ch5();prog(82);await sleep(20);
+ch6();prog(90);await sleep(20);
+ch7();prog(100);await sleep(200);
+document.getElementById("loading").style.display="none";
+document.getElementById("chapters").style.display="block";
+document.getElementById("outro").style.display="block";
+}
+
+init().catch(e=>{
+document.getElementById("loading").textContent="Error: "+e.message;console.error(e);
+});
+</script>
+		<script type="module" src="src/ui/top-nav.js"></script>
+	</body>
+</html>

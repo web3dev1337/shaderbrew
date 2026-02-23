@@ -1,0 +1,108 @@
+{
+  "version": 1,
+  "resolution": 512,
+  "layers": [
+    {
+      "name": "Helix Nebula",
+      "effectController": {
+        "type": "CoherentNoise",
+        "animate": true,
+        "time": 12.4,
+        "resolution": "1024",
+        "polarConversion": true,
+        "tiling": false,
+        "normalMap": false,
+        "cHeightScale": 2,
+        "cRadialMask": 0.72,
+        "cColorBalanceShadowsR": 0.45,
+        "cColorBalanceShadowsG": -0.85,
+        "cColorBalanceShadowsB": 0.65,
+        "cColorBalanceMidtonesR": 0.15,
+        "cColorBalanceMidtonesG": 0.55,
+        "cColorBalanceMidtonesB": 0.8,
+        "cColorBalanceHighlightsR": 1.0,
+        "cColorBalanceHighlightsG": 0.85,
+        "cColorBalanceHighlightsB": 0.4,
+        "cToonEnable": false,
+        "cToonDark": 0.8,
+        "cToonLight": 0.95,
+        "cNoiseOctave": 6,
+        "cNoiseFrequency": 12,
+        "cNoiseAmplitude": 1.6,
+        "cNoiseLacunarity": 3,
+        "cNoisePersistence": 0.42,
+        "cGradientNoise": 0.0,
+        "cValueNoise": 0.0,
+        "cVoronoiNoise": 0.7,
+        "cVoronoiCell": 0.25,
+        "cSimplexNoise": 0.55,
+        "cRepeat": 1,
+        "cTurbulence": 0.65,
+        "cRidge": 0.8,
+        "cRidgeOffset": 0.35,
+        "cScaleShift": 0.18,
+        "cPowerExponent": 2.4,
+        "cBias": 0.1,
+        "cGain": -0.35,
+        "cThreshold": 0.12,
+        "cInvert": 0.0,
+        "cNoiseSphereEnable": false,
+        "cNoiseGraphEnable": false
+      },
+      "opacity": 1.0,
+      "blendMode": "Normal",
+      "visible": true
+    },
+    {
+      "name": "Starfield",
+      "effectController": {
+        "type": "SparkNoise",
+        "animate": true,
+        "time": 8.0,
+        "resolution": "512",
+        "polarConversion": false,
+        "tiling": false,
+        "normalMap": false,
+        "cNoiseOctave": 3,
+        "cNoiseFrequency": 20,
+        "cNoiseAmplitude": 1.5,
+        "cNoiseLacunarity": 3,
+        "cNoisePersistence": 0.3,
+        "cColorBalanceShadowsR": -0.4,
+        "cColorBalanceShadowsG": -0.3,
+        "cColorBalanceShadowsB": 0.6,
+        "cColorBalanceMidtonesR": 0.2,
+        "cColorBalanceMidtonesG": 0.4,
+        "cColorBalanceMidtonesB": 0.9,
+        "cColorBalanceHighlightsR": 1.0,
+        "cColorBalanceHighlightsG": 0.95,
+        "cColorBalanceHighlightsB": 0.8
+      },
+      "opacity": 0.65,
+      "blendMode": "Screen",
+      "visible": true
+    }
+  ],
+  "gradient": {
+    "enabled": true,
+    "intensity": 0.85,
+    "stops": [
+      {
+        "position": 0.0,
+        "color": "#050314"
+      },
+      {
+        "position": 0.35,
+        "color": "#2a1b6a"
+      },
+      {
+        "position": 0.7,
+        "color": "#3bb6c6"
+      },
+      {
+        "position": 1.0,
+        "color": "#f1f6ff"
+      }
+    ]
+  }
+}

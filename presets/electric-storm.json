@@ -1,0 +1,21 @@
+{
+	"type": "Electric",
+	"animate": true,
+	"time": 0.5,
+	"resolution": "512",
+	"polarConversion": false,
+	"tiling": false,
+	"normalMap": false,
+	"cFrequency": 15,
+	"cIntensity": 0.8,
+	"cSpeed": 1.5,
+	"cColorBalanceShadowsR": -0.6,
+	"cColorBalanceShadowsG": -0.9,
+	"cColorBalanceShadowsB": 1.0,
+	"cColorBalanceMidtonesR": 0.5,
+	"cColorBalanceMidtonesG": -0.3,
+	"cColorBalanceMidtonesB": 1.0,
+	"cColorBalanceHighlightsR": 1.0,
+	"cColorBalanceHighlightsG": 0.8,
+	"cColorBalanceHighlightsB": 1.0
+}

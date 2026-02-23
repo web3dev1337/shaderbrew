@@ -1,0 +1,22 @@
+{
+	"type": "Caustics",
+	"animate": true,
+	"time": 6.0,
+	"resolution": "512",
+	"polarConversion": false,
+	"tiling": true,
+	"normalMap": false,
+	"cFrequency": 8,
+	"cAmplitude": 0.03,
+	"cIntensity": 0.75,
+	"cSpeed": 0.2,
+	"cColorBalanceShadowsR": 0.7,
+	"cColorBalanceShadowsG": -1.0,
+	"cColorBalanceShadowsB": 0.3,
+	"cColorBalanceMidtonesR": 1.0,
+	"cColorBalanceMidtonesG": -0.3,
+	"cColorBalanceMidtonesB": 0.8,
+	"cColorBalanceHighlightsR": 1.0,
+	"cColorBalanceHighlightsG": 0.6,
+	"cColorBalanceHighlightsB": 0.9
+}

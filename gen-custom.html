@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Generate Custom GLSL Sprites</title></head>
+<body>
+<div id="status">Loading...</div>
+<script type="importmap">
+{"imports":{"three":"https://unpkg.com/three@0.174.0/build/three.module.min.js"}}
+</script>
+<script type="module">
+import * as THREE from "three";
+import { NOISE_LIB, SHADERS } from "./shader-defs.js";
+
+const SRES=192,GRID=6,FRAMES=GRID*GRID,SHEET=SRES*GRID;
+const status=document.getElementById("status");
+
+const cv=document.createElement("canvas");cv.width=SRES;cv.height=SRES;
+const r3=new THREE.WebGLRenderer({canvas:cv,alpha:true,preserveDrawingBuffer:true});
+r3.setSize(SRES,SRES,false);r3.autoClear=true;
+function makeRT(){return new THREE.WebGLRenderTarget(SRES,SRES,{minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter,type:THREE.UnsignedByteType});}
+
+const ppV=`varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.0,1.0);}`;
+
+// Circle mask pass
+const maskScene=new THREE.Scene(),maskCam=new THREE.Camera();
+const maskMat=new THREE.ShaderMaterial({
+uniforms:{tDiffuse:{value:null}},vertexShader:ppV,
+fragmentShader:`uniform sampler2D tDiffuse;varying vec2 vUv;
+void main(){vec4 c=texture2D(tDiffuse,vUv);float d=length(vUv-.5)*2.;
+float mask=1.-smoothstep(.3,1.,d);
+float lum=dot(c.rgb,vec3(.299,.587,.114));
+float kill=smoothstep(.0,.04,lum);
+float alpha=mask*kill;
+gl_FragColor=vec4(c.rgb*alpha,alpha);}`,
+depthTest:false,depthWrite:false});
+maskScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),maskMat));
+
+// ==================== CATALOG ====================
+
+const CUSTOM_CATALOG=[
+{name:"Volumetric Nebula",cat:"cosmic",shader:"volumetric_nebula",tStart:0,tEnd:20,fps:6,mask:true},
+{name:"Black Hole",cat:"cosmic",shader:"black_hole",tStart:0,tEnd:25,fps:5,mask:false},
+{name:"Shockwave Pulse",cat:"energy",shader:"shockwave",tStart:0.1,tEnd:3.0,fps:10,mask:true},
+{name:"Plasma Containment",cat:"energy",shader:"plasma_sphere",tStart:0,tEnd:20,fps:7,mask:false},
+{name:"Julia Fractal Morph",cat:"abstract",shader:"fractal_julia",tStart:0,tEnd:40,fps:5,mask:false},
+{name:"Warp Tunnel",cat:"cosmic",shader:"warp_tunnel",tStart:0,tEnd:15,fps:10,mask:false},
+{name:"Warp Inferno",cat:"cosmic",shader:"warp_inferno",tStart:0,tEnd:12,fps:10,mask:false},
+{name:"Warp Void",cat:"cosmic",shader:"warp_void",tStart:0,tEnd:30,fps:6,mask:false},
+{name:"Warp Electric",cat:"cosmic",shader:"warp_electric",tStart:0,tEnd:10,fps:12,mask:false},
+{name:"Warp Rainbow",cat:"cosmic",shader:"warp_rainbow",tStart:0,tEnd:15,fps:9,mask:false},
+{name:"Tornado Vortex",cat:"nature",shader:"tornado",tStart:0,tEnd:20,fps:7,mask:false},
+{name:"Bioluminescent",cat:"nature",shader:"bioluminescent",tStart:0,tEnd:20,fps:6,mask:false},
+{name:"Singularity",cat:"cosmic",shader:"singularity",tStart:0.5,tEnd:8,fps:7,mask:true},
+{name:"Aurora Borealis",cat:"nature",shader:"aurora",tStart:0,tEnd:25,fps:5,mask:false},
+{name:"Cosmic Jellyfish",cat:"nature",shader:"cosmic_jellyfish",tStart:0,tEnd:20,fps:6,mask:false},
+{name:"God Rays",cat:"energy",shader:"god_rays",tStart:0,tEnd:20,fps:6,mask:true},
+{name:"Reality Glitch",cat:"abstract",shader:"reality_glitch",tStart:0,tEnd:10,fps:10,mask:false},
+{name:"Crystal Geode",cat:"abstract",shader:"crystal_geode",tStart:0,tEnd:20,fps:5,mask:false},
+{name:"Phoenix Rebirth",cat:"fire",shader:"phoenix",tStart:0,tEnd:15,fps:8,mask:false},
+{name:"Supernova",cat:"cosmic",shader:"supernova",tStart:0.5,tEnd:12,fps:8,mask:true},
+{name:"Dimensional Portal",cat:"magic",shader:"portal",tStart:0,tEnd:20,fps:8,mask:false},
+{name:"Deep Ocean",cat:"nature",shader:"deep_ocean",tStart:0,tEnd:25,fps:6,mask:false},
+{name:"Galaxy Spiral",cat:"cosmic",shader:"galaxy",tStart:0,tEnd:60,fps:4,mask:false},
+{name:"Mandelbrot Zoom",cat:"abstract",shader:"mandelbrot_zoom",tStart:0,tEnd:30,fps:5,mask:false},
+{name:"Chain Lightning",cat:"energy",shader:"chain_lightning",tStart:0,tEnd:8,fps:12,mask:false},
+{name:"Solar Flare",cat:"fire",shader:"solar_flare",tStart:0,tEnd:20,fps:7,mask:false},
+{name:"Whirlpool",cat:"nature",shader:"whirlpool",tStart:0,tEnd:20,fps:7,mask:false},
+{name:"DNA Helix",cat:"abstract",shader:"dna_helix",tStart:0,tEnd:15,fps:8,mask:false},
+{name:"Lava Flow",cat:"fire",shader:"lava_flow",tStart:0,tEnd:30,fps:5,mask:false},
+{name:"Time Vortex",cat:"abstract",shader:"time_vortex",tStart:0,tEnd:20,fps:8,mask:false},
+{name:"Fluid Ink",cat:"abstract",shader:"fluid_ink",tStart:0,tEnd:25,fps:6,mask:false},
+{name:"Quantum Entangle",cat:"energy",shader:"quantum_entangle",tStart:0,tEnd:20,fps:8,mask:false},
+{name:"Gravity Well",cat:"cosmic",shader:"gravity_well",tStart:0,tEnd:30,fps:6,mask:false},
+{name:"Sound Visualizer",cat:"abstract",shader:"sound_wave",tStart:0,tEnd:15,fps:10,mask:false},
+{name:"Smoke Ring",cat:"nature",shader:"smoke_ring",tStart:0,tEnd:20,fps:6,mask:false},
+{name:"Magic Runes",cat:"magic",shader:"magic_runes",tStart:0,tEnd:20,fps:8,mask:false},
+{name:"Dissolve",cat:"energy",shader:"dissolve",tStart:0.5,tEnd:12,fps:8,mask:false},
+{name:"Energy Shield",cat:"magic",shader:"energy_shield",tStart:0,tEnd:12,fps:10,mask:false},
+{name:"Reality Shatter",cat:"abstract",shader:"reality_shatter",tStart:0.5,tEnd:16,fps:7,mask:false},
+{name:"Blood Moon",cat:"cosmic",shader:"blood_moon",tStart:0,tEnd:30,fps:4,mask:false},
+{name:"Particle Collider",cat:"energy",shader:"particle_collider",tStart:0,tEnd:10,fps:10,mask:false},
+{name:"Dragon Breath",cat:"fire",shader:"dragon_breath",tStart:0,tEnd:15,fps:9,mask:false},
+{name:"Neural Network",cat:"abstract",shader:"neural_net",tStart:0,tEnd:20,fps:7,mask:false},
+{name:"Cosmic Eye",cat:"cosmic",shader:"cosmic_eye",tStart:0,tEnd:25,fps:5,mask:false},
+{name:"Hypercube",cat:"abstract",shader:"hypercube",tStart:0,tEnd:20,fps:8,mask:false},
+{name:"Soul Extraction",cat:"magic",shader:"soul_extract",tStart:0,tEnd:30,fps:6,mask:false},
+{name:"Neon Rain",cat:"abstract",shader:"neon_rain",tStart:0,tEnd:20,fps:8,mask:false},
+{name:"Galaxy Collision",cat:"cosmic",shader:"galaxy_collision",tStart:0,tEnd:50,fps:4,mask:false},
+{name:"EMP Blast",cat:"energy",shader:"emp_blast",tStart:0,tEnd:25,fps:8,mask:false},
+{name:"Void Tendril",cat:"dark",shader:"void_tendril",tStart:0,tEnd:20,fps:7,mask:false},
+{name:"Summoning Circle",cat:"magic",shader:"summoning",tStart:0,tEnd:20,fps:7,mask:false},
+{name:"Lightning Smite",cat:"energy",shader:"lightning_smite",tStart:0,tEnd:1.0,fps:24,mask:false}
+];
+
+// ==================== RENDERING ====================
+
+const pixBuf=new Uint8Array(SRES*SRES*4);
+const fxScene=new THREE.Scene(),fxCam=new THREE.Camera();
+const fxPlane=new THREE.Mesh(new THREE.PlaneGeometry(2,2));
+fxScene.add(fxPlane);
+
+function renderCustom(shaderSrc,t,target){
+  const mat=new THREE.ShaderMaterial({
+    uniforms:{time:{value:t},resolution:{value:new THREE.Vector2(SRES,SRES)}},
+    vertexShader:ppV,
+    fragmentShader:shaderSrc,
+    depthTest:false,depthWrite:false
+  });
+  fxPlane.material=mat;
+  r3.setRenderTarget(target);r3.clear();
+  r3.render(fxScene,fxCam);
+  r3.setRenderTarget(null);
+  mat.dispose();
+}
+
+function doMask(inRT,outRT){
+  maskMat.uniforms.tDiffuse.value=inRT.texture;
+  maskMat.uniformsNeedUpdate=true;
+  r3.setRenderTarget(outRT);r3.clear();
+  r3.render(maskScene,maskCam);r3.setRenderTarget(null);
+}
+
+function makeSpriteSheet(shaderSrc,tStart,tEnd,useMask){
+  const canvas=document.createElement("canvas");
+  canvas.width=SHEET;canvas.height=SHEET;
+  const ctx=canvas.getContext("2d",{willReadFrequently:true});
+  const fxRT=makeRT(),maskedRT=makeRT();
+  for(let f=0;f<FRAMES;f++){
+    const t=tStart+(f/(FRAMES-1))*(tEnd-tStart);
+    renderCustom(shaderSrc,t,fxRT);
+    let readRT=fxRT;
+    if(useMask){doMask(fxRT,maskedRT);readRT=maskedRT;}
+    r3.readRenderTargetPixels(readRT,0,0,SRES,SRES,pixBuf);
+    const col=f%GRID,row=Math.floor(f/GRID);
+    const img=ctx.createImageData(SRES,SRES);
+    for(let y=0;y<SRES;y++){
+      const s=(SRES-1-y)*SRES*4,d=y*SRES*4;
+      for(let x=0;x<SRES*4;x++)img.data[d+x]=pixBuf[s+x];
+    }
+    ctx.putImageData(img,col*SRES,row*SRES);
+  }
+  fxRT.dispose();maskedRT.dispose();
+  return canvas;
+}
+
+// ==================== GENERATE ALL ====================
+window.__sprites=[];
+window.__done=false;
+
+async function generateAll(){
+  for(let i=0;i<CUSTOM_CATALOG.length;i++){
+    const p=CUSTOM_CATALOG[i];
+    status.textContent=`Generating ${i+1}/${CUSTOM_CATALOG.length}: ${p.name}`;
+    const src=SHADERS[p.shader];
+    if(!src){status.textContent=`ERROR: no shader ${p.shader}`;continue;}
+    const canvas=makeSpriteSheet(src,p.tStart,p.tEnd,p.mask);
+    const name=String(i+101).padStart(3,"0")+"-"+p.name.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/-$/,"");
+    window.__sprites.push({name,data:canvas.toDataURL("image/png")});
+    await new Promise(r=>setTimeout(r,0));
+  }
+  status.textContent="Done! "+CUSTOM_CATALOG.length+" custom sprites generated.";
+  window.__done=true;
+}
+generateAll();
+</script>
+</body></html>
