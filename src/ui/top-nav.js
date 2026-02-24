@@ -122,7 +122,7 @@ function initTopNav() {
 
 	const ghLink = document.createElement("a");
 	ghLink.className = "nav-credit";
-	ghLink.href = "https://github.com/web3dev1337/effect-texture-maker";
+	ghLink.href = "https://github.com/web3dev1337/shadersmith";
 	ghLink.target = "_blank";
 	ghLink.style.cssText = "color:#666;font-size:10px;margin-right:8px";
 	ghLink.textContent = "GitHub";
