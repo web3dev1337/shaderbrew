@@ -1,4 +1,4 @@
-# EffectTextureMaker — Codebase Documentation
+# ShaderBrew — Codebase Documentation
 
 Enhanced fork of mebiusbox's MIT-licensed WebGL procedural texture generator. Transformed from a single-effect viewer into a multi-layer texture creation tool with PBR export, 3D preview, gradient editor, undo/redo, and 160 animated sprite sheet effects (100 FXGEN + 52 custom GLSL + 8 composites).
 

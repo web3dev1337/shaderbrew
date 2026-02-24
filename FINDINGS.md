@@ -1,4 +1,4 @@
-# EffectTextureMaker Findings and Roadmap
+# ShaderBrew Findings and Roadmap
 
 Updated: 2026-02-22
 

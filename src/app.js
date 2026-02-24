@@ -1,5 +1,5 @@
 /**
- * Main EffectTextureMaker application.
+ * Main ShaderBrew application.
  * Coordinates rendering, GUI, presets, and export.
  */
 import * as THREE from "three";
@@ -427,7 +427,7 @@ class App {
 		const blob = new Blob([json], { type: "text/plain" });
 		const a = document.createElement("a");
 		a.href = URL.createObjectURL(blob);
-		a.download = "EffectTextureMaker_Project.json";
+		a.download = "ShaderBrew_Project.json";
 		a.click();
 	}
 
@@ -456,7 +456,7 @@ class App {
 		const blob = new Blob([json], { type: "text/plain" });
 		const a = document.createElement("a");
 		a.href = URL.createObjectURL(blob);
-		a.download = "EffectTextureMaker_Untitled.json";
+		a.download = "ShaderBrew_Untitled.json";
 		a.click();
 	}
 

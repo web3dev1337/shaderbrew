@@ -85,7 +85,7 @@ function initTopNav() {
 
 	const title = document.createElement("div");
 	title.className = "nav-title";
-	title.textContent = "FX";
+	title.textContent = "SHADERBREW";
 	nav.appendChild(title);
 
 	const path = window.location.pathname.split("/").pop() || "index.html";
@@ -122,7 +122,7 @@ function initTopNav() {
 
 	const ghLink = document.createElement("a");
 	ghLink.className = "nav-credit";
-	ghLink.href = "https://github.com/web3dev1337/shadersmith";
+	ghLink.href = "https://github.com/web3dev1337/shaderbrew";
 	ghLink.target = "_blank";
 	ghLink.style.cssText = "color:#666;font-size:10px;margin-right:8px";
 	ghLink.textContent = "GitHub";
