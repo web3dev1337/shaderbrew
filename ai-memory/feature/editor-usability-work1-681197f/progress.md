@@ -19,3 +19,11 @@
 - [x] Fix z-index: sidebar/toolbar 9990, popups 9998, dock 9999, picker 10000
 - [x] Constrain all popup panels between sidebars (left:260px, right:300px)
 - [x] Fix custom GLSL panel overflowing onto sidebars
+- [x] Upgrade 3D preview to showcase Chapter 7 quality (PMREMGenerator, 5 lights, shadows, emissive)
+- [x] Reorder showcase sections (hero → 3D Material Forge → Dark Ritual Build → custom GLSL → chapters)
+- [x] Export gen-smite.html as MP4 + GIF (Puppeteer + Xvfb + ffmpeg)
+- [x] Export Dark Ritual Portal sprite sheet as MP4 + GIF + WebM with alpha
+- [x] Set up GitHub Pages deployment
+- [x] Add attribution to original EffectTextureMaker repo (top-nav + showcase)
+- [x] Add GitHub link + comprehensive README with animated GIFs
+- [x] Rename project to ShaderBrew (repo, UI, README, titles, all references)

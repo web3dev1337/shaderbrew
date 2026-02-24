@@ -1,8 +1,8 @@
-# ShaderSmith
+# ShaderBrew
 
 Professional WebGL procedural texture generator. Multi-layer compositing, PBR map generation, 3D material preview, 52 custom GLSL shaders, and 65+ procedural effects — all running in your browser with zero dependencies.
 
-**[Live Demo](https://web3dev1337.github.io/shadersmith/showcase.html)** | **[Open Editor](https://web3dev1337.github.io/shadersmith/editor.html)**
+**[Live Demo](https://web3dev1337.github.io/shaderbrew/showcase.html)** | **[Open Editor](https://web3dev1337.github.io/shaderbrew/editor.html)**
 
 ---
 
@@ -29,12 +29,12 @@ Professional WebGL procedural texture generator. Multi-layer compositing, PBR ma
 
 | Page | Description |
 |------|-------------|
-| **[Showcase](https://web3dev1337.github.io/shadersmith/showcase.html)** | Guided tour — live renders, 3D preview, PBR maps, 7 chapters |
-| **[Editor](https://web3dev1337.github.io/shadersmith/editor.html)** | Full texture editor — layers, gradients, PBR export, undo/redo |
-| **[Gallery](https://web3dev1337.github.io/shadersmith/gallery.html)** | Live animated gallery of 70+ procedural effects |
-| **[Material Forge](https://web3dev1337.github.io/shadersmith/demos.html)** | 3D material demo — textures on lit spinning objects with bloom |
-| **[Sprite Gallery](https://web3dev1337.github.io/shadersmith/sprite-gallery.html)** | 119 animated sprite sheets (FXGEN + custom GLSL) |
-| **[Particles](https://web3dev1337.github.io/shadersmith/particles.html)** | 3D particle viewport with sprite-sheet effects |
+| **[Showcase](https://web3dev1337.github.io/shaderbrew/showcase.html)** | Guided tour — live renders, 3D preview, PBR maps, 7 chapters |
+| **[Editor](https://web3dev1337.github.io/shaderbrew/editor.html)** | Full texture editor — layers, gradients, PBR export, undo/redo |
+| **[Gallery](https://web3dev1337.github.io/shaderbrew/gallery.html)** | Live animated gallery of 70+ procedural effects |
+| **[Material Forge](https://web3dev1337.github.io/shaderbrew/demos.html)** | 3D material demo — textures on lit spinning objects with bloom |
+| **[Sprite Gallery](https://web3dev1337.github.io/shaderbrew/sprite-gallery.html)** | 119 animated sprite sheets (FXGEN + custom GLSL) |
+| **[Particles](https://web3dev1337.github.io/shaderbrew/particles.html)** | 3D particle viewport with sprite-sheet effects |
 
 ---
 
@@ -93,8 +93,8 @@ shader-defs.js         52 custom GLSL shader sources
 ## Running Locally
 
 ```bash
-git clone https://github.com/web3dev1337/shadersmith.git
-cd shadersmith
+git clone https://github.com/web3dev1337/shaderbrew.git
+cd shaderbrew
 python3 -m http.server 4444
 # Open http://localhost:4444/editor.html
 ```
@@ -103,7 +103,7 @@ python3 -m http.server 4444
 
 Built on [EffectTextureMaker](https://github.com/mebiusbox/EffectTextureMaker) by [mebiusbox](https://github.com/mebiusbox) (MIT License). The original tool provides the core procedural shader library (pixy) and single-layer editor.
 
-ShaderSmith adds multi-layer compositing, gradient mapping, PBR generation, 3D preview, 52 custom GLSL shaders, sprite sheet generation, the showcase, material forge, and the enhanced editor UI.
+ShaderBrew adds multi-layer compositing, gradient mapping, PBR generation, 3D preview, 52 custom GLSL shaders, sprite sheet generation, the showcase, material forge, and the enhanced editor UI.
 
 ## License
 

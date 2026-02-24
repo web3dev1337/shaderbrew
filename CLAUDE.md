@@ -1,4 +1,4 @@
-# EffectTextureMaker - Enhanced Fork
+# ShaderBrew
 
 ## First Steps
 1. Read `CODEBASE_DOCUMENTATION.md` for full architecture and file reference

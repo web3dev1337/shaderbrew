@@ -1,8 +1,8 @@
-# EffectTextureMaker - Take It To The Next Level
+# ShaderBrew - Take It To The Next Level
 
 ## Context
 
-EffectTextureMaker is an MIT-licensed WebGL shader-based procedural texture generator (by mebiusbox). We forked it and have been enhancing it. The user wants to transform it from a basic single-effect viewer into a professional multi-layer texture creation tool.
+ShaderBrew (originally EffectTextureMaker by mebiusbox, MIT) is a WebGL shader-based procedural texture generator. We forked it and have been enhancing it into a professional multi-layer texture creation tool.
 
 **Current state (work already done on branch `work1`):**
 - Created `gallery.html` - live animated gallery of all 70+ effects with IntersectionObserver for GPU efficiency
