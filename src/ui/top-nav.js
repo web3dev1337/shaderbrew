@@ -72,6 +72,11 @@ function initTopNav() {
 		#top-nav a.active { color: #fff; border-color: #e94560; background: rgba(233, 69, 96, 0.12); }
 		#top-nav .nav-group.active-group .nav-group-label { color: #e94560; }
 		#top-nav .nav-spacer { flex: 1; }
+		#top-nav .nav-credit {
+			color: #444; font-size: 9px; white-space: nowrap;
+			text-decoration: none; transition: color 0.15s;
+		}
+		#top-nav .nav-credit:hover { color: #888; }
 	`;
 	document.head.appendChild(style);
 
@@ -114,6 +119,13 @@ function initTopNav() {
 	const spacer = document.createElement("div");
 	spacer.className = "nav-spacer";
 	nav.appendChild(spacer);
+
+	const credit = document.createElement("a");
+	credit.className = "nav-credit";
+	credit.href = "https://github.com/mebiusbox/EffectTextureMaker";
+	credit.target = "_blank";
+	credit.textContent = "Based on EffectTextureMaker by mebiusbox";
+	nav.appendChild(credit);
 
 	if (!isEditor) document.body.classList.add("has-top-nav");
 	document.body.appendChild(nav);
