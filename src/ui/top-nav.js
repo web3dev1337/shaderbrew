@@ -120,6 +120,14 @@ function initTopNav() {
 	spacer.className = "nav-spacer";
 	nav.appendChild(spacer);
 
+	const ghLink = document.createElement("a");
+	ghLink.className = "nav-credit";
+	ghLink.href = "https://github.com/web3dev1337/effect-texture-maker";
+	ghLink.target = "_blank";
+	ghLink.style.cssText = "color:#666;font-size:10px;margin-right:8px";
+	ghLink.textContent = "GitHub";
+	nav.appendChild(ghLink);
+
 	const credit = document.createElement("a");
 	credit.className = "nav-credit";
 	credit.href = "https://github.com/mebiusbox/EffectTextureMaker";
