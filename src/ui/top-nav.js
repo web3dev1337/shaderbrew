@@ -4,7 +4,7 @@
 const NAV_GROUPS = [
 	{
 		label: "Build",
-		items: [{ label: "Editor", href: "editor.html", primary: true }]
+		items: [{ label: "Editor", href: "editor.html" }]
 	},
 	{
 		label: "Explore",
@@ -46,9 +46,8 @@ function initTopNav() {
 		}
 		#top-nav::-webkit-scrollbar { display: none; }
 		#top-nav .nav-title {
-			color: #e0e0ff; font-weight: 700; margin-right: 2px;
-			letter-spacing: 0.1em; font-size: 10px; white-space: nowrap;
-			opacity: 0.7;
+			color: #e0e0ff; font-weight: 700; margin-right: 6px;
+			letter-spacing: 0.15em; font-size: 14px; white-space: nowrap;
 		}
 		#top-nav .nav-group {
 			display: flex; align-items: center; gap: 4px; padding-right: 10px; margin-right: 2px;
