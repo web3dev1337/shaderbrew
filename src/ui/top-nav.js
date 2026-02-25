@@ -89,7 +89,7 @@ function initTopNav() {
 	nav.appendChild(title);
 
 	const raw = window.location.pathname.split("/").pop() || "index.html";
-	const path = raw === "index.html" ? "editor.html" : raw;
+	const path = raw === "index.html" ? "showcase.html" : raw;
 
 	for (const group of NAV_GROUPS) {
 		const groupEl = document.createElement("div");
