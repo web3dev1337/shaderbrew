@@ -161,7 +161,6 @@ Initializing WebGL + loading shaders...
 </div>
 <div class="section-note">Pipeline overview</div>
 <div id="grid-ritual"></div>
-<div class="preview-wrap" id="grid-ritual-3d"></div>
 </section>
 <div class="arrow">&#x25BC;</div>
 
@@ -771,55 +770,6 @@ addAnimator(cvA,ANIM_FPS,(t)=>{
 	renderFrame(frame);
 });
 
-// Build PBR maps from the ritual composite for the embedded 3D preview
-doPBR(ritualRT.blend,normalM,ritualRT.normal);
-doPBR(ritualRT.blend,roughM,ritualRT.rough);
-doPBR(ritualRT.blend,aoM,ritualRT.ao);
-doPBR(ritualRT.blend,metalM,ritualRT.metal);
-
-const wrap=document.getElementById("grid-ritual-3d");
-const r=new THREE.WebGLRenderer({antialias:true,alpha:true});
-const W=360,H=280;
-r.setSize(W,H);r.setPixelRatio(Math.min(window.devicePixelRatio,1.5));
-r.toneMapping=THREE.ACESFilmicToneMapping;r.toneMappingExposure=1.2;
-r.domElement.style.cssText="border-radius:10px;border:1px solid #222;background:#0a0a12";
-wrap.appendChild(r.domElement);
-
-const scene=new THREE.Scene();
-scene.background=new THREE.Color(0x08080f);
-const cam=new THREE.PerspectiveCamera(40,W/H,.1,50);
-cam.position.set(0,0,3.2);
-
-const mat=new THREE.MeshStandardMaterial({
-color:0xffffff,roughness:.4,metalness:.6,
-map:ritualRT.blend.texture,
-normalMap:ritualRT.normal.texture,
-roughnessMap:ritualRT.rough.texture,
-aoMap:ritualRT.ao.texture,
-metalnessMap:ritualRT.metal.texture
-});
-mat.normalScale.set(1.2,1.2);
-
-const mesh=new THREE.Mesh(new THREE.SphereGeometry(1,48,48),mat);
-scene.add(mesh);
-
-const amb=new THREE.AmbientLight(0x445566,.9);scene.add(amb);
-const key=new THREE.DirectionalLight(0xffffff,1.4);key.position.set(2,3,4);scene.add(key);
-const rim=new THREE.DirectionalLight(0x6633ff,.6);rim.position.set(-2,1,-3);scene.add(rim);
-
-r.render(scene,cam);
-
-const info=document.createElement("div");info.className="preview-info";
-info.innerHTML=`
-<h3>Ritual Preview (Static)</h3>
-<p>The final composite is converted into PBR maps and applied to a 3D surface for material validation.</p>
-<ul class="map-list">
-<li>Color map (Dark Ritual composite)</li>
-<li>Normal map (Sobel)</li>
-<li>Roughness map (luminance)</li>
-<li>AO + Metallic maps</li>
-</ul>`;
-wrap.appendChild(info);
 }
 
 // ===================================================================
