@@ -96,9 +96,9 @@ python3 -m http.server 4444
 
 ## Credits
 
-Built on [EffectTextureMaker](https://mebiusbox.github.io/contents/EffectTextureMaker/) by [mebiusbox](https://github.com/mebiusbox) (MIT License). The original tool provides the core procedural shader library (pixy) and single-layer editor.
+Uses [pixy.js](https://github.com/mebiusbox/pixy.js) by [mebiusbox](https://github.com/mebiusbox) (MIT License) — the procedural shader library that powers the 65+ built-in effect types.
 
-ShaderBrew adds multi-layer compositing, gradient mapping, PBR generation, 3D preview, 52 custom GLSL shaders, sprite sheet generation, the showcase, material forge, and the enhanced editor UI.
+Everything else (editor, layers, compositing, gradient mapping, PBR generation, 3D preview, 52 custom GLSL shaders, sprite sheets, showcase, material forge) is original ShaderBrew code.
 
 ## License
 

@@ -1,13 +1,13 @@
 # ShaderBrew — Codebase Documentation
 
-Enhanced fork of mebiusbox's MIT-licensed WebGL procedural texture generator. Transformed from a single-effect viewer into a multi-layer texture creation tool with PBR export, 3D preview, gradient editor, undo/redo, and 160 animated sprite sheet effects (100 FXGEN + 52 custom GLSL + 8 composites).
+WebGL procedural texture generator built on mebiusbox's MIT-licensed pixy.js shader library. Multi-layer texture creation tool with PBR export, 3D preview, gradient editor, undo/redo, and 160 animated sprite sheet effects (100 FXGEN + 52 custom GLSL + 8 composites).
 
 ## Quick Navigation
 
 ```
 ENTRY POINTS:
   editor.html          Main editor (loads src/app.js)
-  index.html           Original editor (loads fxgen.module.min.js, kept for compat)
+  index.html           Redirect to showcase.html
   gallery.html         Live animated gallery of 70+ effects
   showcase.html        Feature showcase (pipeline + custom GLSL previews)
   demos.html           Interactive material demos
@@ -67,8 +67,7 @@ PRESET & LOADER:
   preset-loader.js     Preset bar UI + JSON/URL loading
 
 LIBRARY (DO NOT MODIFY):
-  pixy.module.min.js   439KB shader library — 70+ effects, noise functions, Composer
-  fxgen.module.min.js  42KB original app (kept for index.html compat)
+  pixy.module.min.js   439KB MIT-licensed shader library by mebiusbox — 70+ effects, noise functions, Composer
 
 DATA:
   presets/              38 JSON preset files (13 custom + 25 built-in)
@@ -197,7 +196,7 @@ Exportable individually or as ZIP bundle.
 
 | Phase | Status | Description |
 |-------|--------|-------------|
-| 0 | DONE | Deobfuscated fxgen into src/ modules |
+| 0 | DONE | Built src/ modules using pixy.js shader API |
 | 1 | DONE | Multi-layer compositing (LayerManager, 9 blend modes, Compositor) |
 | 2 | DONE | Gradient map color ramp (editor + 5 presets + GLSL shader) |
 | 3 | DONE | Enhanced UI layout (layer panel, toolbar, split-pane) |
@@ -229,7 +228,6 @@ xvfb-run --auto-servernum --server-args="-screen 0 1280x1024x24" node save-custo
 | Component | Files | Size |
 |-----------|-------|------|
 | pixy.module.min.js | 1 | 439KB |
-| fxgen.module.min.js | 1 | 42KB |
 | src/ modules | 22 | ~3,800 lines |
 | sprites/ | 118 | ~133MB |
 | presets/ | 38 | ~200KB |

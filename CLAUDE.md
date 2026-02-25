@@ -6,13 +6,12 @@
 3. Run on `http://localhost:4444` (do NOT use port 3000)
 
 ## Project Overview
-WebGL shader-based procedural texture generator. Originally by mebiusbox (MIT). Enhanced into a professional multi-layer texture creation tool with PBR export, 3D preview, gradient editor, undo/redo, and 119 pre-rendered sprite sheet particle effects (100 pixy-based + 19 custom GLSL).
+WebGL shader-based procedural texture generator. Uses mebiusbox's MIT-licensed pixy.js shader library. Built into a professional multi-layer texture creation tool with PBR export, 3D preview, gradient editor, undo/redo, and 119 pre-rendered sprite sheet particle effects (100 pixy-based + 19 custom GLSL).
 
 ## Key Files
 - `editor.html` - Main editor (loads src/app.js, has layers/PBR/gradient/export)
-- `index.html` - Original editor (loads fxgen.module.min.js, kept for compat)
-- `fxgen.module.min.js` - Original minified app (kept for index.html)
-- `pixy.module.min.js` - 439KB shader library (DO NOT MODIFY)
+- `index.html` - Redirect to showcase.html
+- `pixy.module.min.js` - 439KB MIT-licensed shader library by mebiusbox (DO NOT MODIFY)
 - `gallery.html` - Live animated gallery of 70+ effects
 - `particles.html` - 3D particle viewport + Browse 100 mode
 - `sprite-gallery.html` - 119 animated sprite sheets from pre-rendered PNGs
@@ -74,7 +73,6 @@ WebGL shader-based procedural texture generator. Originally by mebiusbox (MIT). 
 - **Analogous cool**: Warp Rainbow (teal→blue→violet HSV sweep)
 
 ## Gotchas
-- `s` (fxgen app object) is module-private — not accessible from outside
 - Gallery uses IntersectionObserver + round-robin (max 6/frame) for GPU efficiency
 - Puppeteer needs Xvfb for WebGL: `xvfb-run --auto-servernum node save-sprites.mjs`
 - Custom shaders NOT in editor yet — only in sprite gallery. Editor uses pixy effects only.

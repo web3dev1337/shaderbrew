@@ -126,9 +126,9 @@ function initTopNav() {
 
 	const credit = document.createElement("a");
 	credit.className = "nav-credit";
-	credit.href = "https://github.com/mebiusbox/EffectTextureMaker";
+	credit.href = "https://github.com/mebiusbox/pixy.js";
 	credit.target = "_blank";
-	credit.textContent = "Based on EffectTextureMaker by mebiusbox";
+	credit.textContent = "Shader library: pixy.js by mebiusbox (MIT)";
 	nav.appendChild(credit);
 
 	if (!isEditor) document.body.classList.add("has-top-nav");
