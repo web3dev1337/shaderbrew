@@ -1,5 +1,6 @@
 /**
- * Default effect controller values and effect type registry.
+ * Effect types, default parameters, and per-type configs for the pixy.js shader API.
+ * Derived from mebiusbox's pixy.js (MIT) — https://github.com/mebiusbox/pixy.js
  */
 
 export const EFFECT_TYPES = [

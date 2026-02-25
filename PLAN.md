@@ -2,7 +2,7 @@
 
 ## Context
 
-ShaderBrew (originally EffectTextureMaker by mebiusbox, MIT) is a WebGL shader-based procedural texture generator. We forked it and have been enhancing it into a professional multi-layer texture creation tool.
+ShaderBrew is a WebGL shader-based procedural texture generator built on mebiusbox's MIT-licensed pixy.js shader library. Enhanced into a professional multi-layer texture creation tool.
 
 **Current state (work already done on branch `work1`):**
 - Created `gallery.html` - live animated gallery of all 70+ effects with IntersectionObserver for GPU efficiency
@@ -114,10 +114,10 @@ Created 5 basic V1 presets + 8 advanced V2 presets with intentional parameter in
 
 ## Implementation Plan
 
-### Phase 0: Deobfuscate & Structure -- DONE (commit ff2d265)
+### Phase 0: Project Structure -- DONE (commit ff2d265)
 **Files created:** `src/app.js`, `src/pixy-api.js`, `src/defaults.js`, `src/render-pipeline.js`, `src/sprite-sheet.js`, `src/alpha-export.js`, `src/noise-sphere.js`, `src/preset-loader.js`, `src/ui/gui-setup.js`, `editor.html`
 
-- [x] Deobfuscated fxgen.module.min.js into 10 focused modules in src/
+- [x] Built 10 focused modules in src/ using pixy.js shader API
 - [x] Created pixy-api.js facade
 - [x] Created editor.html loading from src/
 - [ ] Verify everything works identically (needs browser test)
