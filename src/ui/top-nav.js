@@ -24,7 +24,7 @@ const NAV_GROUPS = [
 	},
 	{
 		label: "Legacy",
-		items: [{ label: "Classic", href: "index.html" }]
+		items: [{ label: "Classic", href: "classic.html" }]
 	}
 ];
 
@@ -88,7 +88,8 @@ function initTopNav() {
 	title.textContent = "SHADERBREW";
 	nav.appendChild(title);
 
-	const path = window.location.pathname.split("/").pop() || "index.html";
+	const raw = window.location.pathname.split("/").pop() || "index.html";
+	const path = raw === "index.html" ? "editor.html" : raw;
 
 	for (const group of NAV_GROUPS) {
 		const groupEl = document.createElement("div");
