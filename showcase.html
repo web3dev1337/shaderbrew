@@ -75,7 +75,10 @@ body{background:radial-gradient(1200px 600px at 50% -200px,#16162a 0%,#07070c 55
 .outro{text-align:center;padding:50px 20px;max-width:700px;margin:0 auto}
 .outro h2{color:#e0e0ff;margin-bottom:10px;font-size:22px}
 .outro p{color:#555;margin-bottom:18px;font-size:14px}
-.outro a{display:inline-block;padding:10px 28px;background:#e94560;color:#fff;text-decoration:none;border-radius:6px;font-family:monospace;letter-spacing:1px;font-size:14px;margin:0 6px}
+.outro-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px}
+.outro-actions a{display:inline-block;padding:8px 18px;border-radius:6px;border:1px solid #333;background:#111;color:#bbb;text-decoration:none;font-family:monospace;font-size:12px;letter-spacing:.5px;transition:all .2s}
+.outro-actions a.primary{background:#1a1a3e;border-color:#e94560;color:#fff}
+.outro-actions a:hover{border-color:#e94560;color:#fff}
 #loading{text-align:center;padding:60px;color:#555;font-family:monospace;font-size:14px}
 .progress{width:300px;height:3px;background:#111;margin:12px auto 0;border-radius:3px;overflow:hidden}
 .progress-bar{width:0;height:100%;background:#e94560;transition:width .3s}
@@ -235,10 +238,13 @@ Initializing WebGL + loading shaders...
 <div class="outro" id="outro" style="display:none">
 <h2>From Single Effect to Texture Studio</h2>
 <p>Multi-layer compositing, gradient color mapping, PBR material generation, 3D preview, undo/redo, and ZIP export — all running entirely in your browser.</p>
-<a href="editor.html">Open Editor</a>
-<a href="gallery.html">View Gallery</a>
+<div class="outro-actions">
+<a class="primary" href="editor.html">Open Editor</a>
+<a href="gallery.html">Gallery</a>
 <a href="demos.html">Material Forge</a>
-<p style="margin-top:30px;font-size:12px;color:#444">Built on <a href="https://github.com/mebiusbox/EffectTextureMaker" target="_blank" style="color:#666">EffectTextureMaker</a> by <a href="https://github.com/mebiusbox" target="_blank" style="color:#666">mebiusbox</a> (MIT License)</p>
+<a href="sprite-gallery.html">Sprite Gallery</a>
+</div>
+<p style="margin-top:40px;font-size:11px;color:#333">Built on <a href="https://github.com/mebiusbox/EffectTextureMaker" target="_blank" style="color:#444">EffectTextureMaker</a> by <a href="https://github.com/mebiusbox" target="_blank" style="color:#444">mebiusbox</a> (MIT)</p>
 </div>
 
 <script type="importmap">
