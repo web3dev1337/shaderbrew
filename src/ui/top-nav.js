@@ -22,10 +22,6 @@ const NAV_GROUPS = [
 			{ label: "Sprite Gallery", href: "sprite-gallery.html" }
 		]
 	},
-	{
-		label: "Legacy",
-		items: [{ label: "Classic", href: "classic.html" }]
-	}
 ];
 
 function initTopNav() {
