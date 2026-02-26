@@ -103,3 +103,5 @@ Everything else (editor, layers, compositing, gradient mapping, PBR generation, 
 ## License
 
 MIT — see [LICENSE](LICENSE) for details.
+
+`pixy.module.min.js` bundles GLSL from Shadertoy authors (CC-BY-NC-SA 3.0) and other sources — see [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md) for full attribution.
