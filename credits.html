@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ShaderBrew — Credits</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:radial-gradient(1200px 600px at 50% -200px,#16162a 0%,#07070c 55%,#030306 100%);color:#ccc;font-family:'Segoe UI',system-ui,sans-serif;line-height:1.7;min-height:100vh}
+.wrap{max-width:800px;margin:0 auto;padding:60px 24px 80px}
+h1{font-family:monospace;font-size:28px;color:#e0e0ff;letter-spacing:2px;margin-bottom:6px}
+.sub{color:#555;font-size:13px;margin-bottom:40px}
+h2{font-family:monospace;font-size:16px;color:#e0e0ff;margin-top:36px;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid #1a1a2e}
+h3{font-family:monospace;font-size:13px;color:#aaa;margin-top:24px;margin-bottom:8px}
+p{color:#999;font-size:13px;margin-bottom:10px;max-width:640px}
+a{color:#7788cc;text-decoration:none;transition:color .15s}
+a:hover{color:#aabbff}
+.badge{display:inline-block;font-family:monospace;font-size:10px;padding:2px 6px;border-radius:3px;margin-left:6px;vertical-align:middle}
+.mit{background:rgba(0,180,100,.12);color:#44cc88;border:1px solid rgba(0,180,100,.25)}
+.cc{background:rgba(200,150,0,.12);color:#ccaa44;border:1px solid rgba(200,150,0,.25)}
+table{width:100%;border-collapse:collapse;margin:10px 0 20px;font-size:12px}
+th{text-align:left;font-family:monospace;color:#666;font-size:10px;text-transform:uppercase;letter-spacing:.08em;padding:6px 10px;border-bottom:1px solid #1a1a2e}
+td{padding:6px 10px;border-bottom:1px solid #0d0d18;color:#999}
+td a{font-family:monospace;font-size:11px}
+tr:hover td{background:rgba(255,255,255,.015)}
+.thanks{color:#666;font-size:12px;line-height:1.8;max-width:640px}
+.thanks span{color:#888}
+.footer{margin-top:50px;padding-top:20px;border-top:1px solid #111;font-size:11px;color:#333}
+.footer a{color:#444}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Credits</h1>
+<p class="sub">ShaderBrew is built on open-source libraries and shader techniques from the community.</p>
+
+<h2>Shader Library</h2>
+<p>
+	<a href="https://github.com/mebiusbox/pixy.js" target="_blank">pixy.js</a>
+	by <a href="https://github.com/mebiusbox" target="_blank">mebiusbox</a>
+	<span class="badge mit">MIT</span>
+</p>
+<p>Procedural shader library for Three.js — provides the 65+ built-in effect types (explosions, noise, caustics, lightning, etc.), the FxgenShader/FxgenShaderUtils API, and the Composer system.</p>
+
+<h2>Shadertoy Shaders</h2>
+<p>pixy.js bundles GLSL shader code ported from <a href="https://www.shadertoy.com" target="_blank">Shadertoy</a>. The default Shadertoy license is <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" target="_blank">CC BY-NC-SA 3.0</a> unless the author specified otherwise.</p>
+
+<table>
+<tr><th>Effect</th><th>Source</th><th>Author</th></tr>
+<tr><td>Cloud</td><td><a href="https://www.shadertoy.com/view/XslGRr" target="_blank">XslGRr</a>, <a href="https://www.shadertoy.com/view/XsfXW8" target="_blank">XsfXW8</a></td><td>Inigo Quilez (iq)</td></tr>
+<tr><td>Explosion2</td><td><a href="https://www.shadertoy.com/view/lsySzd" target="_blank">lsySzd</a></td><td>Duke</td></tr>
+<tr><td>Explosion</td><td><a href="https://www.shadertoy.com/view/Xd3GWn" target="_blank">Xd3GWn</a>, <a href="https://www.shadertoy.com/view/XdSXDc" target="_blank">XdSXDc</a></td><td></td></tr>
+<tr><td>Fire</td><td><a href="https://www.shadertoy.com/view/XsXSWS" target="_blank">XsXSWS</a></td><td>xbe</td></tr>
+<tr><td>Flame</td><td><a href="https://www.shadertoy.com/view/MdX3zr" target="_blank">MdX3zr</a></td><td></td></tr>
+<tr><td>FlameEye</td><td><a href="https://www.shadertoy.com/view/ltBfDt" target="_blank">ltBfDt</a></td><td></td></tr>
+<tr><td>Corona</td><td><a href="https://www.shadertoy.com/view/XdV3DW" target="_blank">XdV3DW</a></td><td></td></tr>
+<tr><td>Sun</td><td><a href="https://www.shadertoy.com/view/MlKGDc" target="_blank">MlKGDc</a>, <a href="https://www.shadertoy.com/view/MsBGRh" target="_blank">MsBGRh</a>, <a href="https://www.shadertoy.com/view/4lBXzy" target="_blank">4lBXzy</a>, <a href="https://www.shadertoy.com/view/4sfGzS" target="_blank">4sfGzS</a></td><td>iq et al.</td></tr>
+<tr><td>Flare</td><td><a href="https://www.shadertoy.com/view/4scXWB" target="_blank">4scXWB</a></td><td></td></tr>
+<tr><td>Flare2</td><td><a href="https://www.shadertoy.com/view/Xs33R2" target="_blank">Xs33R2</a></td><td></td></tr>
+<tr><td>Flare3</td><td><a href="https://www.shadertoy.com/view/4sX3Rs" target="_blank">4sX3Rs</a></td><td></td></tr>
+<tr><td>Caustics</td><td><a href="https://www.shadertoy.com/view/MdKXDm" target="_blank">MdKXDm</a></td><td></td></tr>
+<tr><td>Energy</td><td><a href="https://www.shadertoy.com/view/XdjcWc" target="_blank">XdjcWc</a></td><td></td></tr>
+<tr><td>MagicCircle</td><td><a href="https://www.shadertoy.com/view/4dfXDn" target="_blank">4dfXDn</a></td><td></td></tr>
+<tr><td>Mandara</td><td><a href="https://www.shadertoy.com/view/MtcSz4" target="_blank">MtcSz4</a></td><td></td></tr>
+<tr><td>Mandalas</td><td><a href="https://www.shadertoy.com/view/4tdSDr" target="_blank">4tdSDr</a></td><td></td></tr>
+<tr><td>BrushStroke</td><td><a href="https://www.shadertoy.com/view/lt23D3" target="_blank">lt23D3</a></td><td></td></tr>
+<tr><td>CoherentNoise</td><td><a href="https://www.shadertoy.com/view/4dS3Wd" target="_blank">4dS3Wd</a></td><td></td></tr>
+<tr><td>MarbleNoise</td><td><a href="https://www.shadertoy.com/view/lsf3WH" target="_blank">lsf3WH</a></td><td></td></tr>
+<tr><td>Squiggles</td><td><a href="https://www.shadertoy.com/view/MstBD4" target="_blank">MstBD4</a></td><td></td></tr>
+<tr><td>Bubbles</td><td><a href="https://www.shadertoy.com/view/Xl2Bz3" target="_blank">Xl2Bz3</a></td><td></td></tr>
+<tr><td>Pentagon</td><td><a href="https://www.shadertoy.com/view/MlBfWz" target="_blank">MlBfWz</a></td><td></td></tr>
+<tr><td>KochCurve</td><td><a href="https://www.shadertoy.com/view/XdcGzH" target="_blank">XdcGzH</a></td><td></td></tr>
+<tr><td>Particle</td><td><a href="https://www.shadertoy.com/view/llGBWw" target="_blank">llGBWw</a></td><td></td></tr>
+<tr><td>Cross</td><td><a href="https://www.shadertoy.com/view/ls3GRS" target="_blank">ls3GRS</a></td><td></td></tr>
+<tr><td>Speckle</td><td><a href="https://www.shadertoy.com/view/XlSBDz" target="_blank">XlSBDz</a></td><td></td></tr>
+</table>
+
+<h3>Utility Functions</h3>
+<table>
+<tr><th>Function</th><th>Source</th><th>Author</th></tr>
+<tr><td>iqnoise / iqhash</td><td><a href="https://www.shadertoy.com/view/Xd23Dh" target="_blank">Xd23Dh</a></td><td>Inigo Quilez (iq)</td></tr>
+<tr><td>Hash functions</td><td><a href="https://www.shadertoy.com/view/4djSRW" target="_blank">4djSRW</a></td><td>Dave Hoskins</td></tr>
+</table>
+
+<h2>GitHub Libraries</h2>
+<table>
+<tr><th>Component</th><th>Source</th><th>Author</th><th>License</th></tr>
+<tr><td>Simplex noise</td><td><a href="https://github.com/ashima/webgl-noise" target="_blank">ashima/webgl-noise</a></td><td>Stefan Gustavson</td><td><span class="badge mit">MIT</span></td></tr>
+<tr><td>Color balance</td><td><a href="https://github.com/liovch/GPUImage" target="_blank">liovch/GPUImage</a></td><td>liovch</td><td><span class="badge mit">BSD-3</span></td></tr>
+<tr><td>Sky scattering</td><td><a href="https://github.com/SimonWallner/kocmoc-demo" target="_blank">SimonWallner/kocmoc-demo</a></td><td>Simon Wallner</td><td></td></tr>
+<tr><td>Cloud overlay</td><td><a href="https://github.com/GameTechDev/CloudsGPUPro6" target="_blank">GameTechDev/CloudsGPUPro6</a></td><td>Intel</td><td></td></tr>
+</table>
+
+<h2>Runtime Dependencies</h2>
+<table>
+<tr><th>Library</th><th>Version</th><th>License</th></tr>
+<tr><td><a href="https://github.com/mrdoob/three.js" target="_blank">Three.js</a></td><td>0.174.0</td><td><span class="badge mit">MIT</span></td></tr>
+<tr><td><a href="https://github.com/georgealways/lil-gui" target="_blank">lil-gui</a></td><td>CDN</td><td><span class="badge mit">MIT</span></td></tr>
+<tr><td><a href="https://github.com/Stuk/jszip" target="_blank">JSZip</a></td><td>CDN (on demand)</td><td><span class="badge mit">MIT</span></td></tr>
+</table>
+
+<h2>Special Thanks</h2>
+<p class="thanks">
+As credited by mebiusbox on the original EffectTextureMaker page:
+<span>doxas</span>, <span>liovch</span>, <span>iq</span>, <span>KeyMaster-</span>, <span>knighty</span>,
+<span>XT95</span>, <span>Brandon Fogerty</span>, <span>FabriceNeyret2</span>, <span>TambakoJaguar</span>,
+<span>mu6k</span>, <span>anisoptera</span>, <span>namortrailblazer</span>, <span>vamoss</span>, <span>xbe</span>,
+<span>Iulian Marinescu Ghetau</span>, <span>Duke</span>, <span>hclarke</span>, <span>104</span>,
+<span>vchizhov</span>, <span>smkgames</span>, <span>Stefan Gustavson</span>, <span>skaplun</span>,
+<span>Koltes</span>, <span>arxyz</span>, <span>diviaki</span>, <span>Sunpy</span>, <span>Hadyn</span>,
+<span>Dave_Hoskins</span>, <span>maysssam</span>, <span>joltz0r</span>, <span>Xor</span>
+</p>
+
+<h2>ShaderBrew</h2>
+<p>The editor, multi-layer compositing, gradient mapping, PBR generation, 3D preview, 52 custom GLSL shaders, sprite sheet system, showcase, and all UI — original code by <a href="https://github.com/web3dev1337" target="_blank">web3dev1337</a>.</p>
+<p>Licensed under <a href="https://github.com/web3dev1337/shaderbrew/blob/master/LICENSE" target="_blank">MIT</a>.</p>
+
+<div class="footer">
+<a href="showcase.html">Back to Showcase</a> &nbsp;&middot;&nbsp;
+<a href="https://github.com/web3dev1337/shaderbrew" target="_blank">GitHub</a>
+</div>
+
+</div>
+<script type="module" src="src/ui/top-nav.js"></script>
+</body>
+</html>
