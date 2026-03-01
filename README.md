@@ -100,6 +100,8 @@ Uses [pixy.js](https://github.com/mebiusbox/pixy.js) by [mebiusbox](https://gith
 
 Everything else (editor, layers, compositing, gradient mapping, PBR generation, 3D preview, 52 custom GLSL shaders, sprite sheets, showcase, material forge) is original ShaderBrew code.
 
+See the full **[Credits Page](https://web3dev1337.github.io/shaderbrew/credits.html)** for detailed attribution of all Shadertoy shaders, GitHub libraries, and runtime dependencies.
+
 ## License
 
 MIT — see [LICENSE](LICENSE) for details.

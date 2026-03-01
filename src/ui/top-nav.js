@@ -67,11 +67,14 @@ function initTopNav() {
 		#top-nav a.active { color: #fff; border-color: #e94560; background: rgba(233, 69, 96, 0.12); }
 		#top-nav .nav-group.active-group .nav-group-label { color: #e94560; }
 		#top-nav .nav-spacer { flex: 1; }
-		#top-nav .nav-credit {
-			color: #444; font-size: 9px; white-space: nowrap;
-			text-decoration: none; transition: color 0.15s;
+		#site-footer {
+			border-top: 1px solid #1a1a2e; padding: 16px 20px; margin-top: 40px;
+			display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+			font-family: monospace; font-size: 11px; color: #999;
 		}
-		#top-nav .nav-credit:hover { color: #888; }
+		#site-footer a { color: #aaa; text-decoration: none; transition: color .15s; }
+		#site-footer a:hover { color: #e0e0ff; }
+		#site-footer .footer-credit { color: #999; }
 	`;
 	document.head.appendChild(style);
 
@@ -116,24 +119,29 @@ function initTopNav() {
 	spacer.className = "nav-spacer";
 	nav.appendChild(spacer);
 
-	const ghLink = document.createElement("a");
-	ghLink.className = "nav-credit";
-	ghLink.href = "https://github.com/web3dev1337/shaderbrew";
-	ghLink.target = "_blank";
-	ghLink.style.cssText = "color:#666;font-size:10px;margin-right:8px";
-	ghLink.textContent = "GitHub";
-	nav.appendChild(ghLink);
-
 	const creditsLink = document.createElement("a");
-	creditsLink.className = "nav-credit";
 	creditsLink.href = "credits.html";
 	creditsLink.textContent = "Credits";
-	creditsLink.style.cssText = "color:#666;font-size:10px";
-	if (path === "credits.html") creditsLink.style.color = "#aaa";
+	creditsLink.style.cssText = "padding:3px 7px;white-space:nowrap";
+	if (path === "credits.html") creditsLink.classList.add("active");
 	nav.appendChild(creditsLink);
+
+	const ghLink = document.createElement("a");
+	ghLink.href = "https://github.com/web3dev1337/shaderbrew";
+	ghLink.target = "_blank";
+	ghLink.textContent = "GitHub";
+	ghLink.style.cssText = "padding:3px 7px;white-space:nowrap";
+	nav.appendChild(ghLink);
 
 	if (!isEditor) document.body.classList.add("has-top-nav");
 	document.body.appendChild(nav);
+
+	if (!isEditor && path !== "credits.html") {
+		const footer = document.createElement("div");
+		footer.id = "site-footer";
+		footer.innerHTML = `<span class="footer-credit">Shader library: <a href="https://github.com/mebiusbox/pixy.js" target="_blank">pixy.js</a> by <a href="https://github.com/mebiusbox" target="_blank">mebiusbox</a> (MIT) · Includes <a href="credits.html">Shadertoy community shaders</a></span><span><a href="credits.html">Credits</a> · <a href="https://github.com/web3dev1337/shaderbrew" target="_blank">GitHub</a></span>`;
+		document.body.appendChild(footer);
+	}
 
 	if (isEditor) {
 		const toolbar = document.getElementById("toolbar");
