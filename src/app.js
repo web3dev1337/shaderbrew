@@ -87,7 +87,7 @@ class App {
 	}
 
 	_initGraphics() {
-		this.renderer = new THREE.WebGLRenderer();
+		this.renderer = new THREE.WebGLRenderer({ preserveDrawingBuffer: true });
 		this.renderer.setSize(512, 512);
 		if (this.renderer.capabilities.isWebGL2) console.log("[fxgen] WebGL2");
 
@@ -199,6 +199,7 @@ class App {
 	_initLayerPanel() {
 		this.layerPanel = new LayerPanel(this.layerManager, () => this._onLayerChange());
 		this.layerPanel.build();
+		this.layerPanel.setRenderer(this.renderer);
 	}
 
 	_onLayerChange() {

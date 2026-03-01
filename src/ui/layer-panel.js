@@ -6,6 +6,7 @@ import { BLEND_MODES } from "../shaders/blend.js";
 import { EFFECT_TYPES } from "../defaults.js";
 import { CUSTOM_EFFECT_TYPES, CUSTOM_PREFIX, isCustomEffect, getCustomShaderKey } from "../custom-shader-registry.js";
 import { SHADERS } from "../../shader-defs.js";
+import { generateThumbnails, getCachedThumbnail } from "./effect-thumbnails.js";
 
 const EFFECT_CATEGORIES = {
 	"Fire & Heat": ["Flame", "FlameEye", "Fire", "FlameLance", "Bonfire", "Explosion", "Explosion2"],
@@ -30,6 +31,8 @@ export class LayerPanel {
 		this._pickerLayerIdx = -1;
 		this._pickerFocusIdx = -1;
 		this._pickerItems = [];
+		this._renderer = null;
+		this._thumbCancel = null;
 	}
 
 	build() {
@@ -253,6 +256,34 @@ export class LayerPanel {
 		grid.className = "fx-picker-grid";
 
 		const currentType = layer.effectController.type;
+		const TRANSPARENT_PX = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+
+		const makePickerItem = (fx, idx) => {
+			const item = document.createElement("button");
+			item.className = "fx-picker-item" + (fx === currentType ? " selected" : "");
+			item.dataset.fx = fx;
+			item.dataset.idx = idx;
+
+			const thumb = getCachedThumbnail(fx);
+			const img = document.createElement("img");
+			img.className = "fx-picker-thumb";
+			img.src = thumb || TRANSPARENT_PX;
+			img.dataset.fx = fx;
+			item.appendChild(img);
+
+			const label = document.createElement("span");
+			label.className = "fx-picker-label";
+			label.textContent = isCustomEffect(fx) ? fx.slice(CUSTOM_PREFIX.length) : fx;
+			item.appendChild(label);
+
+			item.addEventListener("click", () => this._selectEffect(fx, layer));
+			item.addEventListener("mouseenter", () => {
+				this._pickerFocusIdx = parseInt(item.dataset.idx);
+				this._updatePickerFocus();
+			});
+			return item;
+		};
+
 		const renderItems = (filter) => {
 			grid.innerHTML = "";
 			this._pickerItems = [];
@@ -271,16 +302,7 @@ export class LayerPanel {
 				catGrid.className = "fx-picker-cat-grid";
 
 				for (const fx of filtered) {
-					const item = document.createElement("button");
-					item.className = "fx-picker-item" + (fx === currentType ? " selected" : "");
-					item.textContent = fx;
-					item.dataset.fx = fx;
-					item.dataset.idx = idx;
-					item.addEventListener("click", () => this._selectEffect(fx, layer));
-					item.addEventListener("mouseenter", () => {
-						this._pickerFocusIdx = parseInt(item.dataset.idx);
-						this._updatePickerFocus();
-					});
+					const item = makePickerItem(fx, idx);
 					catGrid.appendChild(item);
 					this._pickerItems.push(item);
 					if (fx === currentType) this._pickerFocusIdx = idx;
@@ -301,16 +323,7 @@ export class LayerPanel {
 				const catGrid = document.createElement("div");
 				catGrid.className = "fx-picker-cat-grid";
 				for (const fx of uncategorized) {
-					const item = document.createElement("button");
-					item.className = "fx-picker-item" + (fx === currentType ? " selected" : "");
-					item.textContent = fx;
-					item.dataset.fx = fx;
-					item.dataset.idx = idx;
-					item.addEventListener("click", () => this._selectEffect(fx, layer));
-					item.addEventListener("mouseenter", () => {
-						this._pickerFocusIdx = parseInt(item.dataset.idx);
-						this._updatePickerFocus();
-					});
+					const item = makePickerItem(fx, idx);
 					catGrid.appendChild(item);
 					this._pickerItems.push(item);
 					if (fx === currentType) this._pickerFocusIdx = idx;
@@ -322,6 +335,18 @@ export class LayerPanel {
 
 		renderItems("");
 		picker.appendChild(grid);
+
+		// Generate thumbnails lazily and update picker items as they complete
+		if (this._thumbCancel) this._thumbCancel();
+		if (this._renderer) {
+			const allEffects = Object.values(EFFECT_CATEGORIES).flat()
+				.concat(EFFECT_TYPES.filter(e => !new Set(Object.values(EFFECT_CATEGORIES).flat()).has(e)));
+			this._thumbCancel = generateThumbnails(this._renderer, allEffects, (fx, url) => {
+				if (!this._pickerEl) return;
+				const img = this._pickerEl.querySelector(`img.fx-picker-thumb[data-fx="${CSS.escape(fx)}"]`);
+				if (img && url) img.src = url;
+			});
+		}
 
 		// Keyboard handling
 		const onKey = (e) => {
@@ -414,6 +439,7 @@ export class LayerPanel {
 	}
 
 	_closePicker() {
+		if (this._thumbCancel) { this._thumbCancel(); this._thumbCancel = null; }
 		if (this._pickerEl) {
 			if (this._pickerEl._cleanup) this._pickerEl._cleanup();
 			this._pickerEl.remove();
@@ -428,7 +454,7 @@ export class LayerPanel {
 		style.textContent = `
 			.fx-picker {
 				position: fixed; left: 264px; top: 40px;
-				width: 340px; max-height: calc(100vh - 100px);
+				width: 420px; max-height: calc(100vh - 100px);
 				background: rgba(10,10,20,0.98); border: 1px solid #2a2a4a;
 				border-radius: 8px; z-index: 10000;
 				display: flex; flex-direction: column;
@@ -450,13 +476,17 @@ export class LayerPanel {
 				letter-spacing: 1px; padding: 8px 4px 4px; font-weight: 700;
 			}
 			.fx-picker-cat-grid {
-				display: flex; flex-wrap: wrap; gap: 4px;
+				display: grid;
+				grid-template-columns: repeat(auto-fill, 72px);
+				gap: 6px;
 			}
 			.fx-picker-item {
-				padding: 5px 8px; border: 1px solid #1a1a2a; border-radius: 4px;
+				display: flex; flex-direction: column; align-items: center;
+				width: 72px; padding: 4px 2px;
+				border: 1px solid #1a1a2a; border-radius: 6px;
 				background: #0c0c18; color: #aab; cursor: pointer;
-				font-family: monospace; font-size: 11px;
-				transition: all 0.1s; white-space: nowrap;
+				font-family: monospace; font-size: 9px;
+				transition: all 0.1s; overflow: hidden;
 			}
 			.fx-picker-item:hover, .fx-picker-item.focused {
 				background: rgba(233,69,96,0.15); color: #fff;
@@ -469,8 +499,22 @@ export class LayerPanel {
 			.fx-picker-item.focused.selected {
 				box-shadow: 0 0 6px rgba(233,69,96,0.4);
 			}
+			.fx-picker-thumb {
+				width: 48px; height: 48px; border-radius: 4px;
+				background: #111; object-fit: cover;
+				image-rendering: pixelated;
+			}
+			.fx-picker-label {
+				margin-top: 3px; text-align: center;
+				line-height: 1.1; word-break: break-word;
+				max-width: 68px;
+			}
 		`;
 		document.head.appendChild(style);
+	}
+
+	setRenderer(renderer) {
+		this._renderer = renderer;
 	}
 
 	_makeBtn(text, title) {
