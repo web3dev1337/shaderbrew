@@ -501,7 +501,11 @@ class App {
 	animate() {
 		const isAnimating = this.effectController.animate;
 		if (isAnimating) {
-			this.effectController.time += this.clock.getDelta();
+			const dt = this.clock.getDelta();
+			// Advance time on ALL layers so every layer animates, not just the active one
+			for (const layer of this.layerManager.layers) {
+				layer.effectController.time += dt;
+			}
 		}
 
 		const timeStr = this.effectController.time.toString() + "0000000";
