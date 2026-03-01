@@ -159,11 +159,11 @@ export class Preview3D {
 
 		this.material = new THREE.MeshStandardMaterial({
 			color: 0xffffff,
-			roughness: 0.25,
-			metalness: 0.5,
-			envMapIntensity: 2.5,
-			emissive: new THREE.Color(0x1a0628),
-			emissiveIntensity: 0.8,
+			roughness: 0.55,
+			metalness: 0.0,
+			envMapIntensity: 0.6,
+			emissive: new THREE.Color(0xffffff),
+			emissiveIntensity: 0.85,
 			side: THREE.DoubleSide
 		});
 		this.material.normalScale.set(1.5, 1.5);
