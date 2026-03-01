@@ -6,8 +6,7 @@ export default [
 		ignores: [
 			"**/node_modules/**",
 			"**/*.min.js",
-			"pixy.module.min.js",
-			"fxgen.module.min.js"
+			"pixy.module.min.js"
 		],
 		languageOptions: {
 			ecmaVersion: 2022,

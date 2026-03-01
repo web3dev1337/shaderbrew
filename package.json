@@ -2,14 +2,14 @@
   "name": "work1",
   "version": "1.0.0",
   "description": "",
-  "main": "fxgen.module.min.js",
+  "main": "src/app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint ."
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "type": "commonjs",
   "devDependencies": {
     "eslint": "^10.0.1",

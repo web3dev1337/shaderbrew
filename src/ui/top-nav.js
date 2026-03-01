@@ -124,12 +124,13 @@ function initTopNav() {
 	ghLink.textContent = "GitHub";
 	nav.appendChild(ghLink);
 
-	const credit = document.createElement("a");
-	credit.className = "nav-credit";
-	credit.href = "https://github.com/mebiusbox/EffectTextureMaker";
-	credit.target = "_blank";
-	credit.textContent = "Based on EffectTextureMaker by mebiusbox";
-	nav.appendChild(credit);
+	const creditsLink = document.createElement("a");
+	creditsLink.className = "nav-credit";
+	creditsLink.href = "credits.html";
+	creditsLink.textContent = "Credits";
+	creditsLink.style.cssText = "color:#666;font-size:10px";
+	if (path === "credits.html") creditsLink.style.color = "#aaa";
+	nav.appendChild(creditsLink);
 
 	if (!isEditor) document.body.classList.add("has-top-nav");
 	document.body.appendChild(nav);

@@ -2,7 +2,25 @@
 
 Professional WebGL procedural texture generator. Multi-layer compositing, PBR map generation, 3D material preview, 52 custom GLSL shaders, and 65+ procedural effects — all running in your browser with zero dependencies.
 
-**[Live Demo](https://web3dev1337.github.io/shaderbrew/showcase.html)** | **[Open Editor](https://web3dev1337.github.io/shaderbrew/editor.html)**
+**[Live Showcase](https://web3dev1337.github.io/shaderbrew/showcase.html)** | **[Open Editor](https://web3dev1337.github.io/shaderbrew/editor.html)**
+
+---
+
+## What It Does
+
+The **[Showcase](https://web3dev1337.github.io/shaderbrew/showcase.html)** walks through the full pipeline in 7 chapters:
+
+| Chapter | What You See |
+|---------|-------------|
+| **Raw Canvas** | 65+ procedural effects — explosions, corona, caustics, frozen lightning |
+| **Color Balance** | RGB channel shifting on raw effects |
+| **Gradient Mapping** | One explosion through 10 different color palettes |
+| **Multi-Layer Compositing** | Organic caustics + digital matrix blended with 9 modes |
+| **Combination** | Full chains — two effects blended and gradient-mapped |
+| **PBR Maps** | Auto-generated Normal, Roughness, AO, Metallic from any texture |
+| **3D Preview** | PBR materials applied to lit, rotating geometry in real-time |
+
+The hero demo builds a **Dark Ritual Portal** from scratch — layering a raymarched warp tunnel with a sprite ring and alpha compositing it into a final effect.
 
 ---
 
@@ -23,13 +41,15 @@ Professional WebGL procedural texture generator. Multi-layer compositing, PBR ma
 <img src="docs/media/dark-ritual-portal.gif" width="160" alt="Dark Ritual Portal">
 </p>
 
+The showcase features 12 of these live — Volumetric Nebula, Black Hole, Cosmic Jellyfish, God Rays, Reality Shatter, Dimensional Portal, Time Vortex, Particle Collider, Void Tendril, and Summoning Circle among them.
+
 ---
 
 ## Pages
 
 | Page | Description |
 |------|-------------|
-| **[Showcase](https://web3dev1337.github.io/shaderbrew/showcase.html)** | Guided tour — live renders, 3D preview, PBR maps, 7 chapters |
+| **[Showcase](https://web3dev1337.github.io/shaderbrew/showcase.html)** | Guided tour — 7 chapters, live renders, PBR pipeline walkthrough |
 | **[Editor](https://web3dev1337.github.io/shaderbrew/editor.html)** | Full texture editor — layers, gradients, PBR export, undo/redo |
 | **[Gallery](https://web3dev1337.github.io/shaderbrew/gallery.html)** | Live animated gallery of 70+ procedural effects |
 | **[Material Forge](https://web3dev1337.github.io/shaderbrew/demos.html)** | 3D material demo — textures on lit spinning objects with bloom |
@@ -41,24 +61,18 @@ Professional WebGL procedural texture generator. Multi-layer compositing, PBR ma
 ## Features
 
 ### Editor
-- **65+ procedural effect types** — explosions, fire, plasma, voronoi, fractals, caustics, and more
-- **52 custom GLSL shaders** — raymarched nebulae, black holes, warp tunnels, fractals, cosmic phenomena
-- **Multi-layer compositing** — unlimited layers with 9 blend modes (Normal, Multiply, Screen, Overlay, etc.)
+- **65+ procedural effect types** — explosions, fire, plasma, voronoi, fractals, caustics
+- **52 custom GLSL shaders** — raymarched nebulae, black holes, warp tunnels, fractals
+- **Multi-layer compositing** — unlimited layers with 9 blend modes
 - **Gradient color mapping** — multi-stop gradient editor with 5 presets
-- **PBR map generation** — auto-generates Normal, Roughness, AO, and Metallic maps
-- **3D material preview** — real-time on sphere/cube/torus knot with environment reflections, ACES tone mapping, PCF shadows
+- **PBR map generation** — Normal, Roughness, AO, Metallic
+- **3D material preview** — real-time on sphere/cube/torus knot with environment reflections
 - **Undo/Redo** — 50-state history (Ctrl+Z / Ctrl+Shift+Z)
 - **Export** — PNG, JPEG, ZIP bundles with all PBR maps, up to 2048x2048
 
 ### Sprite Sheets
 - **119 pre-rendered sprite sheets** — 6x6 grid, 36 frames each
 - **Game-ready** — transparent PNGs with alpha for particle systems and VFX
-- **Export** — GIF and MP4 video export via Puppeteer + ffmpeg
-
-### Showcase
-- **Dark Ritual Portal** — multi-layer composite build walkthrough
-- **Material Forge** — live 3D scene with PBR materials, bloom, and environment lighting
-- **7 chapters** — raw effects, color balance, gradients, layers, compositing, PBR maps, 3D preview
 
 ---
 
@@ -71,40 +85,23 @@ Professional WebGL procedural texture generator. Multi-layer compositing, PBR ma
 - **JSZip** — ZIP export (loaded on demand)
 - No build step, no bundler — pure ES modules served directly
 
-## Architecture
-
-```
-editor.html            Main editor
-src/
-  app.js               Main coordinator
-  render-pipeline.js   6-pass pipeline (Base > Polar > ColorBalance > Tiling > Normal > Copy)
-  layer-manager.js     Multi-layer CRUD, reorder, duplicate
-  compositor.js        Ping-pong RT compositor, 9 blend modes
-  gradient-editor.js   Multi-stop gradient editor
-  pbr-generator.js     Normal / Roughness / AO / Metallic pass generation
-  preview-3d.js        3D preview — PMREM environment, ACES tone mapping, shadows
-  history.js           Undo/redo (50 snapshots)
-  export.js            PNG / JPEG / ZIP export
-  ui/                  GUI panels, layer panel, toolbar, action dock
-  shaders/             Blend modes, gradient map, tiling, PBR shaders
-shader-defs.js         52 custom GLSL shader sources
-```
-
 ## Running Locally
 
 ```bash
 git clone https://github.com/web3dev1337/shaderbrew.git
 cd shaderbrew
 python3 -m http.server 4444
-# Open http://localhost:4444/editor.html
+# Open http://localhost:4444/showcase.html
 ```
 
 ## Credits
 
-Built on [EffectTextureMaker](https://github.com/mebiusbox/EffectTextureMaker) by [mebiusbox](https://github.com/mebiusbox) (MIT License). The original tool provides the core procedural shader library (pixy) and single-layer editor.
+Uses [pixy.js](https://github.com/mebiusbox/pixy.js) by [mebiusbox](https://github.com/mebiusbox) (MIT License) — the procedural shader library that powers the 65+ built-in effect types.
 
-ShaderBrew adds multi-layer compositing, gradient mapping, PBR generation, 3D preview, 52 custom GLSL shaders, sprite sheet generation, the showcase, material forge, and the enhanced editor UI.
+Everything else (editor, layers, compositing, gradient mapping, PBR generation, 3D preview, 52 custom GLSL shaders, sprite sheets, showcase, material forge) is original ShaderBrew code.
 
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE) for details.
+
+`pixy.module.min.js` bundles GLSL from Shadertoy authors (CC-BY-NC-SA 3.0) and other sources — see [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md) for full attribution.

@@ -1,0 +1,6 @@
+- [x] Create branch off latest master
+- [x] Research upstream license (mebiusbox EffectTextureMaker)
+- [x] Rewrite README with showcase-based examples
+- [x] Add proper LICENSE file with dual copyright
+- [x] Commit and push
+- [ ] Create PR
