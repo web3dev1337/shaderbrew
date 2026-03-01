@@ -500,12 +500,13 @@ class App {
 	// --- Core loop ---
 
 	animate() {
-		const isAnimating = this.effectController.animate;
-		if (isAnimating) {
-			const dt = this.clock.getDelta();
-			// Advance time on ALL layers so every layer animates, not just the active one
-			for (const layer of this.layerManager.layers) {
+		// Check if ANY layer is animating, not just the active one
+		let anyAnimating = false;
+		const dt = this.clock.getDelta();
+		for (const layer of this.layerManager.layers) {
+			if (layer.effectController.animate) {
 				layer.effectController.time += dt;
+				anyAnimating = true;
 			}
 		}
 
@@ -515,7 +516,7 @@ class App {
 
 		requestAnimationFrame(() => this.animate());
 
-		if (isAnimating) {
+		if (anyAnimating) {
 			this.render();
 			return;
 		}
@@ -694,7 +695,8 @@ class App {
 
 	requestRender() {
 		this.needsRender = true;
-		if (this.effectController.animate || this.liveRender) {
+		const anyAnimating = this.layerManager.layers.some(l => l.effectController.animate);
+		if (anyAnimating || this.liveRender) {
 			this.render();
 		}
 	}
