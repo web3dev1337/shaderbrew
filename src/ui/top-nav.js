@@ -32,45 +32,45 @@ function initTopNav() {
 
 	const style = document.createElement("style");
 	style.textContent = `
-		:root { --top-nav-height: 36px; }
+		:root { --top-nav-height: 44px; }
 		body.has-top-nav { padding-top: var(--top-nav-height); }
 		#top-nav {
 			position: fixed; top: 0; left: 0; right: 0; height: var(--top-nav-height);
-			display: flex; align-items: center; gap: 10px; padding: 0 12px;
-			background: rgba(5, 5, 10, 0.98);
-			border-bottom: 1px solid #1f1f2f;
-			font-family: monospace; font-size: 11px; color: #bbb; z-index: 10000;
-			backdrop-filter: blur(8px);
+			display: flex; align-items: center; gap: 6px; padding: 0 16px;
+			background: linear-gradient(180deg, rgba(12, 12, 20, 0.99) 0%, rgba(8, 8, 14, 0.99) 100%);
+			border-bottom: 1px solid #2a2a3f;
+			font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+			font-size: 13px; color: #ccc; z-index: 10000;
+			backdrop-filter: blur(12px);
 			overflow-x: auto;
 			scrollbar-width: none;
 		}
 		#top-nav::-webkit-scrollbar { display: none; }
 		#top-nav .nav-title {
-			color: #e0e0ff; font-weight: 700; margin-right: 6px;
-			letter-spacing: 0.15em; font-size: 14px; white-space: nowrap;
+			color: #e0e0ff; font-weight: 700; margin-right: 10px;
+			letter-spacing: 0.12em; font-size: 15px; white-space: nowrap;
+			font-family: monospace;
 		}
-		#top-nav .nav-group {
-			display: flex; align-items: center; gap: 4px; padding-right: 10px; margin-right: 2px;
-			border-right: 1px solid #1a1a2a;
-		}
-		#top-nav .nav-group:last-of-type { border-right: none; }
-		#top-nav .nav-group-label {
-			font-size: 9px; color: #555; text-transform: uppercase; letter-spacing: 0.1em;
+		#top-nav .nav-sep {
+			width: 1px; height: 20px; background: #2a2a40; margin: 0 4px; flex-shrink: 0;
 		}
 		#top-nav a {
-			color: #888; text-decoration: none; padding: 3px 7px;
-			border: 1px solid transparent; border-radius: 3px; transition: all 0.15s;
-			white-space: nowrap;
+			color: #b0b0c0; text-decoration: none; padding: 6px 12px;
+			border-radius: 6px; transition: all 0.15s;
+			white-space: nowrap; font-weight: 500;
 		}
-		#top-nav a:hover { color: #ddd; border-color: #333; background: rgba(255,255,255,0.03); }
-		#top-nav a.primary { border-color: #e94560; color: #e0e0ff; background: rgba(233, 69, 96, 0.08); }
-		#top-nav a.active { color: #fff; border-color: #e94560; background: rgba(233, 69, 96, 0.12); }
-		#top-nav .nav-group.active-group .nav-group-label { color: #e94560; }
+		#top-nav a:hover { color: #fff; background: rgba(255,255,255,0.07); }
+		#top-nav a.active {
+			color: #fff; background: rgba(233, 69, 96, 0.15);
+			box-shadow: inset 0 0 0 1px rgba(233, 69, 96, 0.4);
+		}
 		#top-nav .nav-spacer { flex: 1; }
+		#top-nav .nav-right a { color: #8888aa; font-size: 12px; padding: 5px 10px; }
+		#top-nav .nav-right a:hover { color: #ddd; background: rgba(255,255,255,0.05); }
 		#site-footer {
-			border-top: 1px solid #1a1a2e; padding: 16px 20px; margin-top: 40px;
-			display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;
-			font-family: monospace; font-size: 11px; color: #999;
+			border-top: 1px solid #1a1a2e; padding: 18px 24px; margin-top: 40px;
+			display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+			font-family: 'Segoe UI', system-ui, sans-serif; font-size: 12px; color: #999;
 		}
 		#site-footer a { color: #aaa; text-decoration: none; transition: color .15s; }
 		#site-footer a:hover { color: #e0e0ff; }
@@ -89,49 +89,43 @@ function initTopNav() {
 	const raw = window.location.pathname.split("/").pop() || "index.html";
 	const path = raw === "index.html" ? "showcase.html" : raw;
 
-	for (const group of NAV_GROUPS) {
-		const groupEl = document.createElement("div");
-		groupEl.className = "nav-group";
-
-		const label = document.createElement("div");
-		label.className = "nav-group-label";
-		label.textContent = group.label;
-		groupEl.appendChild(label);
-
-		let groupActive = false;
+	for (let gi = 0; gi < NAV_GROUPS.length; gi++) {
+		const group = NAV_GROUPS[gi];
+		if (gi > 0) {
+			const sep = document.createElement("div");
+			sep.className = "nav-sep";
+			nav.appendChild(sep);
+		}
 		for (const item of group.items) {
 			const link = document.createElement("a");
 			link.href = item.href;
 			link.textContent = item.label;
-			if (item.primary) link.classList.add("primary");
-			if (path === item.href) {
-				link.classList.add("active");
-				groupActive = true;
-			}
-			groupEl.appendChild(link);
+			if (path === item.href) link.classList.add("active");
+			nav.appendChild(link);
 		}
-		if (groupActive) groupEl.classList.add("active-group");
-
-		nav.appendChild(groupEl);
 	}
 
 	const spacer = document.createElement("div");
 	spacer.className = "nav-spacer";
 	nav.appendChild(spacer);
 
+	const rightGroup = document.createElement("div");
+	rightGroup.className = "nav-right";
+	rightGroup.style.cssText = "display:flex;align-items:center;gap:2px";
+
 	const creditsLink = document.createElement("a");
 	creditsLink.href = "credits.html";
 	creditsLink.textContent = "Credits";
-	creditsLink.style.cssText = "padding:3px 7px;white-space:nowrap";
 	if (path === "credits.html") creditsLink.classList.add("active");
-	nav.appendChild(creditsLink);
+	rightGroup.appendChild(creditsLink);
 
 	const ghLink = document.createElement("a");
 	ghLink.href = "https://github.com/web3dev1337/shaderbrew";
 	ghLink.target = "_blank";
 	ghLink.textContent = "GitHub";
-	ghLink.style.cssText = "padding:3px 7px;white-space:nowrap";
-	nav.appendChild(ghLink);
+	rightGroup.appendChild(ghLink);
+
+	nav.appendChild(rightGroup);
 
 	if (!isEditor) document.body.classList.add("has-top-nav");
 	document.body.appendChild(nav);
