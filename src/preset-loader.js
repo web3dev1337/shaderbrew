@@ -108,7 +108,6 @@ export class PresetLoader {
 			this._buildFilters();
 			this._renderGrid();
 			this._loadFromURL();
-			this._generateAllThumbs();
 		} catch (err) {
 			console.error("[fxgen] preset manifest load failed:", err);
 		}
@@ -339,14 +338,13 @@ export class PresetLoader {
 		const presetId = url.searchParams.get("preset");
 		const projectId = url.searchParams.get("project");
 		const match = this.manifest.find(item => item.id === (projectId || presetId));
-		if (match) {
-			this.load(match);
-			return;
-		}
-		if (this.manifest.length > 0) this.load(this.manifest[0]);
+		if (match) this.load(match);
 	}
 
-	show() { this.panel.style.display = "block"; }
+	show() {
+		this.panel.style.display = "block";
+		this._generateAllThumbs();
+	}
 	hide() { this.panel.style.display = "none"; }
 	toggle() {
 		this.panel.style.display = this.panel.style.display === "none" ? "block" : "none";
