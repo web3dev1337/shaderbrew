@@ -417,5 +417,19 @@
       "bio",
       "sci-fi"
     ]
+  },
+  {
+    "id": "void-singularity",
+    "name": "Void Singularity",
+    "file": "presets/projects/void-singularity.json",
+    "kind": "project",
+    "category": "example",
+    "description": "4-layer cosmic vortex: Corona core, slow-motion plasma explosion, cyan energy tendrils, polar lightning fractures — unified by a deep purple-to-gold gradient ramp.",
+    "tags": [
+      "layers",
+      "cosmic",
+      "energy",
+      "showcase"
+    ]
   }
 ]
