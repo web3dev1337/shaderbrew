@@ -97,7 +97,7 @@ export class Preview3D {
 		this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 		this.renderer.outputColorSpace = THREE.SRGBColorSpace;
 		this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-		this.renderer.toneMappingExposure = 2.4;
+		this.renderer.toneMappingExposure = 1.4;
 		this.renderer.shadowMap.enabled = true;
 		this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 		this.renderer.domElement.style.cssText = "position:absolute;top:28px;left:0";
@@ -130,7 +130,7 @@ export class Preview3D {
 		this.scene.add(hemi);
 
 		// Key light — main directional with shadows
-		const keyLight = new THREE.DirectionalLight(0xffeedd, 3.5);
+		const keyLight = new THREE.DirectionalLight(0xffeedd, 1.8);
 		keyLight.position.set(3, 4, 3);
 		keyLight.castShadow = true;
 		keyLight.shadow.mapSize.set(512, 512);
@@ -143,7 +143,7 @@ export class Preview3D {
 		this.scene.add(keyLight);
 
 		// Fill light — cooler, softer
-		const fillLight = new THREE.DirectionalLight(0x9ab6e6, 1.8);
+		const fillLight = new THREE.DirectionalLight(0x9ab6e6, 0.8);
 		fillLight.position.set(-3, 2, -2);
 		this.scene.add(fillLight);
 
@@ -159,11 +159,11 @@ export class Preview3D {
 
 		this.material = new THREE.MeshStandardMaterial({
 			color: 0xffffff,
-			roughness: 0.55,
+			roughness: 0.45,
 			metalness: 0.0,
-			envMapIntensity: 0.6,
+			envMapIntensity: 0.3,
 			emissive: new THREE.Color(0xffffff),
-			emissiveIntensity: 0.85,
+			emissiveIntensity: 0.35,
 			side: THREE.DoubleSide
 		});
 		this.material.normalScale.set(1.5, 1.5);
