@@ -53,7 +53,7 @@ export class LayerPanel {
 		const btnGroup = document.createElement("div");
 		btnGroup.style.cssText = "display:flex;gap:4px";
 
-		const addBtn = this._makeBtn("+", "Add layer");
+		const addBtn = this._makeBtn("Add Layer");
 		addBtn.addEventListener("click", () => {
 			const active = this.layerManager.getActiveLayer();
 			const w = active ? active.renderTarget.width : 512;
@@ -72,14 +72,14 @@ export class LayerPanel {
 			this.onLayerChange();
 		});
 
-		const dupBtn = this._makeBtn("D", "Duplicate layer");
+		const dupBtn = this._makeBtn("Duplicate");
 		dupBtn.addEventListener("click", () => {
 			this.layerManager.duplicateLayer(this.layerManager.activeLayerIndex);
 			this.refresh();
 			this.onLayerChange();
 		});
 
-		const delBtn = this._makeBtn("-", "Remove layer");
+		const delBtn = this._makeBtn("Delete Layer");
 		delBtn.addEventListener("click", () => {
 			this.layerManager.removeLayer(this.layerManager.activeLayerIndex);
 			this.refresh();
@@ -526,11 +526,10 @@ export class LayerPanel {
 		this._renderer = renderer;
 	}
 
-	_makeBtn(text, title) {
+	_makeBtn(text) {
 		const btn = document.createElement("button");
 		btn.textContent = text;
-		btn.title = title;
-		btn.style.cssText = "width:24px;height:24px;border:1px solid #2a2a3a;border-radius:4px;background:#111122;color:#ccc;cursor:pointer;font-family:monospace;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all 0.15s";
+		btn.style.cssText = "padding:3px 8px;height:24px;border:1px solid #2a2a3a;border-radius:4px;background:#111122;color:#ccc;cursor:pointer;font-family:monospace;font-size:10px;display:flex;align-items:center;justify-content:center;transition:all 0.15s;white-space:nowrap";
 		btn.addEventListener("mouseenter", () => { btn.style.background = "#1a1a3e"; btn.style.borderColor = "#e94560"; btn.style.color = "#fff"; });
 		btn.addEventListener("mouseleave", () => { btn.style.background = "#111122"; btn.style.borderColor = "#2a2a3a"; btn.style.color = "#ccc"; });
 		return btn;
