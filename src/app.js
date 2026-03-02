@@ -87,7 +87,7 @@ class App {
 	}
 
 	_initGraphics() {
-		this.renderer = new THREE.WebGLRenderer();
+		this.renderer = new THREE.WebGLRenderer({ preserveDrawingBuffer: true });
 		this.renderer.setSize(512, 512);
 		if (this.renderer.capabilities.isWebGL2) console.log("[fxgen] WebGL2");
 
@@ -199,6 +199,7 @@ class App {
 	_initLayerPanel() {
 		this.layerPanel = new LayerPanel(this.layerManager, () => this._onLayerChange());
 		this.layerPanel.build();
+		this.layerPanel.setRenderer(this.renderer);
 	}
 
 	_onLayerChange() {
@@ -499,9 +500,14 @@ class App {
 	// --- Core loop ---
 
 	animate() {
-		const isAnimating = this.effectController.animate;
-		if (isAnimating) {
-			this.effectController.time += this.clock.getDelta();
+		// Check if ANY layer is animating, not just the active one
+		let anyAnimating = false;
+		const dt = this.clock.getDelta();
+		for (const layer of this.layerManager.layers) {
+			if (layer.effectController.animate) {
+				layer.effectController.time += dt;
+				anyAnimating = true;
+			}
 		}
 
 		const timeStr = this.effectController.time.toString() + "0000000";
@@ -510,7 +516,7 @@ class App {
 
 		requestAnimationFrame(() => this.animate());
 
-		if (isAnimating) {
+		if (anyAnimating) {
 			this.render();
 			return;
 		}
@@ -689,7 +695,8 @@ class App {
 
 	requestRender() {
 		this.needsRender = true;
-		if (this.effectController.animate || this.liveRender) {
+		const anyAnimating = this.layerManager.layers.some(l => l.effectController.animate);
+		if (anyAnimating || this.liveRender) {
 			this.render();
 		}
 	}

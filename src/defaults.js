@@ -18,7 +18,7 @@ export const EFFECT_TYPES = [
 
 export function getDefaultEffectController() {
 	return {
-		animate: false,
+		animate: true,
 		time: 0,
 		resolution: "512",
 		polarConversion: false,
