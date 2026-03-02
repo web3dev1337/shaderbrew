@@ -1,1 +1,10 @@
 node_modules/
+*.mp4
+*.webm
+export-portal/
+export-smite/
+export-smite.mjs
+record-video*.mjs
+gen-hires-test.html
+FINDINGS.md
+PLAN.md
