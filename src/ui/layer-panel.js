@@ -39,21 +39,21 @@ export class LayerPanel {
 		this.container = document.createElement("div");
 		this.container.id = "layer-panel";
 		this.container.style.cssText = `
-			position: fixed; left: 0; top: 0; bottom: 44px; width: 260px;
+			position: fixed; left: 0; top: 0; bottom: 2.75rem; width: 16.25rem;
 			background: rgba(8, 8, 16, 0.97); border-right: 1px solid #1f1f2f;
-			font-family: monospace; font-size: 12px; color: #ccc;
+			font-family: monospace; font-size: 0.75rem; color: #ccc;
 			display: flex; flex-direction: column; z-index: 9990;
 			overflow: hidden;
 		`;
 
 		const header = document.createElement("div");
-		header.style.cssText = "padding:10px;border-bottom:1px solid #1f1f2f;display:flex;justify-content:space-between;align-items:center";
-		header.innerHTML = '<span style="font-size:14px;color:#e0e0ff">Layers</span>';
+		header.style.cssText = "padding:0.5rem 0.625rem;border-bottom:1px solid #1f1f2f;display:flex;justify-content:space-between;align-items:center";
+		header.innerHTML = '<span style="font-size:0.875rem;color:#e0e0ff">Layers</span>';
 
 		const btnGroup = document.createElement("div");
-		btnGroup.style.cssText = "display:flex;gap:4px";
+		btnGroup.style.cssText = "display:flex;gap:0.25rem;flex-wrap:wrap;justify-content:flex-end";
 
-		const addBtn = this._makeBtn("Add Layer");
+		const addBtn = this._makeBtn("Add");
 		addBtn.addEventListener("click", () => {
 			const active = this.layerManager.getActiveLayer();
 			const w = active ? active.renderTarget.width : 512;
@@ -72,14 +72,14 @@ export class LayerPanel {
 			this.onLayerChange();
 		});
 
-		const dupBtn = this._makeBtn("Duplicate");
+		const dupBtn = this._makeBtn("Dupe");
 		dupBtn.addEventListener("click", () => {
 			this.layerManager.duplicateLayer(this.layerManager.activeLayerIndex);
 			this.refresh();
 			this.onLayerChange();
 		});
 
-		const delBtn = this._makeBtn("Delete Layer");
+		const delBtn = this._makeBtn("Delete");
 		delBtn.addEventListener("click", () => {
 			this.layerManager.removeLayer(this.layerManager.activeLayerIndex);
 			this.refresh();
@@ -93,7 +93,7 @@ export class LayerPanel {
 		this.container.appendChild(header);
 
 		this.listEl = document.createElement("div");
-		this.listEl.style.cssText = "flex:1;overflow-y:auto;padding:4px";
+		this.listEl.style.cssText = "flex:1;overflow-y:auto;padding:0.25rem";
 		this.container.appendChild(this.listEl);
 
 		document.body.appendChild(this.container);
@@ -113,7 +113,7 @@ export class LayerPanel {
 			row.draggable = true;
 			row.dataset.index = i;
 			row.style.cssText = `
-				padding:6px 8px; margin:2px 0; border-radius:4px; cursor:pointer;
+				padding:0.375rem 0.5rem; margin:0.125rem 0; border-radius:0.25rem; cursor:pointer;
 				border: 1px solid ${isActive ? "#e94560" : "#1a1a2a"};
 				background: ${isActive ? "rgba(233, 69, 96, 0.08)" : "#0c0c18"};
 				transition: all 0.15s;
@@ -151,7 +151,7 @@ export class LayerPanel {
 
 			// Top row: visibility + name
 			const topRow = document.createElement("div");
-			topRow.style.cssText = "display:flex;align-items:center;gap:6px;margin-bottom:4px";
+			topRow.style.cssText = "display:flex;align-items:center;gap:0.375rem;margin-bottom:0.25rem";
 
 			const visCheck = document.createElement("input");
 			visCheck.type = "checkbox";
@@ -164,7 +164,7 @@ export class LayerPanel {
 
 			const nameSpan = document.createElement("span");
 			nameSpan.textContent = layer.name;
-			nameSpan.style.cssText = `flex:1;color:${isActive ? "#fff" : "#aaa"};font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap`;
+			nameSpan.style.cssText = `flex:1;color:${isActive ? "#fff" : "#aaa"};font-size:0.75rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap`;
 
 			topRow.appendChild(visCheck);
 			topRow.appendChild(nameSpan);
@@ -172,15 +172,15 @@ export class LayerPanel {
 
 			// Effect type picker button (always visible)
 			const typeRow = document.createElement("div");
-			typeRow.style.cssText = "margin-top:4px";
+			typeRow.style.cssText = "margin-top:0.25rem";
 			const typeBtn = document.createElement("button");
 			typeBtn.className = "fx-picker-trigger";
 			typeBtn.textContent = layer.effectController.type;
 			typeBtn.style.cssText = `
-				width:100%; text-align:left; padding:4px 8px;
+				width:100%; text-align:left; padding:0.25rem 0.5rem;
 				background:#111122; color:${isActive ? "#e0e0ff" : "#999"};
-				border:1px solid #2a2a3a; border-radius:4px;
-				font-size:11px; font-family:monospace; cursor:pointer;
+				border:1px solid #2a2a3a; border-radius:0.25rem;
+				font-size:0.6875rem; font-family:monospace; cursor:pointer;
 				transition: all 0.15s; position: relative;
 			`;
 			typeBtn.addEventListener("mouseenter", () => {
@@ -201,10 +201,10 @@ export class LayerPanel {
 
 			// Blend mode + opacity (always visible)
 			const ctrlRow = document.createElement("div");
-			ctrlRow.style.cssText = "display:flex;align-items:center;gap:4px;margin-top:4px;overflow:hidden";
+			ctrlRow.style.cssText = "display:flex;align-items:center;gap:0.25rem;margin-top:0.25rem;overflow:hidden";
 
 			const blendSelect = document.createElement("select");
-			blendSelect.style.cssText = `background:#111122;color:${isActive ? "#ddd" : "#999"};border:1px solid #2a2a3a;border-radius:3px;font-size:10px;padding:2px;font-family:monospace;max-width:72px;flex-shrink:0`;
+			blendSelect.style.cssText = `background:#111122;color:${isActive ? "#ddd" : "#999"};border:1px solid #2a2a3a;border-radius:0.1875rem;font-size:0.625rem;padding:0.125rem;font-family:monospace;max-width:4.5rem;flex-shrink:0`;
 			for (const mode of BLEND_MODES) {
 				const opt = document.createElement("option");
 				opt.value = mode;
@@ -219,7 +219,7 @@ export class LayerPanel {
 
 			const opacityVal = document.createElement("span");
 			opacityVal.textContent = Math.round(layer.opacity * 100) + "%";
-			opacityVal.style.cssText = "color:#666;font-size:10px;min-width:32px;flex-shrink:0;text-align:right";
+			opacityVal.style.cssText = "color:#666;font-size:0.625rem;min-width:2rem;flex-shrink:0;text-align:right";
 
 			const opacityInput = document.createElement("input");
 			opacityInput.type = "range";
@@ -227,7 +227,7 @@ export class LayerPanel {
 			opacityInput.max = 1;
 			opacityInput.step = 0.01;
 			opacityInput.value = layer.opacity;
-			opacityInput.style.cssText = "flex:1;height:14px;cursor:pointer;accent-color:#e94560";
+			opacityInput.style.cssText = "flex:1;height:0.875rem;cursor:pointer;accent-color:#e94560";
 			opacityInput.addEventListener("input", () => {
 				layer.opacity = parseFloat(opacityInput.value);
 				opacityVal.textContent = Math.round(layer.opacity * 100) + "%";
@@ -529,7 +529,7 @@ export class LayerPanel {
 	_makeBtn(text) {
 		const btn = document.createElement("button");
 		btn.textContent = text;
-		btn.style.cssText = "padding:3px 8px;height:24px;border:1px solid #2a2a3a;border-radius:4px;background:#111122;color:#ccc;cursor:pointer;font-family:monospace;font-size:10px;display:flex;align-items:center;justify-content:center;transition:all 0.15s;white-space:nowrap";
+		btn.style.cssText = "padding:0.1875rem 0.5rem;min-height:1.5rem;border:1px solid #2a2a3a;border-radius:0.25rem;background:#111122;color:#ccc;cursor:pointer;font-family:monospace;font-size:0.625rem;display:flex;align-items:center;justify-content:center;transition:all 0.15s;white-space:nowrap";
 		btn.addEventListener("mouseenter", () => { btn.style.background = "#1a1a3e"; btn.style.borderColor = "#e94560"; btn.style.color = "#fff"; });
 		btn.addEventListener("mouseleave", () => { btn.style.background = "#111122"; btn.style.borderColor = "#2a2a3a"; btn.style.color = "#ccc"; });
 		return btn;
