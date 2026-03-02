@@ -58,7 +58,16 @@ export class LayerPanel {
 			const active = this.layerManager.getActiveLayer();
 			const w = active ? active.renderTarget.width : 512;
 			const h = active ? active.renderTarget.height : 512;
-			this.layerManager.addLayer(w, h);
+			const newLayer = this.layerManager.addLayer(w, h);
+			// Auto-balance opacity so all layers are visible
+			const count = this.layerManager.layers.length;
+			if (count > 1) {
+				newLayer.blendMode = "Screen";
+				const share = 1 / count;
+				for (const l of this.layerManager.layers) {
+					l.opacity = Math.round(share * 100) / 100;
+				}
+			}
 			this.refresh();
 			this.onLayerChange();
 		});
@@ -192,10 +201,10 @@ export class LayerPanel {
 
 			// Blend mode + opacity (always visible)
 			const ctrlRow = document.createElement("div");
-			ctrlRow.style.cssText = "display:flex;align-items:center;gap:6px;margin-top:4px";
+			ctrlRow.style.cssText = "display:flex;align-items:center;gap:4px;margin-top:4px;overflow:hidden";
 
 			const blendSelect = document.createElement("select");
-			blendSelect.style.cssText = `background:#111122;color:${isActive ? "#ddd" : "#999"};border:1px solid #2a2a3a;border-radius:3px;font-size:11px;padding:2px;font-family:monospace`;
+			blendSelect.style.cssText = `background:#111122;color:${isActive ? "#ddd" : "#999"};border:1px solid #2a2a3a;border-radius:3px;font-size:10px;padding:2px;font-family:monospace;max-width:72px;flex-shrink:0`;
 			for (const mode of BLEND_MODES) {
 				const opt = document.createElement("option");
 				opt.value = mode;
@@ -210,7 +219,7 @@ export class LayerPanel {
 
 			const opacityVal = document.createElement("span");
 			opacityVal.textContent = Math.round(layer.opacity * 100) + "%";
-			opacityVal.style.cssText = "color:#666;font-size:10px;min-width:28px;text-align:right";
+			opacityVal.style.cssText = "color:#666;font-size:10px;min-width:32px;flex-shrink:0;text-align:right";
 
 			const opacityInput = document.createElement("input");
 			opacityInput.type = "range";
