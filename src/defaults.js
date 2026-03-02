@@ -29,7 +29,7 @@ export function getDefaultEffectController() {
 		cColorBalanceShadowsR: 0, cColorBalanceShadowsG: 0, cColorBalanceShadowsB: 0,
 		cColorBalanceMidtonesR: 0, cColorBalanceMidtonesG: 0, cColorBalanceMidtonesB: 0,
 		cColorBalanceHighlightsR: 0, cColorBalanceHighlightsG: 0, cColorBalanceHighlightsB: 0,
-		type: "Wood"
+		type: "Corona"
 	};
 }
 

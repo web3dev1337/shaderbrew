@@ -17,7 +17,7 @@ export class LayerManager {
 		this.activeLayerIndex = 0;
 	}
 
-	addLayer(width, height, effectType = "Wood") {
+	addLayer(width, height, effectType = "Corona") {
 		const id = ++layerIdCounter;
 		const ec = Object.assign(
 			getDefaultEffectController(),
