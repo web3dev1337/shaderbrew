@@ -52,9 +52,9 @@ function renderOne(effectType) {
 			if (!src) { renderer.setRenderTarget(prevRT); return null; }
 			const mat = new THREE.ShaderMaterial({
 				uniforms: {
-					uTime: { value: 1.5 },
-					uResolution: { value: new THREE.Vector2(THUMB_SIZE, THUMB_SIZE) },
-					uMouse: { value: new THREE.Vector2(0.5, 0.5) },
+					time: { value: 1.5 },
+					resolution: { value: new THREE.Vector2(THUMB_SIZE, THUMB_SIZE) },
+					mouse: { value: new THREE.Vector2(0.5, 0.5) },
 				},
 				vertexShader: `varying vec2 vUv; void main(){ vUv=uv; gl_Position=vec4(position,1.0); }`,
 				fragmentShader: src,
