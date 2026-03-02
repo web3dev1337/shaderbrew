@@ -2,7 +2,11 @@
 
 Professional WebGL procedural texture generator. Multi-layer compositing, PBR map generation, 3D material preview, 52 custom GLSL shaders, and 65+ procedural effects — all running in your browser with zero dependencies.
 
-**[Live Showcase](https://web3dev1337.github.io/shaderbrew/showcase.html)** | **[Open Editor](https://web3dev1337.github.io/shaderbrew/editor.html)**
+**[Live Showcase](https://web3dev1337.github.io/shaderbrew/showcase.html)** | **[Open Editor](https://web3dev1337.github.io/shaderbrew/editor.html)** | **[Material Forge](https://web3dev1337.github.io/shaderbrew/demos.html)**
+
+<p align="center">
+<img src="docs/media/material-forge-3d.png" width="800" alt="Procedural Material Forge — 8 animated 3D materials with PBR lighting">
+</p>
 
 ---
 
