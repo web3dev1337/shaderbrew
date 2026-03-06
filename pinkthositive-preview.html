@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pinkthositive Shader Preview</title>
+    <style>
+      :root {
+        --bg-0: #090e14;
+        --bg-1: #121b25;
+        --panel: rgba(8, 12, 18, 0.72);
+        --line: rgba(143, 171, 201, 0.3);
+        --text: #e9f0f6;
+        --muted: #9aabba;
+        --moon: #cfd8e8;
+        --squid: #ea4da9;
+        --pimple: #ff8f8f;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--text);
+        font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+        background:
+          radial-gradient(circle at 18% 20%, rgba(154, 202, 255, 0.12), transparent 45%),
+          radial-gradient(circle at 86% 14%, rgba(255, 104, 173, 0.14), transparent 40%),
+          linear-gradient(165deg, var(--bg-1), var(--bg-0));
+      }
+
+      .shell {
+        width: min(1540px, 95vw);
+        margin: 24px auto 36px;
+      }
+
+      .hero {
+        border: 1px solid var(--line);
+        background: var(--panel);
+        backdrop-filter: blur(6px);
+        border-radius: 14px;
+        padding: 18px 20px;
+      }
+
+      .hero h1 {
+        margin: 0;
+        font-size: clamp(1.2rem, 2.5vw, 1.9rem);
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .hero p {
+        margin: 8px 0 0;
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+
+      .grid {
+        margin-top: 16px;
+        display: grid;
+        gap: 14px;
+        grid-template-columns: repeat(3, minmax(260px, 1fr));
+      }
+
+      .card {
+        border: 1px solid var(--line);
+        background: var(--panel);
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.32);
+      }
+
+      .head {
+        padding: 10px 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .name {
+        font-size: 0.94rem;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        margin: 0;
+      }
+
+      .badge {
+        border: 1px solid currentColor;
+        border-radius: 999px;
+        font-size: 0.72rem;
+        padding: 2px 8px;
+        color: var(--muted);
+      }
+
+      .badge.moon {
+        color: var(--moon);
+      }
+
+      .badge.squid {
+        color: var(--squid);
+      }
+
+      .badge.pimple {
+        color: var(--pimple);
+      }
+
+      .viewport {
+        position: relative;
+        aspect-ratio: 1;
+        border-top: 1px solid rgba(143, 171, 201, 0.25);
+      }
+
+      canvas.preview {
+        width: 100%;
+        height: 100%;
+        display: block;
+        background: #07090d;
+      }
+
+      .status {
+        position: absolute;
+        left: 10px;
+        bottom: 10px;
+        background: rgba(0, 0, 0, 0.62);
+        border: 1px solid rgba(199, 221, 242, 0.22);
+        color: #cae0f2;
+        border-radius: 999px;
+        padding: 3px 9px;
+        font-size: 0.75rem;
+      }
+
+      .status.live {
+        color: #9ef0ca;
+      }
+
+      .links {
+        display: flex;
+        gap: 10px;
+        padding: 10px 12px 12px;
+      }
+
+      .links a {
+        text-decoration: none;
+        color: #b7d4ee;
+        border: 1px solid rgba(120, 161, 201, 0.45);
+        border-radius: 999px;
+        padding: 4px 9px;
+        font-size: 0.78rem;
+      }
+
+      .links a:hover {
+        background: rgba(120, 161, 201, 0.12);
+      }
+
+      .sources {
+        position: fixed;
+        left: -99999px;
+        top: -99999px;
+        width: 1px;
+        height: 1px;
+        pointer-events: none;
+        opacity: 0;
+      }
+
+      .sources iframe {
+        width: 1400px;
+        height: 900px;
+        border: 0;
+        display: block;
+      }
+
+      @media (max-width: 1080px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <section class="hero">
+        <h1>Pinkthositive Shader Finals</h1>
+        <p>Live rendered previews of Moon Surface, Squid Tentacles, and Pimple Surface on one page.</p>
+      </section>
+
+      <section class="grid" id="grid"></section>
+    </div>
+
+    <div class="sources" id="sources" aria-hidden="true"></div>
+
+    <script>
+      const PRESETS = [
+        {
+          id: "moon-surface",
+          name: "Moon Surface",
+          category: "cosmic",
+          accent: "moon"
+        },
+        {
+          id: "squid-tentacles",
+          name: "Squid Tentacles",
+          category: "bio",
+          accent: "squid"
+        },
+        {
+          id: "pimple-surface",
+          name: "Pimple Surface",
+          category: "bio",
+          accent: "pimple"
+        }
+      ];
+
+      const grid = document.getElementById("grid");
+      const sources = document.getElementById("sources");
+      const states = [];
+
+      const createCard = preset => {
+        const card = document.createElement("article");
+        card.className = "card";
+
+        const head = document.createElement("div");
+        head.className = "head";
+
+        const name = document.createElement("h2");
+        name.className = "name";
+        name.textContent = preset.name;
+
+        const badge = document.createElement("span");
+        badge.className = `badge ${preset.accent}`;
+        badge.textContent = preset.category;
+
+        head.append(name, badge);
+
+        const viewport = document.createElement("div");
+        viewport.className = "viewport";
+
+        const canvas = document.createElement("canvas");
+        canvas.className = "preview";
+        canvas.width = 512;
+        canvas.height = 512;
+
+        const status = document.createElement("span");
+        status.className = "status";
+        status.textContent = "loading renderer";
+
+        viewport.append(canvas, status);
+
+        const links = document.createElement("div");
+        links.className = "links";
+
+        const open = document.createElement("a");
+        open.href = `editor.html?project=${preset.id}`;
+        open.textContent = "open editor";
+
+        const reload = document.createElement("a");
+        reload.href = "#";
+        reload.textContent = "reload feed";
+
+        links.append(open, reload);
+        card.append(head, viewport, links);
+        grid.appendChild(card);
+
+        const iframe = document.createElement("iframe");
+        iframe.src = `editor.html?project=${preset.id}`;
+        iframe.title = `${preset.name} source`;
+        sources.appendChild(iframe);
+
+        const state = {
+          preset,
+          iframe,
+          canvas,
+          ctx: canvas.getContext("2d", { alpha: false }),
+          status,
+          sourceCanvas: null,
+          linked: false
+        };
+
+        reload.addEventListener("click", event => {
+          event.preventDefault();
+          state.sourceCanvas = null;
+          state.linked = false;
+          state.status.classList.remove("live");
+          state.status.textContent = "reloading renderer";
+          state.iframe.src = state.iframe.src;
+        });
+
+        return state;
+      };
+
+      const findRenderCanvas = iframe => {
+        const doc = iframe.contentDocument;
+        if (!doc) return null;
+        const candidates = [...doc.querySelectorAll("canvas")]
+          .filter(c => c.width >= 256 && c.height >= 256)
+          .sort((a, b) => (b.width * b.height) - (a.width * a.height));
+        return candidates[0] || null;
+      };
+
+      const attachSource = state => {
+        if (state.sourceCanvas) return true;
+        try {
+          const source = findRenderCanvas(state.iframe);
+          if (!source) return false;
+          state.sourceCanvas = source;
+          if (!state.linked) {
+            state.status.classList.add("live");
+            state.status.textContent = "live";
+            state.linked = true;
+          }
+          return true;
+        } catch (err) {
+          state.status.textContent = "renderer blocked";
+          return false;
+        }
+      };
+
+      const draw = state => {
+        if (!state.ctx || !state.sourceCanvas) return;
+        try {
+          state.ctx.drawImage(state.sourceCanvas, 0, 0, state.canvas.width, state.canvas.height);
+        } catch (_err) {
+          state.sourceCanvas = null;
+          state.status.classList.remove("live");
+          state.status.textContent = "retrying feed";
+        }
+      };
+
+      PRESETS.forEach(preset => {
+        states.push(createCard(preset));
+      });
+
+      const tick = () => {
+        for (const state of states) {
+          if (!state.sourceCanvas) {
+            attachSource(state);
+          }
+          draw(state);
+        }
+        window.requestAnimationFrame(tick);
+      };
+
+      window.requestAnimationFrame(tick);
+    </script>
+  </body>
+</html>

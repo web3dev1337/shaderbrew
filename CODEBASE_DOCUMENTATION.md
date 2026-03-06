@@ -8,6 +8,7 @@ WebGL procedural texture generator built on mebiusbox's MIT-licensed pixy.js sha
 ENTRY POINTS:
   editor.html          Main editor (loads src/app.js)
   index.html           Redirect to showcase.html
+  pinkthositive-preview.html One-page live preview for Moon Surface / Squid Tentacles / Pimple Surface project presets
   gallery.html         Live animated gallery of 70+ effects
   showcase.html        Feature showcase (pipeline + custom GLSL previews)
   demos.html           Interactive material demos
