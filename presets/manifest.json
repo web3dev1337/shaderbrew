@@ -470,5 +470,33 @@
       "organic",
       "pinkthositive"
     ]
+  },
+  {
+    "id": "moon-surface-v2",
+    "name": "Moon Surface V2",
+    "file": "presets/projects/moon-surface-v2.json",
+    "kind": "project",
+    "category": "cosmic",
+    "description": "Sharper lunar terrain study with crater basin rings, fine impact pitting, and restrained cold rim highlights.",
+    "tags": [
+      "cosmic",
+      "terrain",
+      "pinkthositive",
+      "v2"
+    ]
+  },
+  {
+    "id": "squid-tentacles-v2",
+    "name": "Squid Tentacles V2",
+    "file": "presets/projects/squid-tentacles-v2.json",
+    "kind": "project",
+    "category": "bio",
+    "description": "Shape-first squid tentacles with broad organic bodies, suction cup read, and cyan wet bioluminescent accents.",
+    "tags": [
+      "bio",
+      "creature",
+      "pinkthositive",
+      "v2"
+    ]
   }
 ]

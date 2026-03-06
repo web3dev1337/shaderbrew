@@ -1,0 +1,221 @@
+{
+  "version": 1,
+  "resolution": 512,
+  "layers": [
+    {
+      "name": "Lunar Highlands",
+      "effectController": {
+        "type": "CoherentNoise",
+        "animate": true,
+        "time": 14.2,
+        "resolution": "512",
+        "polarConversion": false,
+        "tiling": true,
+        "normalMap": false,
+        "cHeightScale": 2,
+        "cRadialMask": 1,
+        "cNoiseOctave": 6,
+        "cNoiseFrequency": 13,
+        "cNoiseAmplitude": 1.1,
+        "cNoiseLacunarity": 3,
+        "cNoisePersistence": 0.38,
+        "cGradientNoise": 0.18,
+        "cValueNoise": 0.12,
+        "cVoronoiNoise": 0.7,
+        "cVoronoiCell": 0.3,
+        "cSimplexNoise": 0.28,
+        "cRepeat": 1,
+        "cTurbulence": 0.36,
+        "cRidge": 0.58,
+        "cRidgeOffset": 0.24,
+        "cScaleShift": 0.16,
+        "cPowerExponent": 2.4,
+        "cBias": 0.02,
+        "cGain": -0.12,
+        "cThreshold": 0.08,
+        "cInvert": 0,
+        "cNoiseSphereEnable": false,
+        "cNoiseGraphEnable": false,
+        "cColorBalanceShadowsR": -0.42,
+        "cColorBalanceShadowsG": -0.4,
+        "cColorBalanceShadowsB": -0.35,
+        "cColorBalanceMidtonesR": 0.02,
+        "cColorBalanceMidtonesG": 0.04,
+        "cColorBalanceMidtonesB": 0.08,
+        "cColorBalanceHighlightsR": 0.38,
+        "cColorBalanceHighlightsG": 0.45,
+        "cColorBalanceHighlightsB": 0.58,
+        "cToonEnable": false,
+        "cToonDark": 0.8,
+        "cToonLight": 0.95
+      },
+      "opacity": 1,
+      "blendMode": "Normal",
+      "visible": true
+    },
+    {
+      "name": "Primary Crater Basins",
+      "effectController": {
+        "type": "Bubbles",
+        "animate": true,
+        "time": 2.7,
+        "resolution": "512",
+        "polarConversion": false,
+        "tiling": true,
+        "normalMap": false,
+        "cRadius": 0.34,
+        "cWidth": 0.42,
+        "cThickness": 0.92,
+        "cColor": 0.28,
+        "cBubblesVariation": 2,
+        "cColorBalanceShadowsR": -0.75,
+        "cColorBalanceShadowsG": -0.72,
+        "cColorBalanceShadowsB": -0.6,
+        "cColorBalanceMidtonesR": -0.2,
+        "cColorBalanceMidtonesG": -0.18,
+        "cColorBalanceMidtonesB": -0.08,
+        "cColorBalanceHighlightsR": 0.25,
+        "cColorBalanceHighlightsG": 0.3,
+        "cColorBalanceHighlightsB": 0.38
+      },
+      "opacity": 0.36,
+      "blendMode": "Multiply",
+      "visible": true
+    },
+    {
+      "name": "Sunlit Crater Rims",
+      "effectController": {
+        "type": "Bubbles",
+        "animate": true,
+        "time": 2.1,
+        "resolution": "512",
+        "polarConversion": false,
+        "tiling": true,
+        "normalMap": false,
+        "cRadius": 0.34,
+        "cWidth": 0.14,
+        "cThickness": 0.95,
+        "cColor": 0.94,
+        "cBubblesVariation": 2,
+        "cColorBalanceShadowsR": -0.25,
+        "cColorBalanceShadowsG": -0.22,
+        "cColorBalanceShadowsB": -0.15,
+        "cColorBalanceMidtonesR": 0.25,
+        "cColorBalanceMidtonesG": 0.28,
+        "cColorBalanceMidtonesB": 0.34,
+        "cColorBalanceHighlightsR": 0.85,
+        "cColorBalanceHighlightsG": 0.9,
+        "cColorBalanceHighlightsB": 1
+      },
+      "opacity": 0.34,
+      "blendMode": "SoftLight",
+      "visible": true
+    },
+    {
+      "name": "Micro Impact Pits",
+      "effectController": {
+        "type": "CellNoise",
+        "animate": true,
+        "time": 7.5,
+        "resolution": "512",
+        "polarConversion": false,
+        "tiling": true,
+        "normalMap": false,
+        "cNoiseFrequency": 18.5,
+        "cNoiseSphereEnable": false,
+        "cNoiseGraphEnable": false,
+        "cColorBalanceShadowsR": -1,
+        "cColorBalanceShadowsG": -0.98,
+        "cColorBalanceShadowsB": -0.78,
+        "cColorBalanceMidtonesR": -0.45,
+        "cColorBalanceMidtonesG": -0.42,
+        "cColorBalanceMidtonesB": -0.24,
+        "cColorBalanceHighlightsR": 0.05,
+        "cColorBalanceHighlightsG": 0.08,
+        "cColorBalanceHighlightsB": 0.16
+      },
+      "opacity": 0.18,
+      "blendMode": "Multiply",
+      "visible": true
+    },
+    {
+      "name": "Regolith Grain",
+      "effectController": {
+        "type": "Speckle",
+        "animate": true,
+        "time": 3.4,
+        "resolution": "512",
+        "polarConversion": false,
+        "tiling": true,
+        "normalMap": false,
+        "cRadius": 0.42,
+        "cScale": 0.18,
+        "cDensity": 0.95,
+        "cColorBalanceShadowsR": -0.16,
+        "cColorBalanceShadowsG": -0.14,
+        "cColorBalanceShadowsB": -0.1,
+        "cColorBalanceMidtonesR": 0.06,
+        "cColorBalanceMidtonesG": 0.07,
+        "cColorBalanceMidtonesB": 0.1,
+        "cColorBalanceHighlightsR": 0.3,
+        "cColorBalanceHighlightsG": 0.34,
+        "cColorBalanceHighlightsB": 0.42
+      },
+      "opacity": 0.16,
+      "blendMode": "Overlay",
+      "visible": true
+    },
+    {
+      "name": "Cold Ridge Glint",
+      "effectController": {
+        "type": "WaterTurbulence",
+        "animate": true,
+        "time": 0.9,
+        "resolution": "512",
+        "polarConversion": false,
+        "tiling": true,
+        "normalMap": false,
+        "cScale": 0.32,
+        "cIntensity": 0.22,
+        "cColorBalanceShadowsR": -0.6,
+        "cColorBalanceShadowsG": -0.45,
+        "cColorBalanceShadowsB": -0.1,
+        "cColorBalanceMidtonesR": -0.15,
+        "cColorBalanceMidtonesG": 0.12,
+        "cColorBalanceMidtonesB": 0.42,
+        "cColorBalanceHighlightsR": 0.32,
+        "cColorBalanceHighlightsG": 0.7,
+        "cColorBalanceHighlightsB": 1
+      },
+      "opacity": 0.12,
+      "blendMode": "SoftLight",
+      "visible": true
+    }
+  ],
+  "gradient": {
+    "enabled": true,
+    "intensity": 0.68,
+    "stops": [
+      {
+        "position": 0,
+        "color": "#090a0d"
+      },
+      {
+        "position": 0.32,
+        "color": "#383c43"
+      },
+      {
+        "position": 0.62,
+        "color": "#7a8088"
+      },
+      {
+        "position": 0.86,
+        "color": "#bec6d0"
+      },
+      {
+        "position": 1,
+        "color": "#edf3ff"
+      }
+    ]
+  }
+}

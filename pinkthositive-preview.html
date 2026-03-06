@@ -14,7 +14,6 @@
         --muted: #9aabba;
         --moon: #cfd8e8;
         --squid: #ea4da9;
-        --pimple: #ff8f8f;
       }
 
       * {
@@ -62,7 +61,7 @@
         margin-top: 16px;
         display: grid;
         gap: 14px;
-        grid-template-columns: repeat(3, minmax(260px, 1fr));
+        grid-template-columns: repeat(2, minmax(280px, 1fr));
       }
 
       .card {
@@ -101,10 +100,6 @@
 
       .badge.squid {
         color: var(--squid);
-      }
-
-      .badge.pimple {
-        color: var(--pimple);
       }
 
       .viewport {
@@ -183,7 +178,7 @@
     <div class="shell">
       <section class="hero">
         <h1>Pinkthositive Shader Finals</h1>
-        <p>Live rendered previews of Moon Surface, Squid Tentacles, and Pimple Surface on one page.</p>
+        <p>Live rendered previews of the corrected Moon Surface V2 and Squid Tentacles V2 on one page.</p>
       </section>
 
       <section class="grid" id="grid"></section>
@@ -194,22 +189,16 @@
     <script>
       const PRESETS = [
         {
-          id: "moon-surface",
-          name: "Moon Surface",
+          id: "moon-surface-v2",
+          name: "Moon Surface V2",
           category: "cosmic",
           accent: "moon"
         },
         {
-          id: "squid-tentacles",
-          name: "Squid Tentacles",
+          id: "squid-tentacles-v2",
+          name: "Squid Tentacles V2",
           category: "bio",
           accent: "squid"
-        },
-        {
-          id: "pimple-surface",
-          name: "Pimple Surface",
-          category: "bio",
-          accent: "pimple"
         }
       ];
 
