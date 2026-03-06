@@ -9,6 +9,7 @@ ENTRY POINTS:
   editor.html          Main editor (loads src/app.js)
   index.html           Redirect to showcase.html
   pinkthositive-preview.html One-page live preview for Moon Surface Hero and Squid Tentacles Hero custom GLSL renders
+  pinkthositive-materials.html One-page 3D material study for seam-safe moon sphere variations and tentacle mesh skin
   gallery.html         Live animated gallery of 70+ effects
   showcase.html        Feature showcase (pipeline + custom GLSL previews)
   demos.html           Interactive material demos
@@ -69,6 +70,8 @@ PRESET & LOADER:
 
 LIBRARY (DO NOT MODIFY):
   pixy.module.min.js   439KB MIT-licensed shader library by mebiusbox — 70+ effects, noise functions, Composer
+  shader-defs.js       Shared full-screen custom GLSL hero shader library
+  pinkthositive-material-shaders.js Dedicated 3D material shaders for moon sphere and tentacle mesh studies
 
 DATA:
   presets/              38 JSON preset files (13 custom + 25 built-in)
