@@ -1,0 +1,157 @@
+{
+  "version": 1,
+  "resolution": 512,
+  "layers": [
+    {
+      "name": "Tentacle Flesh",
+      "effectController": {
+        "type": "Trabeculum",
+        "animate": true,
+        "time": 2.8,
+        "resolution": "512",
+        "polarConversion": false,
+        "tiling": true,
+        "normalMap": false,
+        "cHeightScale": 2,
+        "cRadialMask": 1,
+        "cDensity": 0.92,
+        "cScale": 0.42,
+        "cIntensity": 0.84,
+        "cTrabeculumVariation": 2,
+        "cCameraTilt": 0.62,
+        "cCameraPan": 0.46,
+        "cColor": 0.78,
+        "cColorBalanceShadowsR": -0.88,
+        "cColorBalanceShadowsG": -0.42,
+        "cColorBalanceShadowsB": 0.35,
+        "cColorBalanceMidtonesR": 0.68,
+        "cColorBalanceMidtonesG": -0.15,
+        "cColorBalanceMidtonesB": 0.72,
+        "cColorBalanceHighlightsR": 1,
+        "cColorBalanceHighlightsG": 0.32,
+        "cColorBalanceHighlightsB": 0.9,
+        "cToonEnable": false,
+        "cToonDark": 0.8,
+        "cToonLight": 0.95
+      },
+      "opacity": 1,
+      "blendMode": "Normal",
+      "visible": true
+    },
+    {
+      "name": "Suction Cup Field",
+      "effectController": {
+        "type": "Bubbles",
+        "animate": true,
+        "time": 5.1,
+        "resolution": "512",
+        "polarConversion": false,
+        "tiling": true,
+        "normalMap": false,
+        "cRadius": 0.24,
+        "cWidth": 0.32,
+        "cThickness": 0.88,
+        "cColor": 0.64,
+        "cBubblesVariation": 2,
+        "cColorBalanceShadowsR": -0.55,
+        "cColorBalanceShadowsG": -0.5,
+        "cColorBalanceShadowsB": 0.25,
+        "cColorBalanceMidtonesR": 0.75,
+        "cColorBalanceMidtonesG": -0.1,
+        "cColorBalanceMidtonesB": 0.55,
+        "cColorBalanceHighlightsR": 1,
+        "cColorBalanceHighlightsG": 0.55,
+        "cColorBalanceHighlightsB": 0.88
+      },
+      "opacity": 0.58,
+      "blendMode": "Overlay",
+      "visible": true
+    },
+    {
+      "name": "Bioluminescent Veins",
+      "effectController": {
+        "type": "Energy",
+        "animate": true,
+        "time": 7.4,
+        "resolution": "512",
+        "polarConversion": false,
+        "tiling": false,
+        "normalMap": false,
+        "cPower": 0.42,
+        "cDensity": 0.72,
+        "cThickness": 0.62,
+        "cScale": 0.36,
+        "cFrequency": 0.95,
+        "cColor": 0.94,
+        "cColorBalanceShadowsR": -1,
+        "cColorBalanceShadowsG": -0.15,
+        "cColorBalanceShadowsB": 0.35,
+        "cColorBalanceMidtonesR": -0.65,
+        "cColorBalanceMidtonesG": 0.75,
+        "cColorBalanceMidtonesB": 1,
+        "cColorBalanceHighlightsR": 0.25,
+        "cColorBalanceHighlightsG": 1,
+        "cColorBalanceHighlightsB": 1
+      },
+      "opacity": 0.34,
+      "blendMode": "Add",
+      "visible": true
+    },
+    {
+      "name": "Wet Iridescent Sheen",
+      "effectController": {
+        "type": "WaterTurbulence",
+        "animate": true,
+        "time": 1.3,
+        "resolution": "512",
+        "polarConversion": false,
+        "tiling": true,
+        "normalMap": false,
+        "cScale": 0.66,
+        "cIntensity": 0.61,
+        "cColorBalanceShadowsR": -1,
+        "cColorBalanceShadowsG": -0.65,
+        "cColorBalanceShadowsB": 0.1,
+        "cColorBalanceMidtonesR": -0.45,
+        "cColorBalanceMidtonesG": 0.35,
+        "cColorBalanceMidtonesB": 0.95,
+        "cColorBalanceHighlightsR": 0.4,
+        "cColorBalanceHighlightsG": 0.95,
+        "cColorBalanceHighlightsB": 1
+      },
+      "opacity": 0.3,
+      "blendMode": "Screen",
+      "visible": true
+    }
+  ],
+  "gradient": {
+    "enabled": true,
+    "intensity": 0.88,
+    "stops": [
+      {
+        "position": 0,
+        "color": "#02050f"
+      },
+      {
+        "position": 0.22,
+        "color": "#1a0c36"
+      },
+      {
+        "position": 0.5,
+        "color": "#4b145f"
+      },
+      {
+        "position": 0.72,
+        "color": "#b32c88"
+      },
+      {
+        "position": 0.9,
+        "color": "#33d6e9"
+      },
+      {
+        "position": 1,
+        "color": "#d9ffff"
+      }
+    ]
+  }
+}

@@ -72,7 +72,7 @@ LIBRARY (DO NOT MODIFY):
 DATA:
   presets/              38 JSON preset files (13 custom + 25 built-in)
   presets/manifest.json Manifest for the preset browser (labels, categories, file paths)
-  presets/projects/     Example multi-layer project JSONs
+  presets/projects/     7 multi-layer project JSON presets (4 examples + 3 Pinkthositive additions)
   sprites/              160 pre-rendered sprite sheet PNGs (6×6 grid, 192px frames)
   game-sprites/          Split-frame outputs for game engine imports
   images/grunge.png     Texture used by shader effects
@@ -205,7 +205,7 @@ Exportable individually or as ZIP bundle.
 | 6 | DONE | Undo/redo (JSON snapshots, Ctrl+Z/Y) |
 | 7 | DONE | Enhanced export (PNG/JPEG/ZIP, resolution selector) |
 | 8 | FUTURE | Node graph editor |
-| — | DONE | 38 gallery presets, 13 custom presets |
+| — | DONE | 38 single-effect presets + 7 project presets (including 3 Pinkthositive additions), 13 custom presets |
 | — | DONE | 100 procedural sprite sheets (pixy effects) |
 | — | DONE | 19 custom GLSL shaders (raymarched, fractals, physics) |
 | — | DONE | Sprite sheet gallery with category filters |
@@ -230,7 +230,7 @@ xvfb-run --auto-servernum --server-args="-screen 0 1280x1024x24" node save-custo
 | pixy.module.min.js | 1 | 439KB |
 | src/ modules | 22 | ~3,800 lines |
 | sprites/ | 118 | ~133MB |
-| presets/ | 38 | ~200KB |
+| presets/ | 46 | ~208KB |
 | gen-custom.html (GLSL) | 1 | ~1,350 lines |
 
 ## Dependencies

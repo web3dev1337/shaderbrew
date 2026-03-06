@@ -1,0 +1,147 @@
+{
+  "version": 1,
+  "resolution": 512,
+  "layers": [
+    {
+      "name": "Dermis Base",
+      "effectController": {
+        "type": "FbmNoise2",
+        "animate": true,
+        "time": 6.9,
+        "resolution": "512",
+        "polarConversion": false,
+        "tiling": true,
+        "normalMap": false,
+        "cNoiseOctave": 6,
+        "cNoiseFrequency": 3.4,
+        "cNoiseAmplitude": 0.88,
+        "cNoiseLacunarity": 2.7,
+        "cNoisePersistence": 0.5,
+        "cScale": 0.62,
+        "cNoiseSphereEnable": false,
+        "cNoiseGraphEnable": false,
+        "cColorBalanceShadowsR": 0.12,
+        "cColorBalanceShadowsG": -0.78,
+        "cColorBalanceShadowsB": -0.62,
+        "cColorBalanceMidtonesR": 0.92,
+        "cColorBalanceMidtonesG": 0.18,
+        "cColorBalanceMidtonesB": 0.12,
+        "cColorBalanceHighlightsR": 1,
+        "cColorBalanceHighlightsG": 0.62,
+        "cColorBalanceHighlightsB": 0.45
+      },
+      "opacity": 1,
+      "blendMode": "Normal",
+      "visible": true
+    },
+    {
+      "name": "Raised Pimples",
+      "effectController": {
+        "type": "Bubbles",
+        "animate": true,
+        "time": 3.7,
+        "resolution": "512",
+        "polarConversion": false,
+        "tiling": true,
+        "normalMap": false,
+        "cRadius": 0.2,
+        "cWidth": 0.46,
+        "cThickness": 0.92,
+        "cColor": 0.42,
+        "cBubblesVariation": 1,
+        "cColorBalanceShadowsR": 0.1,
+        "cColorBalanceShadowsG": -0.95,
+        "cColorBalanceShadowsB": -0.82,
+        "cColorBalanceMidtonesR": 0.9,
+        "cColorBalanceMidtonesG": -0.15,
+        "cColorBalanceMidtonesB": -0.22,
+        "cColorBalanceHighlightsR": 1,
+        "cColorBalanceHighlightsG": 0.55,
+        "cColorBalanceHighlightsB": 0.4
+      },
+      "opacity": 0.62,
+      "blendMode": "Overlay",
+      "visible": true
+    },
+    {
+      "name": "Inflamed Tissue",
+      "effectController": {
+        "type": "CellNoise",
+        "animate": true,
+        "time": 4.4,
+        "resolution": "512",
+        "polarConversion": false,
+        "tiling": true,
+        "normalMap": false,
+        "cNoiseFrequency": 7.6,
+        "cNoiseSphereEnable": false,
+        "cNoiseGraphEnable": false,
+        "cColorBalanceShadowsR": -0.25,
+        "cColorBalanceShadowsG": -1,
+        "cColorBalanceShadowsB": -1,
+        "cColorBalanceMidtonesR": 0.85,
+        "cColorBalanceMidtonesG": -0.65,
+        "cColorBalanceMidtonesB": -0.82,
+        "cColorBalanceHighlightsR": 1,
+        "cColorBalanceHighlightsG": 0.2,
+        "cColorBalanceHighlightsB": 0.05
+      },
+      "opacity": 0.44,
+      "blendMode": "Multiply",
+      "visible": true
+    },
+    {
+      "name": "Oily Inflammation Sheen",
+      "effectController": {
+        "type": "Caustics",
+        "animate": true,
+        "time": 0.8,
+        "resolution": "512",
+        "polarConversion": false,
+        "tiling": true,
+        "normalMap": false,
+        "cScale": 2.8,
+        "cSpeed": 0.18,
+        "cColor": 0.5,
+        "cColorBalanceShadowsR": -0.5,
+        "cColorBalanceShadowsG": -0.95,
+        "cColorBalanceShadowsB": -0.65,
+        "cColorBalanceMidtonesR": 0.6,
+        "cColorBalanceMidtonesG": 0.05,
+        "cColorBalanceMidtonesB": 0,
+        "cColorBalanceHighlightsR": 1,
+        "cColorBalanceHighlightsG": 0.78,
+        "cColorBalanceHighlightsB": 0.62
+      },
+      "opacity": 0.27,
+      "blendMode": "Screen",
+      "visible": true
+    }
+  ],
+  "gradient": {
+    "enabled": true,
+    "intensity": 0.8,
+    "stops": [
+      {
+        "position": 0,
+        "color": "#2b0f11"
+      },
+      {
+        "position": 0.28,
+        "color": "#6f252e"
+      },
+      {
+        "position": 0.55,
+        "color": "#b64858"
+      },
+      {
+        "position": 0.8,
+        "color": "#de7d83"
+      },
+      {
+        "position": 1,
+        "color": "#ffd1c8"
+      }
+    ]
+  }
+}

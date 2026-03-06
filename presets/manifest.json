@@ -431,5 +431,44 @@
       "energy",
       "showcase"
     ]
+  },
+  {
+    "id": "moon-surface",
+    "name": "Moon Surface",
+    "file": "presets/projects/moon-surface.json",
+    "kind": "project",
+    "category": "cosmic",
+    "description": "Cratered lunar regolith with rocky shadow pockets, dust speckle breakup, and subtle blue-white rim glow.",
+    "tags": [
+      "cosmic",
+      "terrain",
+      "pinkthositive"
+    ]
+  },
+  {
+    "id": "squid-tentacles",
+    "name": "Squid Tentacles",
+    "file": "presets/projects/squid-tentacles.json",
+    "kind": "project",
+    "category": "bio",
+    "description": "Organic tentacle flesh with suction cup structures, magenta-violet depth, and cyan bioluminescent wet sheen.",
+    "tags": [
+      "bio",
+      "creature",
+      "pinkthositive"
+    ]
+  },
+  {
+    "id": "pimple-surface",
+    "name": "Pimple Surface",
+    "file": "presets/projects/pimple-surface.json",
+    "kind": "project",
+    "category": "bio",
+    "description": "Bumpy inflamed skin texture with raised pustule forms, fleshy pink-red gradients, and glossy irritation highlights.",
+    "tags": [
+      "bio",
+      "organic",
+      "pinkthositive"
+    ]
   }
 ]
