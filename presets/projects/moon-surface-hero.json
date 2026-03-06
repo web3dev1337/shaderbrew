@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "resolution": 1024,
+  "layers": [
+    {
+      "name": "Moon Surface Hero",
+      "effectController": {
+        "type": "GLSL:Moon Surface Hero",
+        "animate": true,
+        "time": 0,
+        "resolution": "1024",
+        "polarConversion": false,
+        "tiling": false,
+        "normalMap": false
+      },
+      "opacity": 1,
+      "blendMode": "Normal",
+      "visible": true
+    }
+  ],
+  "gradient": {
+    "enabled": false,
+    "intensity": 1,
+    "stops": [
+      {
+        "position": 0,
+        "color": "#000000"
+      },
+      {
+        "position": 1,
+        "color": "#ffffff"
+      }
+    ]
+  }
+}

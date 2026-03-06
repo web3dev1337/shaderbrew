@@ -3,17 +3,18 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Pinkthositive Shader Preview</title>
+    <title>Pinkthositive Hero Renders</title>
     <style>
       :root {
-        --bg-0: #090e14;
-        --bg-1: #121b25;
-        --panel: rgba(8, 12, 18, 0.72);
-        --line: rgba(143, 171, 201, 0.3);
-        --text: #e9f0f6;
-        --muted: #9aabba;
-        --moon: #cfd8e8;
-        --squid: #ea4da9;
+        --bg-0: #04070c;
+        --bg-1: #0c1420;
+        --panel: rgba(8, 12, 18, 0.76);
+        --line: rgba(140, 169, 198, 0.25);
+        --text: #edf3f8;
+        --muted: #99aab9;
+        --moon: #d7e5ff;
+        --squid: #ff7ab8;
+        --hero: #9fe7ff;
       }
 
       * {
@@ -24,74 +25,90 @@
         margin: 0;
         min-height: 100vh;
         color: var(--text);
-        font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+        font-family: "Trebuchet MS", "Lucida Grande", sans-serif;
         background:
-          radial-gradient(circle at 18% 20%, rgba(154, 202, 255, 0.12), transparent 45%),
-          radial-gradient(circle at 86% 14%, rgba(255, 104, 173, 0.14), transparent 40%),
-          linear-gradient(165deg, var(--bg-1), var(--bg-0));
+          radial-gradient(circle at 16% 14%, rgba(196, 224, 255, 0.16), transparent 28%),
+          radial-gradient(circle at 84% 18%, rgba(255, 119, 184, 0.14), transparent 26%),
+          radial-gradient(circle at 50% 140%, rgba(23, 78, 107, 0.35), transparent 36%),
+          linear-gradient(165deg, var(--bg-1), var(--bg-0) 58%);
       }
 
       .shell {
-        width: min(1540px, 95vw);
-        margin: 24px auto 36px;
+        width: min(1480px, 94vw);
+        margin: 24px auto 40px;
       }
 
       .hero {
         border: 1px solid var(--line);
         background: var(--panel);
-        backdrop-filter: blur(6px);
-        border-radius: 14px;
-        padding: 18px 20px;
+        border-radius: 18px;
+        padding: 20px 22px;
+        backdrop-filter: blur(8px);
+        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.34);
+      }
+
+      .kicker {
+        margin: 0 0 8px;
+        font: 700 0.75rem/1 "Consolas", "Menlo", monospace;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--hero);
       }
 
       .hero h1 {
         margin: 0;
-        font-size: clamp(1.2rem, 2.5vw, 1.9rem);
+        font: 700 clamp(1.4rem, 3vw, 2.4rem) / 1.04 "Georgia", "Times New Roman", serif;
         letter-spacing: 0.04em;
         text-transform: uppercase;
       }
 
       .hero p {
-        margin: 8px 0 0;
+        margin: 10px 0 0;
+        max-width: 860px;
         color: var(--muted);
-        font-size: 0.95rem;
+        font-size: 0.98rem;
       }
 
       .grid {
-        margin-top: 16px;
+        margin-top: 18px;
         display: grid;
-        gap: 14px;
+        gap: 16px;
         grid-template-columns: repeat(2, minmax(280px, 1fr));
       }
 
       .card {
         border: 1px solid var(--line);
-        background: var(--panel);
-        border-radius: 14px;
+        background:
+          linear-gradient(180deg, rgba(14, 20, 28, 0.95), rgba(6, 9, 14, 0.94)),
+          var(--panel);
+        border-radius: 18px;
         overflow: hidden;
-        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.32);
+        box-shadow: 0 20px 56px rgba(0, 0, 0, 0.34);
       }
 
       .head {
-        padding: 10px 12px;
         display: flex;
         align-items: center;
         justify-content: space-between;
+        gap: 14px;
+        padding: 12px 14px;
       }
 
-      .name {
-        font-size: 0.94rem;
-        letter-spacing: 0.03em;
-        text-transform: uppercase;
+      .head h2 {
         margin: 0;
+        font: 700 1rem/1.1 "Georgia", "Times New Roman", serif;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
       }
 
       .badge {
-        border: 1px solid currentColor;
+        flex: 0 0 auto;
         border-radius: 999px;
-        font-size: 0.72rem;
-        padding: 2px 8px;
-        color: var(--muted);
+        border: 1px solid currentColor;
+        padding: 3px 9px;
+        font: 700 0.7rem/1 "Consolas", "Menlo", monospace;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
       }
 
       .badge.moon {
@@ -105,66 +122,66 @@
       .viewport {
         position: relative;
         aspect-ratio: 1;
-        border-top: 1px solid rgba(143, 171, 201, 0.25);
+        border-top: 1px solid rgba(140, 169, 198, 0.18);
+        border-bottom: 1px solid rgba(140, 169, 198, 0.18);
+        background: #020406;
       }
 
-      canvas.preview {
+      .viewport canvas {
         width: 100%;
         height: 100%;
         display: block;
-        background: #07090d;
       }
 
       .status {
         position: absolute;
-        left: 10px;
-        bottom: 10px;
-        background: rgba(0, 0, 0, 0.62);
-        border: 1px solid rgba(199, 221, 242, 0.22);
-        color: #cae0f2;
+        left: 12px;
+        bottom: 12px;
         border-radius: 999px;
-        padding: 3px 9px;
-        font-size: 0.75rem;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        background: rgba(0, 0, 0, 0.52);
+        padding: 4px 10px;
+        color: #cce5f6;
+        font: 700 0.72rem/1 "Consolas", "Menlo", monospace;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
       }
 
-      .status.live {
-        color: #9ef0ca;
+      .body {
+        padding: 12px 14px 14px;
+      }
+
+      .body p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.9rem;
+        min-height: 2.8em;
       }
 
       .links {
         display: flex;
         gap: 10px;
-        padding: 10px 12px 12px;
+        flex-wrap: wrap;
+        margin-top: 12px;
       }
 
       .links a {
-        text-decoration: none;
-        color: #b7d4ee;
-        border: 1px solid rgba(120, 161, 201, 0.45);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 112px;
+        padding: 7px 12px;
         border-radius: 999px;
-        padding: 4px 9px;
-        font-size: 0.78rem;
+        border: 1px solid rgba(130, 172, 208, 0.42);
+        color: #d7e7f5;
+        text-decoration: none;
+        font: 700 0.76rem/1 "Consolas", "Menlo", monospace;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
       }
 
       .links a:hover {
-        background: rgba(120, 161, 201, 0.12);
-      }
-
-      .sources {
-        position: fixed;
-        left: -99999px;
-        top: -99999px;
-        width: 1px;
-        height: 1px;
-        pointer-events: none;
-        opacity: 0;
-      }
-
-      .sources iframe {
-        width: 1400px;
-        height: 900px;
-        border: 0;
-        display: block;
+        background: rgba(130, 172, 208, 0.12);
       }
 
       @media (max-width: 1080px) {
@@ -175,163 +192,135 @@
     </style>
   </head>
   <body>
-    <div class="shell">
+    <main class="shell">
       <section class="hero">
-        <h1>Pinkthositive Shader Finals</h1>
-        <p>Live rendered previews of the corrected Moon Surface V2 and Squid Tentacles V2 on one page.</p>
+        <p class="kicker">Custom GLSL Hero Renders</p>
+        <h1>Pinkthositive Moon and Squid</h1>
+        <p>
+          Two fully custom fragment shaders, rendered directly on this page. The moon is a cratered
+          heightfield hero shot instead of a noise texture. The squid render is shape-first with
+          broad tentacle bodies, suction cup rows, wet specular sheen, and cyan glow accents.
+        </p>
       </section>
 
-      <section class="grid" id="grid"></section>
-    </div>
+      <section class="grid">
+        <article class="card" data-shader="moon_surface_hero" data-speed="1.0">
+          <div class="head">
+            <h2>Moon Surface Hero</h2>
+            <span class="badge moon">Cosmic</span>
+          </div>
+          <div class="viewport">
+            <canvas></canvas>
+            <span class="status">Live GLSL</span>
+          </div>
+          <div class="body">
+            <p>Oblique lunar terrain render with crater basins, micro impact pitting, hard sun shadow, and cold rim glints.</p>
+            <div class="links">
+              <a href="editor.html?project=moon-surface-hero">Open In Editor</a>
+              <a href="editor.html?project=moon-surface">Compare Old Preset</a>
+            </div>
+          </div>
+        </article>
 
-    <div class="sources" id="sources" aria-hidden="true"></div>
+        <article class="card" data-shader="squid_tentacles_hero" data-speed="1.0">
+          <div class="head">
+            <h2>Squid Tentacles Hero</h2>
+            <span class="badge squid">Bio</span>
+          </div>
+          <div class="viewport">
+            <canvas></canvas>
+            <span class="status">Live GLSL</span>
+          </div>
+          <div class="body">
+            <p>Animated squid tentacle silhouettes with suction cups, fleshy magenta interiors, wet highlights, and bioluminescent cyan detail.</p>
+            <div class="links">
+              <a href="editor.html?project=squid-tentacles-hero">Open In Editor</a>
+              <a href="editor.html?project=squid-tentacles">Compare Old Preset</a>
+            </div>
+          </div>
+        </article>
+      </section>
+    </main>
 
-    <script>
-      const PRESETS = [
-        {
-          id: "moon-surface-v2",
-          name: "Moon Surface V2",
-          category: "cosmic",
-          accent: "moon"
-        },
-        {
-          id: "squid-tentacles-v2",
-          name: "Squid Tentacles V2",
-          category: "bio",
-          accent: "squid"
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.174.0/build/three.module.min.js"
         }
-      ];
+      }
+    </script>
+    <script type="module">
+      import * as THREE from "three";
+      import { SHADERS } from "./shader-defs.js";
 
-      const grid = document.getElementById("grid");
-      const sources = document.getElementById("sources");
-      const states = [];
+      const FULLSCREEN_VERT = `
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        gl_Position = vec4(position.xy, 0.0, 1.0);
+      }`;
 
-      const createCard = preset => {
-        const card = document.createElement("article");
-        card.className = "card";
-
-        const head = document.createElement("div");
-        head.className = "head";
-
-        const name = document.createElement("h2");
-        name.className = "name";
-        name.textContent = preset.name;
-
-        const badge = document.createElement("span");
-        badge.className = `badge ${preset.accent}`;
-        badge.textContent = preset.category;
-
-        head.append(name, badge);
-
-        const viewport = document.createElement("div");
-        viewport.className = "viewport";
-
-        const canvas = document.createElement("canvas");
-        canvas.className = "preview";
-        canvas.width = 512;
-        canvas.height = 512;
-
-        const status = document.createElement("span");
-        status.className = "status";
-        status.textContent = "loading renderer";
-
-        viewport.append(canvas, status);
-
-        const links = document.createElement("div");
-        links.className = "links";
-
-        const open = document.createElement("a");
-        open.href = `editor.html?project=${preset.id}`;
-        open.textContent = "open editor";
-
-        const reload = document.createElement("a");
-        reload.href = "#";
-        reload.textContent = "reload feed";
-
-        links.append(open, reload);
-        card.append(head, viewport, links);
-        grid.appendChild(card);
-
-        const iframe = document.createElement("iframe");
-        iframe.src = `editor.html?project=${preset.id}`;
-        iframe.title = `${preset.name} source`;
-        sources.appendChild(iframe);
-
-        const state = {
-          preset,
-          iframe,
-          canvas,
-          ctx: canvas.getContext("2d", { alpha: false }),
-          status,
-          sourceCanvas: null,
-          linked: false
-        };
-
-        reload.addEventListener("click", event => {
-          event.preventDefault();
-          state.sourceCanvas = null;
-          state.linked = false;
-          state.status.classList.remove("live");
-          state.status.textContent = "reloading renderer";
-          state.iframe.src = state.iframe.src;
-        });
-
-        return state;
-      };
-
-      const findRenderCanvas = iframe => {
-        const doc = iframe.contentDocument;
-        if (!doc) return null;
-        const candidates = [...doc.querySelectorAll("canvas")]
-          .filter(c => c.width >= 256 && c.height >= 256)
-          .sort((a, b) => (b.width * b.height) - (a.width * a.height));
-        return candidates[0] || null;
-      };
-
-      const attachSource = state => {
-        if (state.sourceCanvas) return true;
-        try {
-          const source = findRenderCanvas(state.iframe);
-          if (!source) return false;
-          state.sourceCanvas = source;
-          if (!state.linked) {
-            state.status.classList.add("live");
-            state.status.textContent = "live";
-            state.linked = true;
-          }
-          return true;
-        } catch (err) {
-          state.status.textContent = "renderer blocked";
-          return false;
+      class ShaderCard {
+        constructor(el) {
+          this.el = el;
+          this.canvas = el.querySelector("canvas");
+          this.shaderKey = el.dataset.shader;
+          this.speed = Number(el.dataset.speed || "1");
+          this.renderer = new THREE.WebGLRenderer({
+            canvas: this.canvas,
+            antialias: true,
+            preserveDrawingBuffer: true,
+            powerPreference: "high-performance"
+          });
+          this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+          this.scene = new THREE.Scene();
+          this.camera = new THREE.Camera();
+          this.uniforms = {
+            time: { value: 0 },
+            resolution: { value: new THREE.Vector2(1, 1) }
+          };
+          this.material = new THREE.ShaderMaterial({
+            vertexShader: FULLSCREEN_VERT,
+            fragmentShader: SHADERS[this.shaderKey],
+            uniforms: this.uniforms,
+            depthTest: false,
+            depthWrite: false
+          });
+          this.scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), this.material));
+          this.resize();
         }
-      };
 
-      const draw = state => {
-        if (!state.ctx || !state.sourceCanvas) return;
-        try {
-          state.ctx.drawImage(state.sourceCanvas, 0, 0, state.canvas.width, state.canvas.height);
-        } catch (_err) {
-          state.sourceCanvas = null;
-          state.status.classList.remove("live");
-          state.status.textContent = "retrying feed";
+        resize() {
+          const rect = this.canvas.getBoundingClientRect();
+          this.renderer.setSize(rect.width, rect.height, false);
+          const drawSize = new THREE.Vector2();
+          this.renderer.getDrawingBufferSize(drawSize);
+          this.uniforms.resolution.value.copy(drawSize);
         }
-      };
 
-      PRESETS.forEach(preset => {
-        states.push(createCard(preset));
-      });
-
-      const tick = () => {
-        for (const state of states) {
-          if (!state.sourceCanvas) {
-            attachSource(state);
-          }
-          draw(state);
+        render(t) {
+          this.uniforms.time.value = t * this.speed;
+          this.renderer.render(this.scene, this.camera);
         }
-        window.requestAnimationFrame(tick);
+      }
+
+      const cards = [...document.querySelectorAll(".card")].map(card => new ShaderCard(card));
+
+      const onResize = () => {
+        for (const card of cards) card.resize();
       };
 
-      window.requestAnimationFrame(tick);
+      window.addEventListener("resize", onResize);
+      onResize();
+
+      const start = performance.now();
+      const frame = now => {
+        const t = (now - start) * 0.001;
+        for (const card of cards) card.render(t);
+        requestAnimationFrame(frame);
+      };
+
+      requestAnimationFrame(frame);
     </script>
   </body>
 </html>

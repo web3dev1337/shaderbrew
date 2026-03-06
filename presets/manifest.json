@@ -498,5 +498,35 @@
       "pinkthositive",
       "v2"
     ]
+  },
+  {
+    "id": "moon-surface-hero",
+    "name": "Moon Surface Hero",
+    "file": "presets/projects/moon-surface-hero.json",
+    "kind": "project",
+    "category": "cosmic",
+    "description": "Custom GLSL hero render of cratered lunar terrain with basin rims, impact pitting, and cold highland glints.",
+    "tags": [
+      "cosmic",
+      "terrain",
+      "pinkthositive",
+      "hero",
+      "glsl"
+    ]
+  },
+  {
+    "id": "squid-tentacles-hero",
+    "name": "Squid Tentacles Hero",
+    "file": "presets/projects/squid-tentacles-hero.json",
+    "kind": "project",
+    "category": "bio",
+    "description": "Custom GLSL hero render of animated squid tentacles with broad bodies, suction cups, wet sheen, and cyan glow.",
+    "tags": [
+      "bio",
+      "creature",
+      "pinkthositive",
+      "hero",
+      "glsl"
+    ]
   }
 ]
