@@ -201,11 +201,11 @@ void main(){
   float rootBulge=exp(-pow(along/0.18,2.0))*uRadius*0.38;
   pos-=normal*uRadius*(1.0-thickness);
   pos+=normal*rootBulge;
-  float wave=sin(uTime*1.2+along*8.0+uSeed*4.3)*0.08*pow(along,1.4)*uSway;
-  float wave2=cos(uTime*0.9+along*11.0+uSeed*6.1)*0.05*pow(along,1.25)*uSway;
+  float wave=sin(uTime*1.2+along*8.0+uSeed*4.3)*0.04*pow(along,1.4)*uSway;
+  float wave2=cos(uTime*0.9+along*11.0+uSeed*6.1)*0.028*pow(along,1.25)*uSway;
   pos.x+=wave;
   pos.z+=wave2;
-  pos+=normal*sin(along*24.0+uTime*5.0+uSeed*9.0)*0.012*(0.25+along*0.75);
+  pos+=normal*sin(along*24.0+uTime*5.0+uSeed*9.0)*0.009*(0.25+along*0.75);
   vec4 world=modelMatrix*vec4(pos,1.0);
   vWorldPos=world.xyz;
   vWorldNormal=normalize(normalMatrix*normal);
@@ -259,8 +259,8 @@ void main(){
   body+=vec3(0.05,0.0,0.04)*(veins-0.5)*1.1;
   body*=mix(0.85,1.12,slime);
 
-  vec3 cupCol=mix(vec3(0.72,0.46,0.66),vec3(1.0,0.76,0.86),cupCore);
-  body=mix(body,cupCol,clamp(cups*0.8+cupCore*0.55,0.0,1.0));
+  vec3 cupCol=mix(vec3(0.6,0.28,0.44),vec3(0.93,0.68,0.8),cupCore);
+  body=mix(body,cupCol,clamp(cups*0.18+cupCore*0.14,0.0,1.0));
 
   float diff=max(dot(n,lightDir),0.0);
   float spec=pow(max(dot(reflect(-lightDir,n),viewDir),0.0),26.0);

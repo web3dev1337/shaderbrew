@@ -282,7 +282,7 @@
               </div>
               <div class="swatch">
                 <h3>Skin Strategy</h3>
-                <p>Shader uses tube `uv` coordinates to place suction cups, wet specular, cyan edge bloom, and fleshy magenta interior tones on the underside band.</p>
+                <p>Shader now handles the wet flesh, veins, and cyan edge bloom, while real attached cup meshes provide the readable sucker depth instead of a flat painted illusion.</p>
               </div>
             </div>
             <div class="footer-links">
@@ -490,6 +490,123 @@
         return new THREE.CatmullRomCurve3(pts);
       }
 
+      function createSuckerAssets() {
+        const stemGeom = new THREE.CylinderGeometry(0.16, 0.2, 0.34, 14);
+        const shellGeom = new THREE.CylinderGeometry(0.58, 0.3, 0.46, 22, 1, true);
+        const lipGeom = new THREE.TorusGeometry(0.54, 0.1, 10, 24);
+        const coreGeom = new THREE.SphereGeometry(0.28, 16, 12);
+
+        const stemMat = new THREE.MeshPhysicalMaterial({
+          color: 0x8d446d,
+          roughness: 0.54,
+          metalness: 0.04,
+          clearcoat: 0.3,
+          clearcoatRoughness: 0.42
+        });
+        const shellMat = new THREE.MeshPhysicalMaterial({
+          color: 0xf0a7c6,
+          roughness: 0.48,
+          metalness: 0.02,
+          clearcoat: 0.78,
+          clearcoatRoughness: 0.22,
+          side: THREE.DoubleSide
+        });
+        const lipMat = new THREE.MeshPhysicalMaterial({
+          color: 0xffd9ea,
+          roughness: 0.34,
+          metalness: 0.02,
+          clearcoat: 0.92,
+          clearcoatRoughness: 0.16
+        });
+        const coreMat = new THREE.MeshStandardMaterial({
+          color: 0xf7cfdd,
+          emissive: 0x4e1d39,
+          emissiveIntensity: 0.32,
+          roughness: 0.62,
+          metalness: 0.0
+        });
+
+        return {
+          makeCup(scale) {
+            const root = new THREE.Group();
+
+            const stem = new THREE.Mesh(stemGeom, stemMat);
+            stem.position.y = 0.16;
+            root.add(stem);
+
+            const shell = new THREE.Mesh(shellGeom, shellMat);
+            shell.position.y = 0.38;
+            root.add(shell);
+
+            const lip = new THREE.Mesh(lipGeom, lipMat);
+            lip.rotation.x = Math.PI * 0.5;
+            lip.position.y = 0.6;
+            root.add(lip);
+
+            const core = new THREE.Mesh(coreGeom, coreMat);
+            core.scale.set(1, 0.42, 1);
+            core.position.y = 0.46;
+            root.add(core);
+
+            root.scale.setScalar(scale);
+            return root;
+          }
+        };
+      }
+
+      function createTentacleSuckers(curve, item, assets) {
+        const group = new THREE.Group();
+        const segments = 180;
+        const frames = curve.computeFrenetFrames(segments, false);
+        const up = new THREE.Vector3(0, 1, 0);
+        const viewBias = new THREE.Vector3(-item.x * 0.28, 0.18, 0.92 - item.z * 0.16).normalize();
+
+        function addRow(count, angleOffset, alongOffset, scaleBias) {
+          for (let i = 0; i < count; i++) {
+            const t = 0.12 + alongOffset + i * ((0.78 - alongOffset) / Math.max(count - 1, 1));
+            if (t >= 0.92) break;
+
+            const point = curve.getPointAt(t);
+            const tangent = curve.getTangentAt(t).normalize();
+            const frameIndex = Math.min(segments, Math.max(0, Math.round(t * segments)));
+            const normal = frames.normals[frameIndex].clone();
+            const binormal = frames.binormals[frameIndex].clone();
+
+            let outward = viewBias.clone().addScaledVector(tangent, -viewBias.dot(tangent));
+            if (outward.lengthSq() < 1e-5) {
+              outward = normal.clone();
+            } else {
+              outward.normalize();
+            }
+
+            const twist = new THREE.Quaternion().setFromAxisAngle(
+              tangent,
+              angleOffset + Math.sin(i * 0.7 + item.seed * 2.0) * 0.08
+            );
+            outward.applyQuaternion(twist).normalize();
+
+            const radial = normal.multiplyScalar(0.68).add(binormal.multiplyScalar(0.32)).normalize();
+            outward.lerp(radial, 0.18).normalize();
+
+            const localRadius = item.radius * THREE.MathUtils.lerp(1.08, 0.18, Math.pow(t, 1.18));
+            const cupScale = localRadius * (0.92 + scaleBias + Math.sin(i * 1.4 + item.seed) * 0.04);
+            const cup = assets.makeCup(cupScale);
+            const cupDir = outward.clone().multiplyScalar(0.97).addScaledVector(tangent, 0.12).normalize();
+
+            cup.position.copy(point).addScaledVector(outward, localRadius * 0.9);
+            cup.quaternion.setFromUnitVectors(up, cupDir);
+            cup.quaternion.multiply(
+              new THREE.Quaternion().setFromAxisAngle(cupDir, Math.sin(i * 1.8 + item.seed) * 0.18)
+            );
+            group.add(cup);
+          }
+        }
+
+        addRow(9, -0.22, 0.0, 0.0);
+        addRow(8, 0.2, 0.045, -0.14);
+        return group;
+      }
+
       function createTentacleStage(canvas) {
         const renderer = makeRenderer(canvas);
         renderer.toneMappingExposure = 1.32;
@@ -522,6 +639,7 @@
 
         const group = new THREE.Group();
         scene.add(group);
+        const suckerAssets = createSuckerAssets();
 
         const tentacleData = [
           { seed: 0.3, height: 4.4, bend: 0.82, lean: new THREE.Vector2(-0.48, 0.28), radius: 0.3, x: -1.55, z: 0.18 },
@@ -538,7 +656,7 @@
           const uniforms = {
             uTime: { value: 0 },
             uSeed: { value: item.seed },
-            uSway: { value: 1.0 + item.radius * 0.4 },
+            uSway: { value: 0.72 + item.radius * 0.2 },
             uRadius: { value: item.radius },
             uLightDir: { value: new THREE.Vector3(-0.45, 0.72, 0.58) }
           };
@@ -549,6 +667,7 @@
           });
           const mesh = new THREE.Mesh(geom, mat);
           mesh.position.set(item.x, -1.1, item.z);
+          mesh.add(createTentacleSuckers(curve, item, suckerAssets));
           group.add(mesh);
           tentacles.push({ mesh, uniforms, seed: item.seed });
 
