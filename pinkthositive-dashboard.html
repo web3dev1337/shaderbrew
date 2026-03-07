@@ -133,7 +133,7 @@
       .stats {
         display: grid;
         gap: 12px;
-        grid-template-columns: repeat(3, minmax(180px, 1fr));
+        grid-template-columns: repeat(4, minmax(180px, 1fr));
         margin-top: 18px;
       }
 
@@ -303,6 +303,10 @@
         background: rgba(7, 10, 17, 0.55);
       }
 
+      .fact-wide {
+        grid-column: 1 / -1;
+      }
+
       .fact span {
         display: block;
         color: var(--muted);
@@ -377,8 +381,9 @@
         <h1>Pinkthositive Groundbreaking Constructs</h1>
         <p>
           This dashboard turns the workflow meta-prompt into new live artifacts instead of vague style requests. Each
-          piece has a clear subject, artifact type, primary read target, and export path. The goal is not generic
-          shader noise. The goal is strong, legible visual invention.
+          piece has a clear subject, artifact type, primary read target, and export path. This pass now mixes hero
+          renders with geometry-bound material studies so there is a meaningful difference between spectacle and
+          actually usable surface work.
         </p>
         <div class="hero-links">
           <a href="pinkthositive-preview.html">Moon + Squid Heroes</a>
@@ -393,6 +398,10 @@
           <div class="stat">
             <span>Live Hero Renders</span>
             <strong data-stat="live">0</strong>
+          </div>
+          <div class="stat">
+            <span>Usable Materials</span>
+            <strong data-stat="usable">0</strong>
           </div>
           <div class="stat">
             <span>Production Strategy</span>
@@ -413,6 +422,21 @@
           <span class="section-badge">Live GLSL</span>
         </div>
         <div class="dashboard-grid" id="dashboard-grid"></div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <h2>Usable Material Pack</h2>
+            <p>
+              Six new material studies rendered on actual geometry. These are the more production-relevant outputs:
+              surfaces that could be baked into maps, rebuilt in engine shaders, or used directly as look-dev sources
+              for props, creatures, crystals, and environment assets.
+            </p>
+          </div>
+          <span class="section-badge">Material Studies</span>
+        </div>
+        <div class="dashboard-grid" id="usable-grid"></div>
       </section>
 
       <section class="section">

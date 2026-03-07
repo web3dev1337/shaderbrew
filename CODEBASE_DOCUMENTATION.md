@@ -8,7 +8,7 @@ WebGL procedural texture generator built on mebiusbox's MIT-licensed pixy.js sha
 ENTRY POINTS:
   editor.html          Main editor (loads src/app.js)
   index.html           Redirect to showcase.html
-  pinkthositive-dashboard.html One-page prompt-led dashboard for new live Pinkthositive shader constructs
+  pinkthositive-dashboard.html One-page prompt-led dashboard for Pinkthositive hero constructs plus usable material studies
   pinkthositive-preview.html One-page live preview for Moon Surface Hero and Squid Tentacles Hero custom GLSL renders
   pinkthositive-materials.html One-page 3D material study for seam-safe moon sphere variations and tentacle mesh skin
   gallery.html         Live animated gallery of 70+ effects
@@ -75,6 +75,7 @@ LIBRARY (DO NOT MODIFY):
   shader-defs.js       Shared full-screen custom GLSL hero shader library
   pinkthositive-dashboard-app.js Runtime bootstrap for the Pinkthositive shader dashboard
   pinkthositive-dashboard-shaders.js New Pinkthositive shader catalog with prompt metadata and fragment shaders
+  pinkthositive-usable-materials.js Geometry-bound Pinkthositive material catalog for the dashboard's usable pack
   pinkthositive-material-shaders.js Dedicated 3D material shaders for moon sphere and tentacle mesh studies
 
 DATA:

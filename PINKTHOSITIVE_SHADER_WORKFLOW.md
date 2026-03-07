@@ -8,6 +8,7 @@ This document explains what was built for the Pinkthositive moon and squid work,
 - `pinkthositive-dashboard.html`
 - `pinkthositive-dashboard-app.js`
 - `pinkthositive-dashboard-shaders.js`
+- `pinkthositive-usable-materials.js`
 - `pinkthositive-preview.html`
 - `pinkthositive-material-shaders.js`
 - `pinkthositive-materials.html`
