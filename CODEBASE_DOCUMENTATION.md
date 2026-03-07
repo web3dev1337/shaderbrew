@@ -22,6 +22,7 @@ ENTRY POINTS:
 
 PROJECT TRACKING:
   FINDINGS.md          Findings checklist and usability roadmap
+  PINKTHOSITIVE_SHADER_WORKFLOW.md Pinkthositive-specific guide for hero shaders, materials, baking, prompts, and engine usage
 
 CORE MODULES (src/):
   app.js               Main coordinator — init, animate, render
