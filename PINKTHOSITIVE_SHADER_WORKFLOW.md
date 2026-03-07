@@ -5,6 +5,9 @@ This document explains what was built for the Pinkthositive moon and squid work,
 ## Related Files
 
 - `shader-defs.js`
+- `pinkthositive-dashboard.html`
+- `pinkthositive-dashboard-app.js`
+- `pinkthositive-dashboard-shaders.js`
 - `pinkthositive-preview.html`
 - `pinkthositive-material-shaders.js`
 - `pinkthositive-materials.html`
@@ -582,4 +585,3 @@ These platform notes were checked against official docs:
 - Three.js `WebGLRenderTarget`: https://threejs.org/docs/pages/WebGLRenderTarget.html
 - Three.js render targets manual: https://threejs.org/manual/en/rendertargets.html
 - Roblox texture specifications and `SurfaceAppearance`: https://create.roblox.com/docs/art/modeling/texture-specifications
-
