@@ -1,0 +1,164 @@
+{
+  "version": 1,
+  "resolution": 512,
+  "layers": [
+    {
+      "name": "Lunar Bedrock",
+      "effectController": {
+        "type": "CoherentNoise",
+        "animate": true,
+        "time": 10.8,
+        "resolution": "512",
+        "polarConversion": false,
+        "tiling": true,
+        "normalMap": false,
+        "cHeightScale": 2,
+        "cRadialMask": 1,
+        "cNoiseOctave": 6,
+        "cNoiseFrequency": 9.4,
+        "cNoiseAmplitude": 1.35,
+        "cNoiseLacunarity": 3,
+        "cNoisePersistence": 0.44,
+        "cGradientNoise": 0.1,
+        "cValueNoise": 0.15,
+        "cVoronoiNoise": 0.85,
+        "cVoronoiCell": 0.38,
+        "cSimplexNoise": 0.2,
+        "cRepeat": 1,
+        "cTurbulence": 0.48,
+        "cRidge": 0.72,
+        "cRidgeOffset": 0.32,
+        "cScaleShift": 0.24,
+        "cPowerExponent": 2.8,
+        "cBias": 0.06,
+        "cGain": -0.2,
+        "cThreshold": 0.14,
+        "cInvert": 0,
+        "cNoiseSphereEnable": false,
+        "cNoiseGraphEnable": false,
+        "cColorBalanceShadowsR": -0.7,
+        "cColorBalanceShadowsG": -0.62,
+        "cColorBalanceShadowsB": -0.38,
+        "cColorBalanceMidtonesR": -0.05,
+        "cColorBalanceMidtonesG": 0.08,
+        "cColorBalanceMidtonesB": 0.25,
+        "cColorBalanceHighlightsR": 0.62,
+        "cColorBalanceHighlightsG": 0.78,
+        "cColorBalanceHighlightsB": 1,
+        "cToonEnable": false,
+        "cToonDark": 0.8,
+        "cToonLight": 0.95
+      },
+      "opacity": 1,
+      "blendMode": "Normal",
+      "visible": true
+    },
+    {
+      "name": "Crater Shadows",
+      "effectController": {
+        "type": "CellNoise",
+        "animate": true,
+        "time": 4.6,
+        "resolution": "512",
+        "polarConversion": false,
+        "tiling": true,
+        "normalMap": false,
+        "cNoiseFrequency": 10.8,
+        "cNoiseSphereEnable": false,
+        "cNoiseGraphEnable": false,
+        "cColorBalanceShadowsR": -1,
+        "cColorBalanceShadowsG": -0.95,
+        "cColorBalanceShadowsB": -0.7,
+        "cColorBalanceMidtonesR": -0.55,
+        "cColorBalanceMidtonesG": -0.45,
+        "cColorBalanceMidtonesB": -0.2,
+        "cColorBalanceHighlightsR": 0.1,
+        "cColorBalanceHighlightsG": 0.2,
+        "cColorBalanceHighlightsB": 0.35
+      },
+      "opacity": 0.42,
+      "blendMode": "Multiply",
+      "visible": true
+    },
+    {
+      "name": "Regolith Dust",
+      "effectController": {
+        "type": "Speckle",
+        "animate": true,
+        "time": 1.9,
+        "resolution": "512",
+        "polarConversion": false,
+        "tiling": true,
+        "normalMap": false,
+        "cRadius": 0.5,
+        "cScale": 0.68,
+        "cDensity": 0.82,
+        "cColorBalanceShadowsR": -0.35,
+        "cColorBalanceShadowsG": -0.3,
+        "cColorBalanceShadowsB": -0.2,
+        "cColorBalanceMidtonesR": 0.12,
+        "cColorBalanceMidtonesG": 0.16,
+        "cColorBalanceMidtonesB": 0.24,
+        "cColorBalanceHighlightsR": 0.75,
+        "cColorBalanceHighlightsG": 0.82,
+        "cColorBalanceHighlightsB": 0.95
+      },
+      "opacity": 0.28,
+      "blendMode": "SoftLight",
+      "visible": true
+    },
+    {
+      "name": "Icy Rim Glow",
+      "effectController": {
+        "type": "Caustics",
+        "animate": true,
+        "time": 0.7,
+        "resolution": "512",
+        "polarConversion": false,
+        "tiling": true,
+        "normalMap": false,
+        "cScale": 2.1,
+        "cSpeed": 0.12,
+        "cColor": 0.45,
+        "cColorBalanceShadowsR": -0.9,
+        "cColorBalanceShadowsG": -0.7,
+        "cColorBalanceShadowsB": 0.15,
+        "cColorBalanceMidtonesR": -0.35,
+        "cColorBalanceMidtonesG": 0.25,
+        "cColorBalanceMidtonesB": 0.85,
+        "cColorBalanceHighlightsR": 0.45,
+        "cColorBalanceHighlightsG": 0.95,
+        "cColorBalanceHighlightsB": 1
+      },
+      "opacity": 0.24,
+      "blendMode": "Screen",
+      "visible": true
+    }
+  ],
+  "gradient": {
+    "enabled": true,
+    "intensity": 0.72,
+    "stops": [
+      {
+        "position": 0,
+        "color": "#07090e"
+      },
+      {
+        "position": 0.35,
+        "color": "#3a3f4a"
+      },
+      {
+        "position": 0.68,
+        "color": "#8f97a3"
+      },
+      {
+        "position": 0.9,
+        "color": "#c8d3e3"
+      },
+      {
+        "position": 1,
+        "color": "#f6f8ff"
+      }
+    ]
+  }
+}

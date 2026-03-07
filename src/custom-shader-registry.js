@@ -57,6 +57,8 @@ export const CUSTOM_SHADER_CATALOG = [
 	{ name: "Void Tendril", key: "void_tendril", file: "150-void-tendril" },
 	{ name: "Summoning Circle", key: "summoning", file: "151-summoning-circle" },
 	{ name: "Lightning Smite", key: "lightning_smite", file: "152-lightning-smite" },
+	{ name: "Moon Surface Hero", key: "moon_surface_hero", file: "153-moon-surface-hero" },
+	{ name: "Squid Tentacles Hero", key: "squid_tentacles_hero", file: "154-squid-tentacles-hero" },
 ];
 
 // Prefix used for custom shader effect types in the layer system

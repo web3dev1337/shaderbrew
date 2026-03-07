@@ -1,0 +1,252 @@
+{
+  "version": 1,
+  "resolution": 512,
+  "layers": [
+    {
+      "name": "Tentacle Body A",
+      "effectController": {
+        "type": "BrushStroke",
+        "animate": true,
+        "time": 1.6,
+        "resolution": "512",
+        "polarConversion": false,
+        "tiling": false,
+        "normalMap": false,
+        "cWidth": 0.62,
+        "cStrength": 0.86,
+        "cAlpha": 0.92,
+        "cAngle": 0.18,
+        "cAmplitude": 0.34,
+        "cBrushStrokeX1": -0.78,
+        "cBrushStrokeY1": 0.94,
+        "cBrushStrokeX2": 0.22,
+        "cBrushStrokeY2": -0.82,
+        "cColor": 0.72,
+        "cColorBalanceShadowsR": -0.95,
+        "cColorBalanceShadowsG": -0.58,
+        "cColorBalanceShadowsB": 0.08,
+        "cColorBalanceMidtonesR": 0.48,
+        "cColorBalanceMidtonesG": -0.15,
+        "cColorBalanceMidtonesB": 0.52,
+        "cColorBalanceHighlightsR": 0.95,
+        "cColorBalanceHighlightsG": 0.3,
+        "cColorBalanceHighlightsB": 0.78
+      },
+      "opacity": 1,
+      "blendMode": "Normal",
+      "visible": true
+    },
+    {
+      "name": "Tentacle Body B",
+      "effectController": {
+        "type": "BrushStroke",
+        "animate": true,
+        "time": 2.3,
+        "resolution": "512",
+        "polarConversion": false,
+        "tiling": false,
+        "normalMap": false,
+        "cWidth": 0.54,
+        "cStrength": 0.8,
+        "cAlpha": 0.84,
+        "cAngle": 0.62,
+        "cAmplitude": 0.46,
+        "cBrushStrokeX1": -0.12,
+        "cBrushStrokeY1": 1,
+        "cBrushStrokeX2": 0.78,
+        "cBrushStrokeY2": -0.7,
+        "cColor": 0.76,
+        "cColorBalanceShadowsR": -0.98,
+        "cColorBalanceShadowsG": -0.6,
+        "cColorBalanceShadowsB": 0.12,
+        "cColorBalanceMidtonesR": 0.58,
+        "cColorBalanceMidtonesG": -0.08,
+        "cColorBalanceMidtonesB": 0.58,
+        "cColorBalanceHighlightsR": 1,
+        "cColorBalanceHighlightsG": 0.38,
+        "cColorBalanceHighlightsB": 0.82
+      },
+      "opacity": 0.82,
+      "blendMode": "Screen",
+      "visible": true
+    },
+    {
+      "name": "Tentacle Body C",
+      "effectController": {
+        "type": "BrushStroke",
+        "animate": true,
+        "time": 3.1,
+        "resolution": "512",
+        "polarConversion": false,
+        "tiling": false,
+        "normalMap": false,
+        "cWidth": 0.42,
+        "cStrength": 0.78,
+        "cAlpha": 0.72,
+        "cAngle": 0.41,
+        "cAmplitude": 0.51,
+        "cBrushStrokeX1": 0.42,
+        "cBrushStrokeY1": 0.96,
+        "cBrushStrokeX2": -0.62,
+        "cBrushStrokeY2": -0.56,
+        "cColor": 0.68,
+        "cColorBalanceShadowsR": -1,
+        "cColorBalanceShadowsG": -0.68,
+        "cColorBalanceShadowsB": -0.02,
+        "cColorBalanceMidtonesR": 0.38,
+        "cColorBalanceMidtonesG": -0.22,
+        "cColorBalanceMidtonesB": 0.46,
+        "cColorBalanceHighlightsR": 0.92,
+        "cColorBalanceHighlightsG": 0.22,
+        "cColorBalanceHighlightsB": 0.72
+      },
+      "opacity": 0.72,
+      "blendMode": "Screen",
+      "visible": true
+    },
+    {
+      "name": "Suction Cups",
+      "effectController": {
+        "type": "Bubbles",
+        "animate": true,
+        "time": 5.6,
+        "resolution": "512",
+        "polarConversion": false,
+        "tiling": true,
+        "normalMap": false,
+        "cRadius": 0.18,
+        "cWidth": 0.26,
+        "cThickness": 0.96,
+        "cColor": 0.38,
+        "cBubblesVariation": 2,
+        "cColorBalanceShadowsR": -0.85,
+        "cColorBalanceShadowsG": -0.72,
+        "cColorBalanceShadowsB": 0.12,
+        "cColorBalanceMidtonesR": 0.25,
+        "cColorBalanceMidtonesG": -0.08,
+        "cColorBalanceMidtonesB": 0.32,
+        "cColorBalanceHighlightsR": 0.95,
+        "cColorBalanceHighlightsG": 0.58,
+        "cColorBalanceHighlightsB": 0.78
+      },
+      "opacity": 0.52,
+      "blendMode": "Overlay",
+      "visible": true
+    },
+    {
+      "name": "Cup Interior Glow",
+      "effectController": {
+        "type": "Bubbles",
+        "animate": true,
+        "time": 4.2,
+        "resolution": "512",
+        "polarConversion": false,
+        "tiling": true,
+        "normalMap": false,
+        "cRadius": 0.1,
+        "cWidth": 0.1,
+        "cThickness": 0.78,
+        "cColor": 0.92,
+        "cBubblesVariation": 1,
+        "cColorBalanceShadowsR": -1,
+        "cColorBalanceShadowsG": -0.5,
+        "cColorBalanceShadowsB": 0.2,
+        "cColorBalanceMidtonesR": -0.42,
+        "cColorBalanceMidtonesG": 0.22,
+        "cColorBalanceMidtonesB": 0.72,
+        "cColorBalanceHighlightsR": 0.08,
+        "cColorBalanceHighlightsG": 0.95,
+        "cColorBalanceHighlightsB": 1
+      },
+      "opacity": 0.24,
+      "blendMode": "SoftLight",
+      "visible": true
+    },
+    {
+      "name": "Wet Membrane",
+      "effectController": {
+        "type": "WaterTurbulence",
+        "animate": true,
+        "time": 1.2,
+        "resolution": "512",
+        "polarConversion": false,
+        "tiling": true,
+        "normalMap": false,
+        "cScale": 0.24,
+        "cIntensity": 0.34,
+        "cColorBalanceShadowsR": -1,
+        "cColorBalanceShadowsG": -0.7,
+        "cColorBalanceShadowsB": 0.08,
+        "cColorBalanceMidtonesR": -0.4,
+        "cColorBalanceMidtonesG": 0.18,
+        "cColorBalanceMidtonesB": 0.74,
+        "cColorBalanceHighlightsR": 0.36,
+        "cColorBalanceHighlightsG": 0.92,
+        "cColorBalanceHighlightsB": 1
+      },
+      "opacity": 0.22,
+      "blendMode": "SoftLight",
+      "visible": true
+    },
+    {
+      "name": "Bioluminescent Veins",
+      "effectController": {
+        "type": "Energy",
+        "animate": true,
+        "time": 7.1,
+        "resolution": "512",
+        "polarConversion": false,
+        "tiling": false,
+        "normalMap": false,
+        "cPower": 0.26,
+        "cDensity": 0.34,
+        "cThickness": 0.3,
+        "cScale": 0.18,
+        "cFrequency": 0.22,
+        "cColor": 0.84,
+        "cColorBalanceShadowsR": -1,
+        "cColorBalanceShadowsG": -0.2,
+        "cColorBalanceShadowsB": 0.18,
+        "cColorBalanceMidtonesR": -0.7,
+        "cColorBalanceMidtonesG": 0.58,
+        "cColorBalanceMidtonesB": 0.92,
+        "cColorBalanceHighlightsR": 0.22,
+        "cColorBalanceHighlightsG": 1,
+        "cColorBalanceHighlightsB": 1
+      },
+      "opacity": 0.2,
+      "blendMode": "Add",
+      "visible": true
+    }
+  ],
+  "gradient": {
+    "enabled": true,
+    "intensity": 0.92,
+    "stops": [
+      {
+        "position": 0,
+        "color": "#02040a"
+      },
+      {
+        "position": 0.18,
+        "color": "#120b24"
+      },
+      {
+        "position": 0.45,
+        "color": "#44205d"
+      },
+      {
+        "position": 0.72,
+        "color": "#b43886"
+      },
+      {
+        "position": 0.9,
+        "color": "#38d0de"
+      },
+      {
+        "position": 1,
+        "color": "#dffcff"
+      }
+    ]
+  }
+}

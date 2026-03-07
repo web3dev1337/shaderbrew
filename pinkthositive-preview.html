@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pinkthositive Hero Renders</title>
+    <link rel="icon" href="data:," />
+    <style>
+      :root {
+        --bg-0: #04070c;
+        --bg-1: #0c1420;
+        --panel: rgba(8, 12, 18, 0.76);
+        --line: rgba(140, 169, 198, 0.25);
+        --text: #edf3f8;
+        --muted: #99aab9;
+        --moon: #d7e5ff;
+        --squid: #ff7ab8;
+        --hero: #9fe7ff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--text);
+        font-family: "Trebuchet MS", "Lucida Grande", sans-serif;
+        background:
+          radial-gradient(circle at 16% 14%, rgba(196, 224, 255, 0.16), transparent 28%),
+          radial-gradient(circle at 84% 18%, rgba(255, 119, 184, 0.14), transparent 26%),
+          radial-gradient(circle at 50% 140%, rgba(23, 78, 107, 0.35), transparent 36%),
+          linear-gradient(165deg, var(--bg-1), var(--bg-0) 58%);
+      }
+
+      .shell {
+        width: min(1480px, 94vw);
+        margin: 24px auto 40px;
+      }
+
+      .hero {
+        border: 1px solid var(--line);
+        background: var(--panel);
+        border-radius: 18px;
+        padding: 20px 22px;
+        backdrop-filter: blur(8px);
+        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.34);
+      }
+
+      .kicker {
+        margin: 0 0 8px;
+        font: 700 0.75rem/1 "Consolas", "Menlo", monospace;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--hero);
+      }
+
+      .hero h1 {
+        margin: 0;
+        font: 700 clamp(1.4rem, 3vw, 2.4rem) / 1.04 "Georgia", "Times New Roman", serif;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .hero p {
+        margin: 10px 0 0;
+        max-width: 860px;
+        color: var(--muted);
+        font-size: 0.98rem;
+      }
+
+      .grid {
+        margin-top: 18px;
+        display: grid;
+        gap: 16px;
+        grid-template-columns: repeat(2, minmax(280px, 1fr));
+      }
+
+      .card {
+        border: 1px solid var(--line);
+        background:
+          linear-gradient(180deg, rgba(14, 20, 28, 0.95), rgba(6, 9, 14, 0.94)),
+          var(--panel);
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 20px 56px rgba(0, 0, 0, 0.34);
+      }
+
+      .head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 12px 14px;
+      }
+
+      .head h2 {
+        margin: 0;
+        font: 700 1rem/1.1 "Georgia", "Times New Roman", serif;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
+
+      .badge {
+        flex: 0 0 auto;
+        border-radius: 999px;
+        border: 1px solid currentColor;
+        padding: 3px 9px;
+        font: 700 0.7rem/1 "Consolas", "Menlo", monospace;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .badge.moon {
+        color: var(--moon);
+      }
+
+      .badge.squid {
+        color: var(--squid);
+      }
+
+      .viewport {
+        position: relative;
+        aspect-ratio: 1;
+        border-top: 1px solid rgba(140, 169, 198, 0.18);
+        border-bottom: 1px solid rgba(140, 169, 198, 0.18);
+        background: #020406;
+      }
+
+      .viewport canvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+
+      .status {
+        position: absolute;
+        left: 12px;
+        bottom: 12px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        background: rgba(0, 0, 0, 0.52);
+        padding: 4px 10px;
+        color: #cce5f6;
+        font: 700 0.72rem/1 "Consolas", "Menlo", monospace;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .body {
+        padding: 12px 14px 14px;
+      }
+
+      .body p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.9rem;
+        min-height: 2.8em;
+      }
+
+      .links {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 12px;
+      }
+
+      .links a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 112px;
+        padding: 7px 12px;
+        border-radius: 999px;
+        border: 1px solid rgba(130, 172, 208, 0.42);
+        color: #d7e7f5;
+        text-decoration: none;
+        font: 700 0.76rem/1 "Consolas", "Menlo", monospace;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .links a:hover {
+        background: rgba(130, 172, 208, 0.12);
+      }
+
+      @media (max-width: 1080px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero">
+        <p class="kicker">Custom GLSL Hero Renders</p>
+        <h1>Pinkthositive Moon and Squid</h1>
+        <p>
+          Two fully custom fragment shaders, rendered directly on this page. The moon is a cratered
+          heightfield hero shot instead of a noise texture. The squid render is shape-first with
+          broad tentacle bodies, suction cup rows, wet specular sheen, and cyan glow accents.
+        </p>
+        <div class="links" style="margin-top:14px">
+          <a href="pinkthositive-dashboard.html">Open New Dashboard</a>
+          <a href="pinkthositive-materials.html">Open Material Variations</a>
+        </div>
+      </section>
+
+      <section class="grid">
+        <article class="card" data-shader="moon_surface_hero" data-speed="1.0">
+          <div class="head">
+            <h2>Moon Surface Hero</h2>
+            <span class="badge moon">Cosmic</span>
+          </div>
+          <div class="viewport">
+            <canvas></canvas>
+            <span class="status">Live GLSL</span>
+          </div>
+          <div class="body">
+            <p>Oblique lunar terrain render with crater basins, micro impact pitting, hard sun shadow, and cold rim glints.</p>
+            <div class="links">
+              <a href="editor.html?project=moon-surface-hero">Open In Editor</a>
+              <a href="editor.html?project=moon-surface">Compare Old Preset</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="card" data-shader="squid_tentacles_hero" data-speed="1.0">
+          <div class="head">
+            <h2>Squid Tentacles Hero</h2>
+            <span class="badge squid">Bio</span>
+          </div>
+          <div class="viewport">
+            <canvas></canvas>
+            <span class="status">Live GLSL</span>
+          </div>
+          <div class="body">
+            <p>Animated squid tentacle silhouettes with suction cups, fleshy magenta interiors, wet highlights, and bioluminescent cyan detail.</p>
+            <div class="links">
+              <a href="editor.html?project=squid-tentacles-hero">Open In Editor</a>
+              <a href="editor.html?project=squid-tentacles">Compare Old Preset</a>
+            </div>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.174.0/build/three.module.min.js"
+        }
+      }
+    </script>
+    <script type="module">
+      import * as THREE from "three";
+      import { SHADERS } from "./shader-defs.js";
+
+      const FULLSCREEN_VERT = `
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        gl_Position = vec4(position.xy, 0.0, 1.0);
+      }`;
+
+      class ShaderCard {
+        constructor(el) {
+          this.el = el;
+          this.canvas = el.querySelector("canvas");
+          this.shaderKey = el.dataset.shader;
+          this.speed = Number(el.dataset.speed || "1");
+          this.renderer = new THREE.WebGLRenderer({
+            canvas: this.canvas,
+            antialias: true,
+            preserveDrawingBuffer: true,
+            powerPreference: "high-performance"
+          });
+          this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+          this.scene = new THREE.Scene();
+          this.camera = new THREE.Camera();
+          this.uniforms = {
+            time: { value: 0 },
+            resolution: { value: new THREE.Vector2(1, 1) }
+          };
+          this.material = new THREE.ShaderMaterial({
+            vertexShader: FULLSCREEN_VERT,
+            fragmentShader: SHADERS[this.shaderKey],
+            uniforms: this.uniforms,
+            depthTest: false,
+            depthWrite: false
+          });
+          this.scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), this.material));
+          this.resize();
+        }
+
+        resize() {
+          const rect = this.canvas.getBoundingClientRect();
+          this.renderer.setSize(rect.width, rect.height, false);
+          const drawSize = new THREE.Vector2();
+          this.renderer.getDrawingBufferSize(drawSize);
+          this.uniforms.resolution.value.copy(drawSize);
+        }
+
+        render(t) {
+          this.uniforms.time.value = t * this.speed;
+          this.renderer.render(this.scene, this.camera);
+        }
+      }
+
+      const cards = [...document.querySelectorAll(".card")].map(card => new ShaderCard(card));
+
+      const onResize = () => {
+        for (const card of cards) card.resize();
+      };
+
+      window.addEventListener("resize", onResize);
+      onResize();
+
+      const start = performance.now();
+      const frame = now => {
+        const t = (now - start) * 0.001;
+        for (const card of cards) card.render(t);
+        requestAnimationFrame(frame);
+      };
+
+      requestAnimationFrame(frame);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pinkthositive Shader Dashboard</title>
+    <link rel="icon" href="data:," />
+    <style>
+      :root {
+        --bg0: #050812;
+        --bg1: #08131f;
+        --bg2: #120612;
+        --panel: rgba(9, 12, 22, 0.84);
+        --panel-strong: rgba(12, 16, 28, 0.96);
+        --line: rgba(135, 176, 214, 0.2);
+        --text: #eef5fb;
+        --muted: #98a8b8;
+        --cyan: #89ecff;
+        --rose: #ff7ab8;
+        --gold: #f4c26b;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--text);
+        font-family: "Trebuchet MS", "Lucida Grande", sans-serif;
+        background:
+          radial-gradient(circle at 15% 12%, rgba(107, 214, 255, 0.16), transparent 24%),
+          radial-gradient(circle at 84% 18%, rgba(255, 116, 174, 0.14), transparent 22%),
+          radial-gradient(circle at 50% 140%, rgba(54, 116, 180, 0.22), transparent 34%),
+          linear-gradient(150deg, var(--bg1), var(--bg0) 52%, var(--bg2));
+      }
+
+      .shell {
+        width: min(1540px, 95vw);
+        margin: 22px auto 42px;
+      }
+
+      .hero {
+        position: relative;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 26px;
+        padding: 26px 28px 24px;
+        background:
+          linear-gradient(180deg, rgba(11, 18, 30, 0.9), rgba(8, 10, 18, 0.94)),
+          var(--panel);
+        box-shadow: 0 32px 90px rgba(0, 0, 0, 0.36);
+      }
+
+      .hero::before,
+      .hero::after {
+        content: "";
+        position: absolute;
+        inset: auto;
+        pointer-events: none;
+        filter: blur(14px);
+      }
+
+      .hero::before {
+        width: 320px;
+        height: 320px;
+        top: -120px;
+        right: -80px;
+        background: radial-gradient(circle, rgba(137, 236, 255, 0.18), transparent 68%);
+      }
+
+      .hero::after {
+        width: 340px;
+        height: 340px;
+        bottom: -180px;
+        left: -80px;
+        background: radial-gradient(circle, rgba(255, 122, 184, 0.16), transparent 70%);
+      }
+
+      .kicker {
+        margin: 0 0 10px;
+        color: var(--cyan);
+        font: 700 0.78rem/1 "Consolas", "Menlo", monospace;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+      }
+
+      .hero h1 {
+        margin: 0;
+        max-width: 980px;
+        font: 700 clamp(1.8rem, 4vw, 3.4rem) / 0.96 "Georgia", "Times New Roman", serif;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
+
+      .hero p {
+        margin: 14px 0 0;
+        max-width: 980px;
+        color: var(--muted);
+        font-size: 1rem;
+      }
+
+      .hero-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 18px;
+      }
+
+      .hero-links a,
+      .archive-links a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 132px;
+        padding: 9px 14px;
+        border-radius: 999px;
+        border: 1px solid rgba(137, 176, 214, 0.34);
+        color: var(--text);
+        text-decoration: none;
+        font: 700 0.76rem/1 "Consolas", "Menlo", monospace;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      .hero-links a:hover,
+      .archive-links a:hover {
+        background: rgba(137, 176, 214, 0.1);
+      }
+
+      .stats {
+        display: grid;
+        gap: 12px;
+        grid-template-columns: repeat(4, minmax(180px, 1fr));
+        margin-top: 18px;
+      }
+
+      .stat {
+        border: 1px solid rgba(137, 176, 214, 0.16);
+        border-radius: 18px;
+        padding: 14px 16px;
+        background: rgba(5, 8, 14, 0.5);
+      }
+
+      .stat strong {
+        display: block;
+        margin-top: 6px;
+        font: 700 1.75rem/1 "Georgia", "Times New Roman", serif;
+        letter-spacing: 0.04em;
+      }
+
+      .stat span {
+        color: var(--muted);
+        font-size: 0.86rem;
+      }
+
+      .section {
+        margin-top: 18px;
+        border: 1px solid var(--line);
+        border-radius: 26px;
+        overflow: hidden;
+        background:
+          linear-gradient(180deg, rgba(11, 16, 28, 0.96), rgba(6, 9, 16, 0.98)),
+          var(--panel-strong);
+        box-shadow: 0 22px 64px rgba(0, 0, 0, 0.28);
+      }
+
+      .section-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 18px;
+        padding: 18px 20px 16px;
+      }
+
+      .section-head h2 {
+        margin: 0;
+        font: 700 clamp(1.2rem, 2vw, 1.6rem) / 1.05 "Georgia", "Times New Roman", serif;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .section-head p {
+        margin: 8px 0 0;
+        max-width: 900px;
+        color: var(--muted);
+        font-size: 0.94rem;
+      }
+
+      .section-badge {
+        flex: 0 0 auto;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        padding: 4px 10px;
+        color: var(--gold);
+        font: 700 0.72rem/1 "Consolas", "Menlo", monospace;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .dashboard-grid {
+        display: grid;
+        gap: 18px;
+        grid-template-columns: repeat(3, minmax(300px, 1fr));
+        padding: 0 18px 18px;
+      }
+
+      .artifact-card {
+        border: 1px solid rgba(137, 176, 214, 0.16);
+        border-radius: 22px;
+        overflow: hidden;
+        background:
+          linear-gradient(180deg, rgba(13, 20, 34, 0.96), rgba(6, 10, 16, 0.94)),
+          rgba(6, 9, 14, 0.9);
+      }
+
+      .card-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 14px 16px 12px;
+      }
+
+      .card-kicker {
+        margin: 0 0 6px;
+        color: var(--cyan);
+        font: 700 0.72rem/1 "Consolas", "Menlo", monospace;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .card-head h2 {
+        margin: 0;
+        font: 700 1.12rem/1.08 "Georgia", "Times New Roman", serif;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .artifact-badge {
+        flex: 0 0 auto;
+        align-self: flex-start;
+        padding: 4px 10px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        color: var(--rose);
+        font: 700 0.7rem/1 "Consolas", "Menlo", monospace;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .viewport {
+        position: relative;
+        border-top: 1px solid rgba(137, 176, 214, 0.12);
+        border-bottom: 1px solid rgba(137, 176, 214, 0.12);
+        background: #020407;
+      }
+
+      .viewport canvas {
+        display: block;
+        width: 100%;
+        height: auto;
+        aspect-ratio: 16 / 11;
+      }
+
+      .status {
+        position: absolute;
+        left: 12px;
+        bottom: 12px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        background: rgba(0, 0, 0, 0.5);
+        color: #d7ecfb;
+        font: 700 0.72rem/1 "Consolas", "Menlo", monospace;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .card-body {
+        padding: 14px 16px 16px;
+      }
+
+      .description {
+        margin: 0;
+        min-height: 4.5em;
+        color: var(--muted);
+        font-size: 0.92rem;
+      }
+
+      .fact-grid {
+        display: grid;
+        gap: 10px;
+        grid-template-columns: repeat(2, minmax(140px, 1fr));
+        margin-top: 14px;
+      }
+
+      .fact {
+        border: 1px solid rgba(137, 176, 214, 0.14);
+        border-radius: 14px;
+        padding: 11px 12px;
+        background: rgba(7, 10, 17, 0.55);
+      }
+
+      .fact-wide {
+        grid-column: 1 / -1;
+      }
+
+      .fact span {
+        display: block;
+        color: var(--muted);
+        font-size: 0.74rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .fact strong {
+        display: block;
+        margin-top: 6px;
+        font-size: 0.86rem;
+        line-height: 1.35;
+      }
+
+      .prompt-block {
+        margin-top: 14px;
+        border: 1px solid rgba(137, 176, 214, 0.14);
+        border-radius: 16px;
+        padding: 12px 13px;
+        background: linear-gradient(180deg, rgba(5, 9, 16, 0.72), rgba(11, 9, 17, 0.64));
+      }
+
+      .prompt-block p {
+        margin: 0 0 8px;
+        color: var(--gold);
+        font: 700 0.78rem/1 "Consolas", "Menlo", monospace;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .prompt-block ul {
+        margin: 0;
+        padding-left: 18px;
+        color: var(--muted);
+        font-size: 0.86rem;
+        line-height: 1.45;
+      }
+
+      .archive-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 0 20px 20px;
+      }
+
+      @media (max-width: 1220px) {
+        .dashboard-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      @media (max-width: 860px) {
+        .stats,
+        .dashboard-grid,
+        .fact-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .section-head,
+        .card-head {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero">
+        <p class="kicker">Prompt-Led Shader Lab</p>
+        <h1>Pinkthositive Groundbreaking Constructs</h1>
+        <p>
+          This dashboard turns the workflow meta-prompt into new live artifacts instead of vague style requests. Each
+          piece has a clear subject, artifact type, primary read target, and export path. This pass now mixes hero
+          renders with geometry-bound material studies so there is a meaningful difference between spectacle and
+          actually usable surface work.
+        </p>
+        <div class="hero-links">
+          <a href="pinkthositive-preview.html">Moon + Squid Heroes</a>
+          <a href="pinkthositive-materials.html">Moon + Squid Materials</a>
+          <a href="PINKTHOSITIVE_SHADER_WORKFLOW.md">Workflow Notes</a>
+        </div>
+        <div class="stats">
+          <div class="stat">
+            <span>New Constructs</span>
+            <strong data-stat="constructs">0</strong>
+          </div>
+          <div class="stat">
+            <span>Live Hero Renders</span>
+            <strong data-stat="live">0</strong>
+          </div>
+          <div class="stat">
+            <span>Usable Materials</span>
+            <strong data-stat="usable">0</strong>
+          </div>
+          <div class="stat">
+            <span>Production Strategy</span>
+            <strong>Prompt → Form → Light</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <h2>New Live Artifacts</h2>
+            <p>
+              Three fresh pieces built directly from the workflow: one architectural hero render, one cosmic bioform,
+              and one storm environment. Each card exposes the prompt vector so the generation logic is inspectable.
+            </p>
+          </div>
+          <span class="section-badge">Live GLSL</span>
+        </div>
+        <div class="dashboard-grid" id="dashboard-grid"></div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <h2>Usable Material Pack</h2>
+            <p>
+              Six new material studies rendered on actual geometry. These are the more production-relevant outputs:
+              surfaces that could be baked into maps, rebuilt in engine shaders, or used directly as look-dev sources
+              for props, creatures, crystals, and environment assets.
+            </p>
+          </div>
+          <span class="section-badge">Material Studies</span>
+        </div>
+        <div class="dashboard-grid" id="usable-grid"></div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <h2>Pinkthositive Archive</h2>
+            <p>
+              Previous moon and squid work stays linked here so the dashboard acts as a single entry point for the
+              whole Pinkthositive thread: original hero experiments, material studies, and the process guide.
+            </p>
+          </div>
+          <span class="section-badge">Reference</span>
+        </div>
+        <div class="archive-links">
+          <a href="pinkthositive-preview.html">Open Hero Archive</a>
+          <a href="pinkthositive-materials.html">Open Material Archive</a>
+          <a href="editor.html?project=moon-surface-hero">Moon Hero In Editor</a>
+          <a href="editor.html?project=squid-tentacles-hero">Squid Hero In Editor</a>
+          <a href="PINKTHOSITIVE_SHADER_WORKFLOW.md">Open Workflow Guide</a>
+        </div>
+      </section>
+    </main>
+
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.174.0/build/three.module.min.js"
+        }
+      }
+    </script>
+    <script type="module" src="./pinkthositive-dashboard-app.js"></script>
+  </body>
+</html>

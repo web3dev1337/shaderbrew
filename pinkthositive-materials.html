@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pinkthositive Material Variations</title>
+    <link rel="icon" href="data:," />
+    <style>
+      :root {
+        --bg0: #071019;
+        --bg1: #03070d;
+        --panel: rgba(8, 13, 20, 0.86);
+        --line: rgba(143, 176, 208, 0.22);
+        --text: #edf4fb;
+        --muted: #98aaba;
+        --moon: #dce6f4;
+        --cyan: #98f1ff;
+        --pink: #ff7ab8;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--text);
+        font-family: "Trebuchet MS", "Lucida Grande", sans-serif;
+        background:
+          radial-gradient(circle at 18% 18%, rgba(169, 211, 255, 0.15), transparent 24%),
+          radial-gradient(circle at 82% 22%, rgba(255, 119, 184, 0.13), transparent 25%),
+          radial-gradient(circle at 50% 120%, rgba(20, 73, 109, 0.3), transparent 34%),
+          linear-gradient(170deg, var(--bg0), var(--bg1) 60%);
+      }
+
+      .shell {
+        width: min(1520px, 95vw);
+        margin: 24px auto 40px;
+      }
+
+      .hero {
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        background: var(--panel);
+        backdrop-filter: blur(8px);
+        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.34);
+        padding: 22px 24px;
+      }
+
+      .kicker {
+        margin: 0 0 8px;
+        color: var(--cyan);
+        font: 700 0.76rem/1 "Consolas", "Menlo", monospace;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+
+      .hero h1 {
+        margin: 0;
+        font: 700 clamp(1.55rem, 3.2vw, 2.75rem) / 1.02 "Georgia", "Times New Roman", serif;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+
+      .hero p {
+        margin: 10px 0 0;
+        color: var(--muted);
+        max-width: 960px;
+        font-size: 0.98rem;
+      }
+
+      .hero .links {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 14px;
+      }
+
+      .hero a,
+      .section a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 132px;
+        padding: 8px 14px;
+        border-radius: 999px;
+        border: 1px solid rgba(134, 170, 202, 0.4);
+        color: #dce9f5;
+        text-decoration: none;
+        font: 700 0.77rem/1 "Consolas", "Menlo", monospace;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .hero a:hover,
+      .section a:hover {
+        background: rgba(134, 170, 202, 0.12);
+      }
+
+      .layout {
+        display: grid;
+        gap: 18px;
+        margin-top: 18px;
+      }
+
+      .section {
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        overflow: hidden;
+        background:
+          linear-gradient(180deg, rgba(12, 18, 28, 0.94), rgba(6, 10, 16, 0.95)),
+          var(--panel);
+        box-shadow: 0 20px 56px rgba(0, 0, 0, 0.28);
+      }
+
+      .section-head {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 16px 18px 14px;
+      }
+
+      .section-head h2 {
+        margin: 0;
+        font: 700 1.2rem/1.1 "Georgia", "Times New Roman", serif;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .section-head p {
+        margin: 8px 0 0;
+        color: var(--muted);
+        max-width: 840px;
+        font-size: 0.93rem;
+      }
+
+      .badge {
+        flex: 0 0 auto;
+        padding: 4px 10px;
+        border-radius: 999px;
+        border: 1px solid currentColor;
+        font: 700 0.72rem/1 "Consolas", "Menlo", monospace;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .badge.moon {
+        color: var(--moon);
+      }
+
+      .badge.bio {
+        color: var(--pink);
+      }
+
+      .viewport {
+        border-top: 1px solid rgba(143, 176, 208, 0.18);
+        border-bottom: 1px solid rgba(143, 176, 208, 0.18);
+        background: #02050a;
+      }
+
+      .viewport canvas {
+        width: 100%;
+        height: auto;
+        display: block;
+        aspect-ratio: 16 / 8;
+      }
+
+      .meta {
+        padding: 14px 18px 18px;
+      }
+
+      .meta-grid {
+        display: grid;
+        gap: 12px;
+        grid-template-columns: repeat(3, minmax(160px, 1fr));
+      }
+
+      .meta-grid.two {
+        grid-template-columns: repeat(2, minmax(180px, 1fr));
+      }
+
+      .swatch {
+        border: 1px solid rgba(143, 176, 208, 0.14);
+        border-radius: 14px;
+        background: rgba(5, 8, 14, 0.58);
+        padding: 12px;
+      }
+
+      .swatch h3 {
+        margin: 0 0 6px;
+        font: 700 0.88rem/1.1 "Consolas", "Menlo", monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+
+      .swatch p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.86rem;
+      }
+
+      .footer-links {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 14px;
+      }
+
+      @media (max-width: 980px) {
+        .meta-grid,
+        .meta-grid.two {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero">
+        <p class="kicker">Object-Space Material Study</p>
+        <h1>Pinkthositive Surface Variations</h1>
+        <p>
+          This page uses actual 3D materials instead of camera-baked hero renders. The moon study is seam-safe on
+          spheres because the crater field lives in object space. The squid study applies a tentacle skin shader to
+          real `TubeGeometry` tentacle meshes, with suction cups and wet sheen on the model instead of on a flat image.
+        </p>
+        <div class="links">
+          <a href="pinkthositive-dashboard.html">Open New Dashboard</a>
+          <a href="pinkthositive-preview.html">Open Hero Renders</a>
+          <a href="editor.html?project=moon-surface-hero">Moon Hero In Editor</a>
+          <a href="editor.html?project=squid-tentacles-hero">Squid Hero In Editor</a>
+        </div>
+      </section>
+
+      <section class="layout">
+        <article class="section">
+          <div class="section-head">
+            <div>
+              <h2>Moon Material Variations</h2>
+              <p>Three cratered moon variants on actual spheres: dense highlands, mare-heavy basalt, and a colder silver pass. Orbit the stage to inspect the seam-free surface behavior.</p>
+            </div>
+            <span class="badge moon">Sphere Material</span>
+          </div>
+          <div class="viewport">
+            <canvas id="moon-stage"></canvas>
+          </div>
+          <div class="meta">
+            <div class="meta-grid">
+              <div class="swatch">
+                <h3>Highland Craterfield</h3>
+                <p>Dense crater amplitude, minimal mare flattening, brighter dust and sharper crater rims.</p>
+              </div>
+              <div class="swatch">
+                <h3>Mare Basin</h3>
+                <p>Broader dark plains mixed into the crater field so it reads more like a planetary surface than a generic rock ball.</p>
+              </div>
+              <div class="swatch">
+                <h3>Cold Silver</h3>
+                <p>Same seam-safe crater workflow, but with more blue-white rim light and a cleaner, colder regolith response.</p>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="section">
+          <div class="section-head">
+            <div>
+              <h2>Squid Tentacle Model Study</h2>
+              <p>Procedural squid skin on tentacle meshes built from curves and `TubeGeometry`. The cups live on the underside band of the actual mesh rather than in a flat 2D composition.</p>
+            </div>
+            <span class="badge bio">Tentacle Mesh</span>
+          </div>
+          <div class="viewport">
+            <canvas id="tentacle-stage"></canvas>
+          </div>
+          <div class="meta">
+            <div class="meta-grid two">
+              <div class="swatch">
+                <h3>Model Strategy</h3>
+                <p>Five tapered tentacle meshes with different curve silhouettes, sway timing, and a shared collar so the study reads like a real creature rig instead of parallel tubes.</p>
+              </div>
+              <div class="swatch">
+                <h3>Skin Strategy</h3>
+                <p>Shader now handles the wet flesh, veins, and cyan edge bloom, while real attached cup meshes provide the readable sucker depth instead of a flat painted illusion.</p>
+              </div>
+            </div>
+            <div class="footer-links">
+              <a href="pinkthositive-preview.html">Compare Against Hero Render</a>
+            </div>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.174.0/build/three.module.min.js",
+          "three/addons/": "https://unpkg.com/three@0.174.0/examples/jsm/"
+        }
+      }
+    </script>
+    <script type="module">
+      import * as THREE from "three";
+      import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+      import {
+        MOON_MATERIAL_VERT,
+        MOON_MATERIAL_FRAG,
+        TENTACLE_MATERIAL_VERT,
+        TENTACLE_MATERIAL_FRAG
+      } from "./pinkthositive-material-shaders.js";
+
+      function makeRenderer(canvas) {
+        const renderer = new THREE.WebGLRenderer({
+          canvas,
+          antialias: true,
+          alpha: false,
+          preserveDrawingBuffer: true,
+          powerPreference: "high-performance"
+        });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+        renderer.outputColorSpace = THREE.SRGBColorSpace;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.25;
+        return renderer;
+      }
+
+      function fitRenderer(renderer, canvas) {
+        const rect = canvas.getBoundingClientRect();
+        renderer.setSize(rect.width, rect.height, false);
+      }
+
+      function addStarField(scene, count, spread, color) {
+        const positions = new Float32Array(count * 3);
+        for (let i = 0; i < count; i++) {
+          const r = spread * (0.35 + Math.random() * 0.65);
+          const theta = Math.random() * Math.PI * 2;
+          const phi = Math.acos(2 * Math.random() - 1);
+          positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+          positions[i * 3 + 1] = r * Math.cos(phi);
+          positions[i * 3 + 2] = r * Math.sin(phi) * Math.sin(theta);
+        }
+        const geom = new THREE.BufferGeometry();
+        geom.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+        const mat = new THREE.PointsMaterial({ color, size: 0.03, sizeAttenuation: true });
+        scene.add(new THREE.Points(geom, mat));
+      }
+
+      function createMoonStage(canvas) {
+        const renderer = makeRenderer(canvas);
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x05070b);
+        addStarField(scene, 1800, 24, 0xbfd7ff);
+
+        const camera = new THREE.PerspectiveCamera(36, 1, 0.1, 100);
+        camera.position.set(0, 1.6, 9.6);
+
+        const controls = new OrbitControls(camera, canvas);
+        controls.enableDamping = true;
+        controls.enablePan = false;
+        controls.target.set(0, 0.6, 0);
+        controls.minDistance = 5;
+        controls.maxDistance = 18;
+
+        const hemi = new THREE.HemisphereLight(0x7d91b8, 0x090b11, 1.2);
+        scene.add(hemi);
+        const key = new THREE.DirectionalLight(0xfff1dc, 1.9);
+        key.position.set(-4, 5, 3);
+        scene.add(key);
+        const fill = new THREE.DirectionalLight(0x7cc9ff, 0.55);
+        fill.position.set(3, 1.5, -4);
+        scene.add(fill);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        const pedestalMat = new THREE.MeshStandardMaterial({
+          color: 0x10161f,
+          roughness: 0.82,
+          metalness: 0.18
+        });
+
+        const sphereGeom = new THREE.SphereGeometry(1, 180, 120);
+        const pedestalGeom = new THREE.CylinderGeometry(1.35, 1.6, 0.36, 48);
+        const ringGeom = new THREE.TorusGeometry(1.48, 0.045, 14, 70);
+
+        const variations = [
+          {
+            x: -3.1,
+            seed: 1.1,
+            mare: 0.18,
+            cold: 0.12,
+            craterAmp: 1.08,
+            heightScale: 0.22
+          },
+          {
+            x: 0,
+            seed: 2.3,
+            mare: 0.9,
+            cold: 0.1,
+            craterAmp: 0.92,
+            heightScale: 0.2
+          },
+          {
+            x: 3.1,
+            seed: 4.8,
+            mare: 0.32,
+            cold: 0.95,
+            craterAmp: 1.0,
+            heightScale: 0.18
+          }
+        ];
+
+        const moonMeshes = [];
+        for (const variant of variations) {
+          const uniforms = {
+            uLightDir: { value: new THREE.Vector3(-0.7, 0.8, 0.45) },
+            uSeed: { value: variant.seed },
+            uMare: { value: variant.mare },
+            uCold: { value: variant.cold },
+            uCraterAmp: { value: variant.craterAmp },
+            uHeightScale: { value: variant.heightScale }
+          };
+
+          const mat = new THREE.ShaderMaterial({
+            uniforms,
+            vertexShader: MOON_MATERIAL_VERT,
+            fragmentShader: MOON_MATERIAL_FRAG
+          });
+
+          const moon = new THREE.Mesh(sphereGeom, mat);
+          moon.position.set(variant.x, 0.95, 0);
+          group.add(moon);
+          moonMeshes.push(moon);
+
+          const pedestal = new THREE.Mesh(pedestalGeom, pedestalMat);
+          pedestal.position.set(variant.x, -0.55, 0);
+          group.add(pedestal);
+
+          const ring = new THREE.Mesh(
+            ringGeom,
+            new THREE.MeshBasicMaterial({
+              color: variant.cold > 0.8 ? 0x9fc7ff : 0xd7dde9,
+              transparent: true,
+              opacity: 0.45
+            })
+          );
+          ring.rotation.x = Math.PI * 0.5;
+          ring.position.set(variant.x, -0.18, 0);
+          group.add(ring);
+        }
+
+        fitRenderer(renderer, canvas);
+
+        return {
+          renderer,
+          scene,
+          camera,
+          controls,
+          resize() {
+            fitRenderer(renderer, canvas);
+            const rect = canvas.getBoundingClientRect();
+            camera.aspect = rect.width / rect.height;
+            camera.updateProjectionMatrix();
+          },
+          render(t) {
+            moonMeshes[0].rotation.y = t * 0.08;
+            moonMeshes[1].rotation.y = -0.06 * t + 0.6;
+            moonMeshes[2].rotation.y = 0.05 * t - 0.4;
+            group.rotation.y = Math.sin(t * 0.18) * 0.1;
+            controls.update();
+            renderer.render(scene, camera);
+          }
+        };
+      }
+
+      function createTentacleCurve(seed, height, bend, lean) {
+        const pts = [];
+        for (let i = 0; i < 8; i++) {
+          const t = i / 7;
+          const sway = Math.sin(t * 2.4 + seed) * bend * (0.2 + t * 0.8);
+          const twist = Math.cos(t * 3.1 + seed * 1.7) * bend * 0.6 * (0.1 + t);
+          pts.push(new THREE.Vector3(
+            lean.x * t * 0.8 + sway,
+            t * height,
+            lean.y * t * 0.8 + twist
+          ));
+        }
+        return new THREE.CatmullRomCurve3(pts);
+      }
+
+      function createSuckerAssets() {
+        const stemGeom = new THREE.CylinderGeometry(0.16, 0.2, 0.34, 14);
+        const shellGeom = new THREE.CylinderGeometry(0.58, 0.3, 0.46, 22, 1, true);
+        const lipGeom = new THREE.TorusGeometry(0.54, 0.1, 10, 24);
+        const coreGeom = new THREE.SphereGeometry(0.28, 16, 12);
+
+        const stemMat = new THREE.MeshPhysicalMaterial({
+          color: 0x8d446d,
+          roughness: 0.54,
+          metalness: 0.04,
+          clearcoat: 0.3,
+          clearcoatRoughness: 0.42
+        });
+        const shellMat = new THREE.MeshPhysicalMaterial({
+          color: 0xf0a7c6,
+          roughness: 0.48,
+          metalness: 0.02,
+          clearcoat: 0.78,
+          clearcoatRoughness: 0.22,
+          side: THREE.DoubleSide
+        });
+        const lipMat = new THREE.MeshPhysicalMaterial({
+          color: 0xffd9ea,
+          roughness: 0.34,
+          metalness: 0.02,
+          clearcoat: 0.92,
+          clearcoatRoughness: 0.16
+        });
+        const coreMat = new THREE.MeshStandardMaterial({
+          color: 0xf7cfdd,
+          emissive: 0x4e1d39,
+          emissiveIntensity: 0.32,
+          roughness: 0.62,
+          metalness: 0.0
+        });
+
+        return {
+          makeCup(scale) {
+            const root = new THREE.Group();
+
+            const stem = new THREE.Mesh(stemGeom, stemMat);
+            stem.position.y = 0.16;
+            root.add(stem);
+
+            const shell = new THREE.Mesh(shellGeom, shellMat);
+            shell.position.y = 0.38;
+            root.add(shell);
+
+            const lip = new THREE.Mesh(lipGeom, lipMat);
+            lip.rotation.x = Math.PI * 0.5;
+            lip.position.y = 0.6;
+            root.add(lip);
+
+            const core = new THREE.Mesh(coreGeom, coreMat);
+            core.scale.set(1, 0.42, 1);
+            core.position.y = 0.46;
+            root.add(core);
+
+            root.scale.setScalar(scale);
+            return root;
+          }
+        };
+      }
+
+      function createTentacleSuckers(curve, item, assets) {
+        const group = new THREE.Group();
+        const segments = 180;
+        const frames = curve.computeFrenetFrames(segments, false);
+        const up = new THREE.Vector3(0, 1, 0);
+        const viewBias = new THREE.Vector3(-item.x * 0.28, 0.18, 0.92 - item.z * 0.16).normalize();
+
+        function addRow(count, angleOffset, alongOffset, scaleBias) {
+          for (let i = 0; i < count; i++) {
+            const t = 0.12 + alongOffset + i * ((0.78 - alongOffset) / Math.max(count - 1, 1));
+            if (t >= 0.92) break;
+
+            const point = curve.getPointAt(t);
+            const tangent = curve.getTangentAt(t).normalize();
+            const frameIndex = Math.min(segments, Math.max(0, Math.round(t * segments)));
+            const normal = frames.normals[frameIndex].clone();
+            const binormal = frames.binormals[frameIndex].clone();
+
+            let outward = viewBias.clone().addScaledVector(tangent, -viewBias.dot(tangent));
+            if (outward.lengthSq() < 1e-5) {
+              outward = normal.clone();
+            } else {
+              outward.normalize();
+            }
+
+            const twist = new THREE.Quaternion().setFromAxisAngle(
+              tangent,
+              angleOffset + Math.sin(i * 0.7 + item.seed * 2.0) * 0.08
+            );
+            outward.applyQuaternion(twist).normalize();
+
+            const radial = normal.multiplyScalar(0.68).add(binormal.multiplyScalar(0.32)).normalize();
+            outward.lerp(radial, 0.18).normalize();
+
+            const localRadius = item.radius * THREE.MathUtils.lerp(1.08, 0.18, Math.pow(t, 1.18));
+            const cupScale = localRadius * (0.92 + scaleBias + Math.sin(i * 1.4 + item.seed) * 0.04);
+            const cup = assets.makeCup(cupScale);
+            const cupDir = outward.clone().multiplyScalar(0.97).addScaledVector(tangent, 0.12).normalize();
+
+            cup.position.copy(point).addScaledVector(outward, localRadius * 0.9);
+            cup.quaternion.setFromUnitVectors(up, cupDir);
+            cup.quaternion.multiply(
+              new THREE.Quaternion().setFromAxisAngle(cupDir, Math.sin(i * 1.8 + item.seed) * 0.18)
+            );
+            group.add(cup);
+          }
+        }
+
+        addRow(9, -0.22, 0.0, 0.0);
+        addRow(8, 0.2, 0.045, -0.14);
+        return group;
+      }
+
+      function createTentacleStage(canvas) {
+        const renderer = makeRenderer(canvas);
+        renderer.toneMappingExposure = 1.32;
+
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x031019);
+        scene.fog = new THREE.FogExp2(0x041018, 0.12);
+
+        const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
+        camera.position.set(0, 1.6, 6.8);
+
+        const controls = new OrbitControls(camera, canvas);
+        controls.enableDamping = true;
+        controls.enablePan = false;
+        controls.target.set(0, 1.8, 0);
+        controls.minDistance = 3.5;
+        controls.maxDistance = 11;
+
+        const hemi = new THREE.HemisphereLight(0x103955, 0x02070a, 1.1);
+        scene.add(hemi);
+        const key = new THREE.DirectionalLight(0xffd6ef, 1.55);
+        key.position.set(-2.2, 4.4, 3.8);
+        scene.add(key);
+        const cyan = new THREE.PointLight(0x49d6ff, 1.6, 12, 2);
+        cyan.position.set(2.4, 2.6, 1.8);
+        scene.add(cyan);
+        const magenta = new THREE.PointLight(0xe447a1, 1.25, 12, 2);
+        magenta.position.set(-2.8, 1.7, -1.5);
+        scene.add(magenta);
+
+        const group = new THREE.Group();
+        scene.add(group);
+        const suckerAssets = createSuckerAssets();
+
+        const tentacleData = [
+          { seed: 0.3, height: 4.4, bend: 0.82, lean: new THREE.Vector2(-0.48, 0.28), radius: 0.3, x: -1.55, z: 0.18 },
+          { seed: 0.9, height: 4.9, bend: 0.52, lean: new THREE.Vector2(-0.18, -0.08), radius: 0.27, x: -0.62, z: -0.08 },
+          { seed: 1.8, height: 5.2, bend: 0.46, lean: new THREE.Vector2(0.04, -0.14), radius: 0.24, x: 0.04, z: -0.24 },
+          { seed: 2.5, height: 4.55, bend: 0.58, lean: new THREE.Vector2(0.22, 0.08), radius: 0.22, x: 0.72, z: -0.04 },
+          { seed: 3.1, height: 4.0, bend: 0.9, lean: new THREE.Vector2(0.46, 0.24), radius: 0.19, x: 1.42, z: 0.24 }
+        ];
+
+        const tentacles = [];
+        for (const item of tentacleData) {
+          const curve = createTentacleCurve(item.seed, item.height, item.bend, item.lean);
+          const geom = new THREE.TubeGeometry(curve, 180, item.radius, 28, false);
+          const uniforms = {
+            uTime: { value: 0 },
+            uSeed: { value: item.seed },
+            uSway: { value: 0.72 + item.radius * 0.2 },
+            uRadius: { value: item.radius },
+            uLightDir: { value: new THREE.Vector3(-0.45, 0.72, 0.58) }
+          };
+          const mat = new THREE.ShaderMaterial({
+            uniforms,
+            vertexShader: TENTACLE_MATERIAL_VERT,
+            fragmentShader: TENTACLE_MATERIAL_FRAG
+          });
+          const mesh = new THREE.Mesh(geom, mat);
+          mesh.position.set(item.x, -1.1, item.z);
+          mesh.add(createTentacleSuckers(curve, item, suckerAssets));
+          group.add(mesh);
+          tentacles.push({ mesh, uniforms, seed: item.seed });
+
+          const base = new THREE.Mesh(
+            new THREE.CylinderGeometry(item.radius * 1.45, item.radius * 1.85, 0.3, 24),
+            new THREE.MeshStandardMaterial({ color: 0x091118, roughness: 0.82, metalness: 0.12 })
+          );
+          base.position.set(item.x, -1.25, item.z);
+          group.add(base);
+        }
+
+        const mantle = new THREE.Mesh(
+          new THREE.SphereGeometry(1.28, 48, 32),
+          new THREE.MeshStandardMaterial({
+            color: 0x0a1018,
+            roughness: 0.74,
+            metalness: 0.08,
+            emissive: 0x11071a,
+            emissiveIntensity: 0.24
+          })
+        );
+        mantle.scale.set(1.0, 0.62, 0.86);
+        mantle.position.set(0, -1.7, 0);
+        group.add(mantle);
+
+        const collar = new THREE.Mesh(
+          new THREE.TorusGeometry(1.15, 0.12, 18, 84),
+          new THREE.MeshStandardMaterial({
+            color: 0x101723,
+            roughness: 0.64,
+            metalness: 0.16
+          })
+        );
+        collar.rotation.x = Math.PI * 0.5;
+        collar.position.set(0, -1.14, 0);
+        group.add(collar);
+
+        const particles = new THREE.BufferGeometry();
+        const particlePos = new Float32Array(240 * 3);
+        for (let i = 0; i < 240; i++) {
+          particlePos[i * 3] = (Math.random() - 0.5) * 7.5;
+          particlePos[i * 3 + 1] = Math.random() * 5.8 - 0.8;
+          particlePos[i * 3 + 2] = (Math.random() - 0.5) * 4.8;
+        }
+        particles.setAttribute("position", new THREE.BufferAttribute(particlePos, 3));
+        const motes = new THREE.Points(
+          particles,
+          new THREE.PointsMaterial({
+            color: 0x80dfff,
+            transparent: true,
+            opacity: 0.32,
+            size: 0.045,
+            sizeAttenuation: true
+          })
+        );
+        scene.add(motes);
+
+        fitRenderer(renderer, canvas);
+
+        return {
+          renderer,
+          scene,
+          camera,
+          controls,
+          resize() {
+            fitRenderer(renderer, canvas);
+            const rect = canvas.getBoundingClientRect();
+            camera.aspect = rect.width / rect.height;
+            camera.updateProjectionMatrix();
+          },
+          render(t) {
+            for (const tentacle of tentacles) {
+              tentacle.uniforms.uTime.value = t;
+              tentacle.mesh.rotation.z = Math.sin(t * 0.65 + tentacle.seed) * 0.1;
+              tentacle.mesh.rotation.x = Math.cos(t * 0.42 + tentacle.seed * 1.4) * 0.06;
+            }
+            group.rotation.y = Math.sin(t * 0.18) * 0.08;
+            controls.update();
+            renderer.render(scene, camera);
+          }
+        };
+      }
+
+      const stages = [
+        createMoonStage(document.getElementById("moon-stage")),
+        createTentacleStage(document.getElementById("tentacle-stage"))
+      ];
+
+      const resize = () => {
+        for (const stage of stages) stage.resize();
+      };
+      window.addEventListener("resize", resize);
+      resize();
+
+      const start = performance.now();
+      const animate = now => {
+        const t = (now - start) * 0.001;
+        for (const stage of stages) stage.render(t);
+        requestAnimationFrame(animate);
+      };
+      requestAnimationFrame(animate);
+    </script>
+  </body>
+</html>

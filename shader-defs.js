@@ -4147,3 +4147,321 @@ void main(){
 
   gl_FragColor=vec4(col,1);
 }`;
+
+// 53. MOON SURFACE HERO
+SHADERS.moon_surface_hero=`
+uniform float time;
+uniform vec2 resolution;
+${NOISE_LIB}
+
+vec3 skyColor(vec3 rd){
+  float h=max(rd.y*0.5+0.5,0.0);
+  vec3 col=mix(vec3(0.004,0.006,0.012),vec3(0.02,0.028,0.045),pow(h,0.8));
+  vec2 suv=rd.xz/(abs(rd.y)+0.2);
+  vec2 gid=floor(suv*120.0);
+  float star=step(0.9988,hash21(gid));
+  col+=vec3(star)*0.8*(1.0-smoothstep(-0.1,0.25,rd.y));
+  return col;
+}
+
+float craterShape(vec2 p,vec2 c,float r){
+  float d=length(p-c);
+  float x=d/max(r,0.0001);
+  float bowl=-(1.0-smoothstep(0.0,1.0,x))*pow(1.0-clamp(x,0.0,1.0),1.65);
+  float rim=exp(-pow((d-r)/(r*0.22),2.0))*0.52;
+  float ejecta=exp(-pow(d/(r*2.6),2.0))*0.05;
+  return bowl*0.95+rim+ejecta;
+}
+
+float craterLayer(vec2 p,float density,float rMin,float rMax,float seed,float weight){
+  vec2 sp=p*density;
+  vec2 cell=floor(sp);
+  float h=0.0;
+  for(int j=-1;j<=1;j++){
+    for(int i=-1;i<=1;i++){
+      vec2 id=cell+vec2(float(i),float(j));
+      float occ=step(0.34,hash21(id+vec2(seed,seed*1.27)));
+      vec2 jitter=vec2(
+        hash21(id+vec2(seed+2.7,seed+8.1)),
+        hash21(id+vec2(seed+13.4,seed+17.9))
+      )-0.5;
+      vec2 center=(id+0.5+jitter*0.72)/density;
+      float rr=mix(rMin,rMax,hash21(id+vec2(seed+23.0,seed+29.0)));
+      h+=craterShape(p,center,rr)*occ*weight;
+    }
+  }
+  return h;
+}
+
+float lunarTerrain(vec2 p){
+  vec2 q=p;
+  q*=rot2(0.18);
+  float base=fbm(vec3(q*2.4,1.0),5)*0.05;
+  base+=fbm(vec3(q*8.0,4.0),3)*0.012;
+  base-=abs(fbm(vec3(q*5.8,7.5),4))*0.012;
+
+  float craters=0.0;
+  craters+=craterShape(q,vec2(-0.28,0.22),0.52)*0.13;
+  craters+=craterShape(q,vec2(0.34,-0.18),0.27)*0.09;
+  craters+=craterLayer(q,1.55,0.12,0.32,11.0,0.12);
+  craters+=craterLayer(q+4.2,3.1,0.05,0.13,23.0,0.07);
+  craters+=craterLayer(q-7.1,7.0,0.018,0.05,37.0,0.028);
+
+  return base+craters;
+}
+
+vec3 terrainNormal(vec2 p){
+  vec2 e=vec2(0.0035,0.0);
+  float hx=lunarTerrain(p+e.xy)-lunarTerrain(p-e.xy);
+  float hz=lunarTerrain(p+e.yx)-lunarTerrain(p-e.yx);
+  return normalize(vec3(-hx/(2.0*e.x),1.0,-hz/(2.0*e.x)));
+}
+
+float terrainShadow(vec3 p,vec3 sunDir){
+  float res=1.0;
+  float t=0.03;
+  for(int i=0;i<22;i++){
+    vec3 pos=p+sunDir*t;
+    float h=pos.y-lunarTerrain(pos.xz)-0.0015;
+    res=min(res,clamp(8.0*h/t,0.0,1.0));
+    if(res<0.01)break;
+    t+=0.05+float(i)*0.02;
+  }
+  return clamp(res,0.0,1.0);
+}
+
+vec3 getRay(vec2 uv,vec3 ro,vec3 ta){
+  vec3 ww=normalize(ta-ro);
+  vec3 uu=normalize(cross(vec3(0.0,1.0,0.0),ww));
+  vec3 vv=cross(ww,uu);
+  return normalize(uu*uv.x+vv*uv.y+ww*1.9);
+}
+
+bool traceTerrain(vec3 ro,vec3 rd,out vec3 hit,out float tHit){
+  float t=0.0;
+  float prevT=0.0;
+  for(int i=0;i<140;i++){
+    vec3 pos=ro+rd*t;
+    float h=pos.y-lunarTerrain(pos.xz);
+    if(h<0.001){
+      float a=prevT;
+      float b=t;
+      for(int j=0;j<5;j++){
+        float m=0.5*(a+b);
+        vec3 mp=ro+rd*m;
+        float mh=mp.y-lunarTerrain(mp.xz);
+        if(mh>0.0)a=m;
+        else b=m;
+      }
+      tHit=b;
+      hit=ro+rd*tHit;
+      return true;
+    }
+    prevT=t;
+    t+=max(0.012,h*0.55);
+    if(t>5.5)break;
+  }
+  return false;
+}
+
+void main(){
+  vec2 uv=(gl_FragCoord.xy-0.5*resolution.xy)/resolution.y;
+  float glide=time*0.02;
+  vec3 ro=vec3(-0.12+sin(time*0.07)*0.08,0.34,-1.58+glide);
+  vec3 ta=vec3(0.04,0.03,0.46+glide);
+  vec3 rd=getRay(uv,ro,ta);
+
+  vec3 hit;
+  float tHit;
+  vec3 col=skyColor(rd);
+
+  if(traceTerrain(ro,rd,hit,tHit)){
+    vec3 n=terrainNormal(hit.xz);
+    vec3 sunDir=normalize(vec3(-0.55,0.72,-0.42));
+    float shadow=terrainShadow(hit+n*0.002,sunDir);
+    float diff=max(dot(n,sunDir),0.0)*shadow;
+    float hemi=0.55+0.45*n.y;
+    float spec=pow(max(dot(reflect(-sunDir,n),-rd),0.0),28.0)*shadow;
+    float fres=pow(1.0-max(dot(n,-rd),0.0),3.0);
+    float dust=fbm(vec3(hit.xz*24.0,3.2),4)*0.5+0.5;
+    float h=lunarTerrain(hit.xz);
+    float tone=clamp(h*6.5+0.5,0.0,1.0);
+    float cavity=clamp(0.55-h*12.0,0.0,1.0);
+
+    vec3 albedo=mix(vec3(0.19,0.19,0.2),vec3(0.6,0.62,0.66),hemi*0.7+tone*0.3);
+    albedo*=mix(0.92,1.08,dust);
+
+    vec3 lightCol=vec3(1.0,0.985,0.96);
+    vec3 coldSpec=vec3(0.56,0.74,1.0);
+    col=albedo*(0.16+diff*0.92);
+    col+=lightCol*spec*0.16;
+    col+=coldSpec*fres*0.09;
+    col*=1.0-cavity*0.08;
+    col=mix(col,skyColor(rd),smoothstep(3.6,5.2,tHit));
+  }
+
+  gl_FragColor=vec4(pow(max(col,0.0),vec3(0.95)),1.0);
+}`;
+
+// 54. SQUID TENTACLES HERO
+SHADERS.squid_tentacles_hero=`
+uniform float time;
+uniform vec2 resolution;
+${NOISE_LIB}
+
+vec2 bez4(vec2 a,vec2 b,vec2 c,vec2 d,float t){
+  float it=1.0-t;
+  return it*it*it*a+3.0*it*it*t*b+3.0*it*t*t*c+t*t*t*d;
+}
+
+vec2 bez4d(vec2 a,vec2 b,vec2 c,vec2 d,float t){
+  float it=1.0-t;
+  return 3.0*it*it*(b-a)+6.0*it*t*(c-b)+3.0*t*t*(d-c);
+}
+
+float tentacleField(
+  vec2 p,
+  vec2 a,vec2 b,vec2 c,vec2 d,
+  float width,float sideSign,float seed,
+  inout float bestT,inout vec2 bestN,inout float cups,inout float glow
+){
+  float best=1e5;
+  for(int i=0;i<52;i++){
+    float t=float(i)/51.0;
+    vec2 pos=bez4(a,b,c,d,t);
+    vec2 der=bez4d(a,b,c,d,t);
+    vec2 tangent=normalize(der+vec2(0.0001,0.0));
+    vec2 normal=vec2(-tangent.y,tangent.x)*sideSign;
+    float taper=mix(width,width*0.14,pow(t,0.82));
+    float dBody=length(p-pos)-taper;
+    if(dBody<best){
+      best=dBody;
+      bestT=t;
+      bestN=normal;
+    }
+
+    float phase=abs(fract(t*12.0+seed)-0.5);
+    float cupGate=smoothstep(0.16,0.02,phase);
+    vec2 cupCenter=pos+normal*taper*0.56;
+    float cupRadius=taper*mix(0.28,0.18,t);
+    float ring=exp(-pow((length(p-cupCenter)-cupRadius)/(cupRadius*0.35),2.0))*cupGate;
+    float core=exp(-pow(length(p-cupCenter)/(cupRadius*0.72),2.0))*cupGate;
+    float vein=exp(-pow(dot(p-(pos-normal*taper*0.18),normal)/(taper*0.22),2.0))
+      *exp(-abs(dot(p-pos,tangent))/(taper*2.7));
+    cups=max(cups,ring);
+    glow=max(glow,max(core*0.35,vein*0.22)*(0.4+0.6*sin(t*18.0+seed*9.0)*0.5+0.5));
+  }
+  return best;
+}
+
+void sampleScene(vec2 p,out float body,out float bodyT,out vec2 bodyN,out float cups,out float glow){
+  body=1e5;
+  bodyT=0.0;
+  bodyN=vec2(0.0,1.0);
+  cups=0.0;
+  glow=0.0;
+
+  float localT;
+  vec2 localN;
+  float localCups;
+  float localGlow;
+  float d;
+
+  float swayA=sin(time*0.65)*0.08;
+  float swayB=cos(time*0.52)*0.06;
+  float swayC=sin(time*0.47+1.7)*0.09;
+
+  localCups=0.0; localGlow=0.0;
+  d=tentacleField(
+    p,
+    vec2(-0.95,-1.35),
+    vec2(-1.02,-0.45+swayA),
+    vec2(-0.55,0.35+swayB),
+    vec2(0.14,1.2+swayA*0.4),
+    0.28,-1.0,0.17,
+    localT,localN,localCups,localGlow
+  );
+  if(d<body){ body=d; bodyT=localT; bodyN=localN; }
+  cups=max(cups,localCups);
+  glow=max(glow,localGlow);
+
+  localCups=0.0; localGlow=0.0;
+  d=tentacleField(
+    p,
+    vec2(-0.18,-1.28),
+    vec2(-0.34,-0.32+swayB),
+    vec2(0.06,0.2+swayC),
+    vec2(0.62,1.15+swayB*0.5),
+    0.24,-1.0,0.43,
+    localT,localN,localCups,localGlow
+  );
+  if(d<body){ body=d; bodyT=localT; bodyN=localN; }
+  cups=max(cups,localCups);
+  glow=max(glow,localGlow);
+
+  localCups=0.0; localGlow=0.0;
+  d=tentacleField(
+    p,
+    vec2(0.56,-1.3),
+    vec2(0.72,-0.35+swayC),
+    vec2(0.42,0.26+swayA),
+    vec2(-0.08,1.04+swayC*0.45),
+    0.22,1.0,0.71,
+    localT,localN,localCups,localGlow
+  );
+  if(d<body){ body=d; bodyT=localT; bodyN=localN; }
+  cups=max(cups,localCups);
+  glow=max(glow,localGlow);
+}
+
+vec3 oceanBackdrop(vec2 p){
+  float v=fbm(vec3(p*1.8,0.4),4)*0.5+0.5;
+  vec3 base=mix(vec3(0.01,0.02,0.05),vec3(0.02,0.08,0.12),0.55+p.y*0.3);
+  base+=vec3(0.0,0.04,0.05)*v*0.12;
+  float mote=step(0.9965,hash21(floor((p+2.0)*vec2(90.0,120.0))));
+  base+=vec3(0.08,0.22,0.3)*mote*0.28;
+  return base;
+}
+
+void main(){
+  vec2 uv=(gl_FragCoord.xy-0.5*resolution.xy)/resolution.y;
+  vec2 p=uv*1.55;
+
+  float body;
+  float bodyT;
+  vec2 bodyN;
+  float cups;
+  float glow;
+  sampleScene(p,body,bodyT,bodyN,cups,glow);
+
+  vec3 col=oceanBackdrop(p);
+  float mask=smoothstep(0.025,-0.025,body);
+
+  if(mask>0.0){
+    vec3 baseA=vec3(0.08,0.02,0.12);
+    vec3 baseB=vec3(0.42,0.05,0.32);
+    vec3 baseC=vec3(0.88,0.18,0.5);
+    vec3 bodyCol=mix(baseA,baseB,1.0-bodyT);
+    bodyCol=mix(bodyCol,baseC,pow(1.0-bodyT,1.5)*0.55);
+
+    vec3 n=normalize(vec3(bodyN*1.45,1.0));
+    vec3 lightDir=normalize(vec3(-0.38,0.74,0.56));
+    vec3 viewDir=vec3(0.0,0.0,1.0);
+    float diff=max(dot(n,lightDir),0.0);
+    float spec=pow(max(dot(reflect(-lightDir,n),viewDir),0.0),24.0);
+    float rim=pow(1.0-max(dot(n,viewDir),0.0),2.4);
+
+    vec3 fleshyCup=vec3(1.0,0.65,0.82)*cups*0.75;
+    vec3 bioGlow=vec3(0.1,0.95,1.0)*glow*0.45;
+    vec3 sheen=vec3(0.95,0.98,1.0)*spec*0.34;
+    vec3 wetEdge=vec3(0.18,0.65,0.92)*rim*0.12;
+
+    vec3 lit=bodyCol*(0.14+diff*0.95);
+    lit+=fleshyCup+bioGlow+sheen+wetEdge;
+    col=mix(col,lit,mask);
+  }
+
+  float vignette=smoothstep(1.9,0.35,length(p));
+  col*=vignette;
+  gl_FragColor=vec4(pow(max(col,0.0),vec3(0.95)),1.0);
+}`;
